@@ -137,12 +137,20 @@ export default function HifzTrackerPage() {
   const totalAyaat = 6236;
   const memorizedPct = Math.min(100, Math.round((stats.totalAyaatMemorized / totalAyaat) * 100));
 
-  const juzData = Array.from({ length: 30 }, (_, i) => {
-    const approxAyaatPerJuz = Math.round(totalAyaat / 30);
-    const juzStart = i * approxAyaatPerJuz;
-    const progress = Math.min(100, Math.round(Math.max(0, stats.totalAyaatMemorized - juzStart) / approxAyaatPerJuz * 100));
-    return { juz: i + 1, memorized: progress };
-  });
+  // Per-juz progress is not derived here. The previous version poured the total
+  // memorised ayah count into equal 1/30 blocks starting at Juz 1, so a student
+  // with ~156 ayaat showed 75% on Juz 1 while the overall figure read 0%. The two
+  // numbers measured different things and the map did not reflect which juz the
+  // entries were actually for.
+  //
+  // Showing a real percentage needs a verified surah-to-juz ayah mapping, which is
+  // Phase 6 and is not invented here. Until that dataset is chosen, a juz shows a
+  // percentage only where real entries exist for it - which is currently none, as
+  // hifz_tracker records carry surah and ayah but no juz.
+  const juzData = Array.from({ length: 30 }, (_, i) => ({
+    juz: i + 1,
+    memorized: null as number | null,
+  }));
 
   if (loading) {
     return (
@@ -406,11 +414,12 @@ export default function HifzTrackerPage() {
           {juzData.map((juz) => (
             <div key={juz.juz} className="flex flex-col items-center gap-1 group cursor-pointer">
               <div className={`w-full aspect-square rounded-lg border flex items-center justify-center text-xs font-bold transition-all group-hover:scale-105 ${
-                juz.memorized === 100 ? "bg-primary text-primary-foreground border-primary"
+                juz.memorized === null ? "bg-muted text-muted-foreground border-muted-foreground/20"
+                  : juz.memorized === 100 ? "bg-primary text-primary-foreground border-primary"
                   : juz.memorized > 0 ? "bg-primary/20 text-primary border-primary/30"
                   : "bg-muted text-muted-foreground border-muted-foreground/20"
               }`}>
-                {juz.memorized > 0 ? `${juz.memorized}%` : ""}
+                {juz.memorized !== null && juz.memorized > 0 ? `${juz.memorized}%` : ""}
               </div>
               <span className="text-[10px] text-muted-foreground">{t("juz")} {juz.juz}</span>
             </div>
