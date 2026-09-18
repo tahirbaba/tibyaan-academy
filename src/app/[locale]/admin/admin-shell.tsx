@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { useLocale } from "next-intl";
+import { signOut } from "@/app/[locale]/(auth)/actions";
 import { Link, usePathname } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "next-themes";
@@ -73,6 +75,7 @@ export function AdminShell({
   userInitial: string;
 }) {
   const t = useTranslations("admin");
+  const locale = useLocale();
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -207,11 +210,11 @@ export function AdminShell({
             </Button>
 
             {/* Logout */}
-            <Link href="/login">
-              <Button variant="ghost" size="sm">
+            <form action={signOut.bind(null, locale)}>
+              <Button type="submit" variant="ghost" size="sm">
                 <LogOut className="w-5 h-5" />
               </Button>
-            </Link>
+            </form>
           </div>
         </header>
 
