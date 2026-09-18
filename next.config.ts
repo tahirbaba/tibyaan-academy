@@ -97,7 +97,12 @@ function assertSiteUrl(): void {
  * Static keys only - dynamic call sites are listed in
  * docs/phase-20-i18n-blind-spots.md.
  */
+let translationsChecked = false;
 function assertTranslations(): void {
+  // Next loads this config more than once per build; check once per process.
+  if (translationsChecked) return;
+  translationsChecked = true;
+
   const { execFileSync } = require("node:child_process");
   try {
     execFileSync(process.execPath, ["scripts/check-i18n.mjs"], { stdio: "inherit" });
