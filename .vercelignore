@@ -1,8 +1,8 @@
-# Exclude large binary files from Vercel upload (serve from Cloudflare R2 in prod)
-public/Aalim Course/
-public/Arabic Language/
-public/Quran Parah Images/
-public/Nazra/
+# NOTE: public/Aalim Course, Arabic Language, Quran Parah Images and Nazra were
+# excluded here on the assumption they would be served from Cloudflare R2. That
+# move was never made - course-syllabus.ts still points at local /public paths -
+# so the syllabus images returned 404 in production. 28 MB across 110 files.
+# Re-included. See docs/phase-20-r2-plan.md before excluding them again.
 
 # Dev-only files
 .claude/
