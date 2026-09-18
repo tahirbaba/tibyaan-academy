@@ -820,7 +820,8 @@
     "improvement": "Improvement",
     "streak": "Streak",
     "tomorrowPlan": "Tomorrow's Plan",
-    "noSchedule": "No schedule yet. Log your first Sabaq to get started!"
+    "noSchedule": "No schedule yet. Log your first Sabaq to get started!",
+    "averageScore": "Average Score"
   },
   "kidsActivities": {
     "title": "Kids Activities",
@@ -1007,7 +1008,21 @@
     "faazil": "Faazil",
     "studentEmail": "Student Email",
     "monthlyAmount": "Monthly Amount",
-    "viewDetails": "View Details"
+    "viewDetails": "View Details",
+    "classesToday": "Classes Today",
+    "upcomingClasses": "Upcoming Classes",
+    "noUpcomingClasses": "No upcoming classes",
+    "noClassesToday": "No classes today",
+    "quickActions": "Quick Actions",
+    "viewAll": "View All",
+    "noPendingActions": "No pending actions",
+    "inProgress": "In Progress",
+    "noLessonsYet": "No lessons yet",
+    "noStudentsYet": "No students yet",
+    "noMatchingStudents": "No matching students",
+    "noTestsYet": "No tests yet",
+    "noCertificatesYet": "No certificates yet",
+    "noRevenueYet": "No revenue yet"
   },
   "payments": {
     "title": "Payments & Subscription",
@@ -1453,7 +1468,16 @@
     "upcoming": "Upcoming",
     "live": "Live",
     "completed": "Completed",
-    "cancelled": "Cancelled"
+    "cancelled": "Cancelled",
+    "teacherTitle": "My Dars Circles",
+    "teacherSubtitle": "Create and manage your live knowledge circles",
+    "noTeacherCircles": "You have not created any circles yet",
+    "circleCreated": "Circle created",
+    "circleTitles": "Circle Title",
+    "titlePlaceholder": "Title",
+    "descriptionPlaceholder": "What will this circle cover?",
+    "scheduledDate": "Date",
+    "scheduledTime": "Time"
   },
   "parentReports": {
     "title": "Parent WhatsApp Reports",

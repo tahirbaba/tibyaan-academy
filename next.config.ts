@@ -1,5 +1,5 @@
 import type { NextConfig } from "next";
-import { PHASE_PRODUCTION_BUILD } from "next/constants";
+import { PHASE_DEVELOPMENT_SERVER, PHASE_PRODUCTION_BUILD } from "next/constants";
 import createNextIntlPlugin from "next-intl/plugin";
 
 const withNextIntl = createNextIntlPlugin();
@@ -89,7 +89,32 @@ function assertSiteUrl(): void {
   }
 }
 
+
+/**
+ * Fail the build when a translation key used in the app is missing from any
+ * locale file. A missing key rendered as a raw key on live pages for months;
+ * the build passed because a missing message only shows at render time.
+ * Static keys only - dynamic call sites are listed in
+ * docs/phase-20-i18n-blind-spots.md.
+ */
+function assertTranslations(): void {
+  const { execFileSync } = require("node:child_process");
+  try {
+    execFileSync(process.execPath, ["scripts/check-i18n.mjs"], { stdio: "inherit" });
+  } catch {
+    throw new Error(
+      "Translation check failed - see the missing keys above. " +
+        "Every key used in the app must exist in all five locale files."
+    );
+  }
+}
 export default function config(phase: string): NextConfig {
-  if (phase === PHASE_PRODUCTION_BUILD) assertSiteUrl();
+  if (phase === PHASE_PRODUCTION_BUILD) {
+    assertSiteUrl();
+    assertTranslations();
+  }
+  // In development the dev server calls this too, so a missing key is caught
+  // on the machine that introduced it rather than in production.
+  if (phase === PHASE_DEVELOPMENT_SERVER) assertTranslations();
   return withNextIntl(withPWA(nextConfig));
 }

@@ -824,7 +824,8 @@
     "improvement": "Amélioration",
     "streak": "Série",
     "tomorrowPlan": "Plan de demain",
-    "noSchedule": "Pas encore de planning. Enregistrez votre premier Sabaq pour commencer !"
+    "noSchedule": "Pas encore de planning. Enregistrez votre premier Sabaq pour commencer !",
+    "averageScore": "Score moyen"
   },
   "kidsActivities": {
     "title": "Activités Enfants",
@@ -1016,7 +1017,21 @@
     "faazil": "Faazil",
     "studentEmail": "E-mail de l'Étudiant",
     "monthlyAmount": "Montant Mensuel",
-    "viewDetails": "Voir les Détails"
+    "viewDetails": "Voir les Détails",
+    "classesToday": "Cours du jour",
+    "upcomingClasses": "Prochains cours",
+    "noUpcomingClasses": "Aucun cours à venir",
+    "noClassesToday": "Aucun cours aujourd'hui",
+    "quickActions": "Actions rapides",
+    "viewAll": "Tout voir",
+    "noPendingActions": "Aucune action en attente",
+    "inProgress": "En cours",
+    "noLessonsYet": "Aucune leçon pour le moment",
+    "noStudentsYet": "Aucun élève pour le moment",
+    "noMatchingStudents": "Aucun élève correspondant",
+    "noTestsYet": "Aucun test pour le moment",
+    "noCertificatesYet": "Aucun certificat pour le moment",
+    "noRevenueYet": "Aucun revenu pour le moment"
   },
   "payments": {
     "title": "Paiements et Abonnement",
@@ -1464,7 +1479,16 @@
     "upcoming": "À venir",
     "live": "En direct",
     "completed": "Terminé",
-    "cancelled": "Annulé"
+    "cancelled": "Annulé",
+    "teacherTitle": "Mes cercles de Dars",
+    "teacherSubtitle": "Créez et gérez vos cercles de savoir en direct",
+    "noTeacherCircles": "Vous n'avez pas encore créé de cercle",
+    "circleCreated": "Cercle créé",
+    "circleTitles": "Titre du cercle",
+    "titlePlaceholder": "Titre",
+    "descriptionPlaceholder": "Que couvrira ce cercle ?",
+    "scheduledDate": "Date",
+    "scheduledTime": "Heure"
   },
   "parentReports": {
     "title": "Rapports WhatsApp parents",

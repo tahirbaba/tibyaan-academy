@@ -7,6 +7,7 @@
     "build": "NODE_OPTIONS='--require ./fix-ipv6.cjs' next build",
     "start": "next start",
     "lint": "eslint",
+    "check:i18n": "node scripts/check-i18n.mjs",
     "db:generate": "NODE_OPTIONS='--require ./fix-ipv6.cjs' drizzle-kit generate",
     "db:migrate": "NODE_OPTIONS='--require ./fix-ipv6.cjs' drizzle-kit migrate",
     "db:push": "NODE_OPTIONS='--require ./fix-ipv6.cjs' drizzle-kit push",

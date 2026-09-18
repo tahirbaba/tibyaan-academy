@@ -824,7 +824,8 @@
     "improvement": "تحسن",
     "streak": "سلسلة",
     "tomorrowPlan": "خطة الغد",
-    "noSchedule": "لا يوجد جدول بعد. سجل أول سبق لك للبدء!"
+    "noSchedule": "لا يوجد جدول بعد. سجل أول سبق لك للبدء!",
+    "averageScore": "متوسط الدرجات"
   },
   "kidsActivities": {
     "title": "أنشطة الأطفال",
@@ -1016,7 +1017,21 @@
     "faazil": "فاضل",
     "studentEmail": "بريد الطالب",
     "monthlyAmount": "المبلغ الشهري",
-    "viewDetails": "عرض التفاصيل"
+    "viewDetails": "عرض التفاصيل",
+    "classesToday": "حصص اليوم",
+    "upcomingClasses": "الحصص القادمة",
+    "noUpcomingClasses": "لا توجد حصص قادمة",
+    "noClassesToday": "لا توجد حصص اليوم",
+    "quickActions": "إجراءات سريعة",
+    "viewAll": "عرض الكل",
+    "noPendingActions": "لا توجد إجراءات معلقة",
+    "inProgress": "قيد التقدم",
+    "noLessonsYet": "لا توجد دروس بعد",
+    "noStudentsYet": "لا يوجد طلاب بعد",
+    "noMatchingStudents": "لا يوجد طلاب مطابقون",
+    "noTestsYet": "لا توجد اختبارات بعد",
+    "noCertificatesYet": "لا توجد شهادات بعد",
+    "noRevenueYet": "لا توجد إيرادات بعد"
   },
   "payments": {
     "title": "المدفوعات والاشتراك",
@@ -1464,7 +1479,16 @@
     "upcoming": "قادمة",
     "live": "مباشر",
     "completed": "منتهية",
-    "cancelled": "ملغاة"
+    "cancelled": "ملغاة",
+    "teacherTitle": "حلقات الدرس الخاصة بي",
+    "teacherSubtitle": "أنشئ حلقاتك العلمية المباشرة وأدرها",
+    "noTeacherCircles": "لم تنشئ أي حلقة بعد",
+    "circleCreated": "تم إنشاء الحلقة",
+    "circleTitles": "عنوان الحلقة",
+    "titlePlaceholder": "العنوان",
+    "descriptionPlaceholder": "ما الذي ستتناوله هذه الحلقة؟",
+    "scheduledDate": "التاريخ",
+    "scheduledTime": "الوقت"
   },
   "parentReports": {
     "title": "تقارير أولياء الأمور عبر واتساب",

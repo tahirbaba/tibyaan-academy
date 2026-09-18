@@ -820,7 +820,8 @@
     "improvement": "بہتری",
     "streak": "سلسلہ",
     "tomorrowPlan": "کل کا منصوبہ",
-    "noSchedule": "ابھی کوئی شیڈول نہیں۔ شروع کرنے کے لیے اپنا پہلا سبق درج کریں!"
+    "noSchedule": "ابھی کوئی شیڈول نہیں۔ شروع کرنے کے لیے اپنا پہلا سبق درج کریں!",
+    "averageScore": "اوسط اسکور"
   },
   "kidsActivities": {
     "title": "بچوں کی سرگرمیاں",
@@ -1007,7 +1008,21 @@
     "faazil": "فاضل",
     "studentEmail": "طالب علم ای میل",
     "monthlyAmount": "ماہانہ رقم",
-    "viewDetails": "تفصیلات دیکھیں"
+    "viewDetails": "تفصیلات دیکھیں",
+    "classesToday": "آج کی کلاسیں",
+    "upcomingClasses": "آنے والی کلاسیں",
+    "noUpcomingClasses": "کوئی آنے والی کلاس نہیں",
+    "noClassesToday": "آج کوئی کلاس نہیں",
+    "quickActions": "فوری اقدامات",
+    "viewAll": "سب دیکھیں",
+    "noPendingActions": "کوئی زیر التوا کام نہیں",
+    "inProgress": "جاری ہے",
+    "noLessonsYet": "ابھی کوئی سبق نہیں",
+    "noStudentsYet": "ابھی کوئی طالب علم نہیں",
+    "noMatchingStudents": "کوئی مماثل طالب علم نہیں",
+    "noTestsYet": "ابھی کوئی ٹیسٹ نہیں",
+    "noCertificatesYet": "ابھی کوئی سرٹیفکیٹ نہیں",
+    "noRevenueYet": "ابھی کوئی آمدنی نہیں"
   },
   "payments": {
     "title": "ادائیگی اور سبسکرپشن",
@@ -1453,7 +1468,16 @@
     "upcoming": "آنے والا",
     "live": "لائیو",
     "completed": "مکمل",
-    "cancelled": "منسوخ"
+    "cancelled": "منسوخ",
+    "teacherTitle": "میرے درس حلقے",
+    "teacherSubtitle": "اپنے لائیو علمی حلقے بنائیں اور ان کا انتظام کریں",
+    "noTeacherCircles": "آپ نے ابھی تک کوئی حلقہ نہیں بنایا",
+    "circleCreated": "حلقہ بن گیا",
+    "circleTitles": "حلقے کا عنوان",
+    "titlePlaceholder": "عنوان",
+    "descriptionPlaceholder": "اس حلقے میں کیا پڑھایا جائے گا؟",
+    "scheduledDate": "تاریخ",
+    "scheduledTime": "وقت"
   },
   "parentReports": {
     "title": "والدین واٹس ایپ رپورٹس",

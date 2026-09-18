@@ -824,7 +824,8 @@
     "improvement": "Peningkatan",
     "streak": "Streak",
     "tomorrowPlan": "Rencana Besok",
-    "noSchedule": "Belum ada jadwal. Catat Sabaq pertama Anda untuk memulai!"
+    "noSchedule": "Belum ada jadwal. Catat Sabaq pertama Anda untuk memulai!",
+    "averageScore": "Skor Rata-rata"
   },
   "kidsActivities": {
     "title": "Aktivitas Anak",
@@ -1016,7 +1017,21 @@
     "faazil": "Faazil",
     "studentEmail": "Email Siswa",
     "monthlyAmount": "Jumlah Bulanan",
-    "viewDetails": "Lihat Detail"
+    "viewDetails": "Lihat Detail",
+    "classesToday": "Kelas Hari Ini",
+    "upcomingClasses": "Kelas Mendatang",
+    "noUpcomingClasses": "Tidak ada kelas mendatang",
+    "noClassesToday": "Tidak ada kelas hari ini",
+    "quickActions": "Tindakan Cepat",
+    "viewAll": "Lihat Semua",
+    "noPendingActions": "Tidak ada tindakan tertunda",
+    "inProgress": "Sedang Berlangsung",
+    "noLessonsYet": "Belum ada pelajaran",
+    "noStudentsYet": "Belum ada siswa",
+    "noMatchingStudents": "Tidak ada siswa yang cocok",
+    "noTestsYet": "Belum ada tes",
+    "noCertificatesYet": "Belum ada sertifikat",
+    "noRevenueYet": "Belum ada pendapatan"
   },
   "payments": {
     "title": "Pembayaran & Langganan",
@@ -1464,7 +1479,16 @@
     "upcoming": "Akan Datang",
     "live": "Langsung",
     "completed": "Selesai",
-    "cancelled": "Dibatalkan"
+    "cancelled": "Dibatalkan",
+    "teacherTitle": "Lingkaran Dars Saya",
+    "teacherSubtitle": "Buat dan kelola lingkaran ilmu langsung Anda",
+    "noTeacherCircles": "Anda belum membuat lingkaran apa pun",
+    "circleCreated": "Lingkaran dibuat",
+    "circleTitles": "Judul Lingkaran",
+    "titlePlaceholder": "Judul",
+    "descriptionPlaceholder": "Apa yang akan dibahas lingkaran ini?",
+    "scheduledDate": "Tanggal",
+    "scheduledTime": "Waktu"
   },
   "parentReports": {
     "title": "Laporan WhatsApp Orang Tua",
