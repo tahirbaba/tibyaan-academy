@@ -45,6 +45,15 @@ const nextConfig: NextConfig = {
         destination: "/:locale/dars",
         permanent: true,
       },
+      // The student recordings pages were merged into one. /student/recordings
+      // rendered only teacher uploads and was linked from nowhere, so students
+      // never saw them; /student/class-recordings now shows both sources.
+      // Redirected rather than dropped so any existing link keeps working.
+      {
+        source: "/:locale/student/recordings",
+        destination: "/:locale/student/class-recordings",
+        permanent: true,
+      },
     ];
   },
 };
