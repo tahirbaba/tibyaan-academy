@@ -6,11 +6,11 @@ import { localeMetadataAlternates, absoluteUrl } from "@/lib/site-config";
 const metaByLocale: Record<string, { title: string; description: string }> = {
   en: {
     title: "Best Online Quran Classes in UK | Tibyaan Academy",
-    description: "Join 500+ Muslims in the UK learning Quran, Hifz, and Arabic online. Live 1-on-1 teachers + AI Ustaz. Start your 5-day free trial today.",
+    description: "Join Muslims in the UK learning Quran, Hifz, and Arabic online. Live 1-on-1 teachers + AI Ustaz. Start your 5-day free trial today.",
   },
   ur: {
     title: "برطانیہ میں بہترین آن لائن قرآن کلاسز | تبیان اکیڈمی",
-    description: "برطانیہ میں 500+ مسلمانوں کے ساتھ شامل ہوں جو آن لائن قرآن، حفظ اور عربی سیکھ رہے ہیں۔ 5 دن مفت ٹرائل۔",
+    description: "برطانیہ میں مسلمانوں کے ساتھ شامل ہوں جو آن لائن قرآن، حفظ اور عربی سیکھ رہے ہیں۔ 5 دن مفت ٹرائل۔",
   },
   ar: {
     title: "أفضل دروس القرآن عبر الإنترنت في المملكة المتحدة | أكاديمية تبيان",
@@ -18,11 +18,11 @@ const metaByLocale: Record<string, { title: string; description: string }> = {
   },
   fr: {
     title: "Meilleurs cours de Coran en ligne au Royaume-Uni | Tibyaan Academy",
-    description: "Rejoignez 500+ musulmans au Royaume-Uni apprenant le Coran en ligne. Essai gratuit de 5 jours.",
+    description: "Rejoignez les musulmans au Royaume-Uni apprenant le Coran en ligne. Essai gratuit de 5 jours.",
   },
   id: {
     title: "Kelas Quran Online Terbaik di Inggris | Tibyaan Academy",
-    description: "Bergabunglah dengan 500+ Muslim di Inggris belajar Quran online. Uji coba gratis 5 hari.",
+    description: "Bergabunglah dengan Muslim di Inggris belajar Quran online. Uji coba gratis 5 hari.",
   },
 };
 
