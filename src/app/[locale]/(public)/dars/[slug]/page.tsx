@@ -8,6 +8,8 @@ import { ArrowLeft, Calendar, BookOpen } from "lucide-react";
 
 import { SITE_URL as BASE_URL, localeMetadataAlternates } from "@/lib/site-config";
 import { renderPostContent, contentToPlainText, truncateText } from "@/lib/markdown";
+import { Navbar } from "@/components/shared/navbar";
+import { Footer } from "@/components/shared/footer";
 
 const categoryLabels: Record<string, Record<string, string>> = {
   quran: { en: "Quran", ur: "قرآن", ar: "القرآن", fr: "Coran", id: "Al-Quran" },
@@ -160,7 +162,9 @@ export default async function DarsDetailPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
       />
-      <div className="max-w-3xl mx-auto px-4 py-12">
+      <div className="flex flex-col min-h-screen">
+      <Navbar />
+      <main className="flex-1 max-w-3xl w-full mx-auto px-4 py-12">
         <Link href="/dars" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors">
           <ArrowLeft className="w-4 h-4" />
           <span>{locale === "ur" ? "تمام درس" : locale === "ar" ? "جميع الدروس" : "All Dars"}</span>
@@ -234,6 +238,8 @@ export default async function DarsDetailPage({
             </div>
           </div>
         </article>
+      </main>
+      <Footer />
       </div>
     </>
   );

@@ -6,6 +6,8 @@ import { Link } from "@/i18n/navigation";
 import { BookOpen, Calendar } from "lucide-react";
 import { localeMetadataAlternates, absoluteUrl } from "@/lib/site-config";
 import { publishedDars } from "@/lib/content/publication";
+import { Navbar } from "@/components/shared/navbar";
+import { Footer } from "@/components/shared/footer";
 
 const darsMeta: Record<string, { title: string; description: string }> = {
   ur: { title: "روزانہ درس — قرآن، حدیث، فقہ و سیرت", description: "تبیان اکیڈمی کا روزانہ درس — قرآن، حدیث، فقہ، سیرت اور دعا۔" },
@@ -85,7 +87,9 @@ export default async function DarsListPage({
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-12">
+    <div className="flex flex-col min-h-screen">
+      <Navbar />
+      <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-12">
       <div className="text-center mb-10">
         <div className="w-14 h-14 rounded-2xl bg-emerald-100 dark:bg-emerald-900 flex items-center justify-center mx-auto mb-4">
           <BookOpen className="w-7 h-7 text-emerald-600" />
@@ -103,15 +107,15 @@ export default async function DarsListPage({
           <p className="text-muted-foreground">No dars posts yet. Check back soon!</p>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {posts.map((post) => {
             const title = (post[titleKey] as string) || post.titleEn || "Untitled";
             return (
-              <Link key={post.id} href={`/dars/${post.slug}`}>
-                <div className="rounded-xl border bg-card p-5 hover:bg-muted/30 transition-colors group">
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+              <Link key={post.id} href={`/dars/${post.slug}`} className="block h-full">
+                <div className="h-full rounded-xl border bg-card p-5 hover:bg-muted/30 hover:border-emerald-600/40 transition-colors group">
+                  <div className="flex flex-col gap-3">
                     <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
+                      <div className="flex flex-wrap items-center gap-2 mb-2">
                         <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${categoryColors[post.category] ?? "bg-muted text-muted-foreground"}`}>
                           {categoryLabels[post.category]?.[locale] ?? post.category}
                         </span>
@@ -136,6 +140,8 @@ export default async function DarsListPage({
           })}
         </div>
       )}
+      </main>
+      <Footer />
     </div>
   );
 }
