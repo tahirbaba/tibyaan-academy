@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { STAT_VALUES, STAT_COUNTS } from "@/lib/site-stats";
 import { getTranslations } from "next-intl/server";
 import { AvatarImage } from "@/components/shared/avatar-image";
 import { Navbar } from "@/components/shared/navbar";
@@ -117,11 +118,11 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
           <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white">
             <div className="inline-flex items-center gap-2 bg-white/10 rounded-full px-4 py-2 text-sm font-semibold mb-6">
               <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
-              {locale === "ur" ? "دنیا بھر میں 2000+ طلبا کا اعتماد" :
-               locale === "ar" ? "يثق بنا أكثر من 2000 طالب حول العالم" :
-               locale === "fr" ? "Approuvé par 2000+ étudiants dans le monde" :
-               locale === "id" ? "Dipercaya oleh 2000+ siswa di seluruh dunia" :
-               "Trusted by 2000+ Students Worldwide"}
+              {locale === "ur" ? `دنیا بھر میں ${STAT_VALUES.students} طلبا کا اعتماد` :
+               locale === "ar" ? `يثق بنا أكثر من ${STAT_COUNTS.studentsCount} طالب حول العالم` :
+               locale === "fr" ? `Approuvé par ${STAT_VALUES.students} étudiants dans le monde` :
+               locale === "id" ? `Dipercaya oleh ${STAT_VALUES.students} siswa di seluruh dunia` :
+               `Trusted by ${STAT_VALUES.students} Students Worldwide`}
             </div>
             <h1 className="text-4xl md:text-6xl font-bold leading-tight">{t("title")}</h1>
             <p className="mt-6 text-xl text-white/80 max-w-3xl mx-auto leading-relaxed">{t("subtitle")}</p>
@@ -149,8 +150,8 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
               {[
-                { value: t("statStudents"), label: "" },
-                { value: t("statCountries"), label: "" },
+                { value: t("statStudents", STAT_VALUES), label: "" },
+                { value: t("statCountries", STAT_VALUES), label: "" },
                 { value: t("statTeachers"), label: "" },
                 { value: t("statYears"), label: "" },
               ].map((stat, i) => (
@@ -175,7 +176,7 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
             <div className="space-y-6 text-muted-foreground text-lg leading-relaxed">
               <p>{t("ourStoryP1")}</p>
               <p>{t("ourStoryP2")}</p>
-              <p>{t("ourStoryP3")}</p>
+              <p>{t("ourStoryP3", { ...STAT_VALUES, ...STAT_COUNTS })}</p>
             </div>
           </div>
         </section>

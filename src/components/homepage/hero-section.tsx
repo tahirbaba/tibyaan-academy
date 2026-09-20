@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { formatStat } from "@/lib/site-stats";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
@@ -16,9 +17,9 @@ const stats = [
 const highlights = [
   "Free Trial Available",
   "1-on-1 Live Classes",
-  "500+ Students Worldwide",
+  `${formatStat("students")} Students Worldwide`,
   "5 Languages Supported",
-] as const;
+];
 
 export function HeroSection() {
   const t = useTranslations("hero");

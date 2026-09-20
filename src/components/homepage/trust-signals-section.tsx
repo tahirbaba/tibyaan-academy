@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { SITE_STATS } from "@/lib/site-stats";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { Users, Globe, BookOpen, Award } from "lucide-react";
@@ -36,10 +37,10 @@ function AnimatedCounter({ target }: { target: number }) {
 }
 
 const signals = [
-  { key: "students", value: 500, suffix: "+", icon: Users },
-  { key: "countries", value: 15, suffix: "+", icon: Globe },
-  { key: "classes", value: 10000, suffix: "+", icon: BookOpen },
-  { key: "huffaz", value: 50, suffix: "+", icon: Award },
+  { key: "students", value: SITE_STATS.students, suffix: "+", icon: Users },
+  { key: "countries", value: SITE_STATS.countries, suffix: "+", icon: Globe },
+  { key: "classes", value: SITE_STATS.classes, suffix: "+", icon: BookOpen },
+  { key: "huffaz", value: SITE_STATS.huffaz, suffix: "+", icon: Award },
 ] as const;
 
 export function TrustSignalsSection() {
