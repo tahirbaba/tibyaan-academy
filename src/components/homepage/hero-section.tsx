@@ -1,17 +1,25 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { formatStat } from "@/lib/site-stats";
+import { formatStat, STAT_VALUES } from "@/lib/site-stats";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import Image from "next/image";
+import { BookOpen } from "lucide-react";
+import { YouTubeEmbed } from "@/components/shared/youtube-embed";
+
+/**
+ * Optional. Set it to a YouTube URL (a normal video or a Short - the embed
+ * detects which) to put a video in the hero. Left unset, the hero shows its
+ * designed panel; it is never a broken image.
+ */
+const heroVideo = process.env.NEXT_PUBLIC_HERO_VIDEO_URL;
 
 const stats = [
-  { key: "students", value: "500+" },
-  { key: "countries", value: "15+" },
-  { key: "classes", value: "10,000+" },
-  { key: "huffaz", value: "50+" },
+  { key: "students", value: STAT_VALUES.students },
+  { key: "countries", value: STAT_VALUES.countries },
+  { key: "classes", value: STAT_VALUES.classes },
+  { key: "huffaz", value: STAT_VALUES.huffaz },
 ] as const;
 
 const highlights = [
@@ -111,31 +119,30 @@ export function HeroSection() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="flex flex-col gap-4"
           >
-            {/* Hero Family Image */}
-            <div className="relative w-full h-72 md:h-80 rounded-2xl overflow-hidden shadow-xl">
-              <Image
-                src="/images/hero-family.jpg"
-                alt="Muslim family learning Quran with Tibyaan Academy"
-                fill
-                className="object-cover"
-                priority
-                onError={(e) => {
-                  const el = e.currentTarget as HTMLImageElement;
-                  el.style.display = "none";
-                  const parent = el.parentElement;
-                  if (parent) {
-                    parent.style.background = "#1B4332";
-                    parent.style.display = "flex";
-                    parent.style.alignItems = "center";
-                    parent.style.justifyContent = "center";
-                  }
-                }}
+            {/* Hero video slot. Empty until NEXT_PUBLIC_HERO_VIDEO_URL is set;
+                the designed panel below stands in its place until then. */}
+            {heroVideo ? (
+              <YouTubeEmbed
+                url={heroVideo}
+                title="Tibyaan Academy"
+                className="shadow-xl"
               />
-              {/* Fallback overlay — shown only if image fails */}
-              <div className="absolute inset-0 bg-primary/5 flex items-center justify-center">
-                <div className="text-6xl">🕌</div>
+            ) : (
+              <div className="relative w-full h-72 md:h-80 rounded-2xl overflow-hidden shadow-xl bg-[#1B4332]">
+                {/* geometric pattern, same one the course heroes use */}
+                <div className="absolute inset-0 opacity-[0.12] bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iODAiIHZpZXdCb3g9IjAgMCA4MCA4MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNNDAgMEw0MCA4ME0wIDQwTDgwIDQwTTAgMEw4MCA4ME04MCAwTDAgODBNMjAgMEwyMCA4ME02MCAwTDYwIDgwTTAgMjBMODAgMjBNMCA2MEw4MCA2MCIgc3Ryb2tlPSIjQzlBODRDIiBzdHJva2Utd2lkdGg9IjAuNSIgZmlsbD0ibm9uZSIvPjwvc3ZnPg==')]" />
+                <div className="absolute inset-0 bg-gradient-to-br from-transparent to-black/25" />
+                <div className="relative h-full flex flex-col items-center justify-center text-center px-8">
+                  <div className="w-14 h-14 rounded-2xl border border-[#C9A84C]/50 bg-[#C9A84C]/10 flex items-center justify-center">
+                    <BookOpen className="w-7 h-7 text-[#C9A84C]" />
+                  </div>
+                  <p className="mt-4 text-xl font-bold text-white">Tibyaan Academy</p>
+                  <p className="mt-1 text-sm text-white/70 max-w-xs">
+                    Live 1-on-1 Quran teachers, guided by AI.
+                  </p>
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Contact Info Card */}
             <div className="bg-card rounded-2xl p-5 shadow-md border border-border">
