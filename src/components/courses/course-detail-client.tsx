@@ -179,7 +179,7 @@ export default function CourseDetailClient() {
   const k = course.key;
   const syllabus = getSyllabus(k);
   const isHifz = k === "hifz";
-  const visibleSyllabus = isHifz && !showAllSyllabus ? syllabus.slice(0, 5) : syllabus;
+  const visibleSyllabus = isHifz && !showAllSyllabus ? syllabus.slice(0, 8) : syllabus;
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -276,7 +276,7 @@ export default function CourseDetailClient() {
             >
               {t("syllabus")}
             </motion.h2>
-            <div className="mt-8 space-y-4">
+            <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {visibleSyllabus.map((section, i) => {
                 const hasMultiBooks = section.books && section.books.length > 0;
                 const hasSingleBook = !hasMultiBooks && !!section.bookImage;
@@ -288,7 +288,7 @@ export default function CourseDetailClient() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.4, delay: i * 0.05 }}
-                  className="p-5 rounded-xl bg-card border shadow-sm"
+                  className={`p-5 rounded-xl bg-card border shadow-sm ${hasMultiBooks || hasSingleBook ? "sm:col-span-2 lg:col-span-3" : ""}`}
                 >
                   {/* Section header */}
                   <div className="flex items-center gap-3 mb-4">
@@ -367,16 +367,16 @@ export default function CourseDetailClient() {
                 </motion.div>
                 );
               })}
-              {isHifz && (
-                <button
-                  onClick={() => setShowAllSyllabus(!showAllSyllabus)}
-                  className="flex items-center gap-2 mx-auto text-sm font-medium text-primary hover:text-primary/80 transition-colors"
-                >
-                  {showAllSyllabus ? t("showLess") : t("showAllParas")}
-                  <ChevronDown className={`w-4 h-4 transition-transform ${showAllSyllabus ? "rotate-180" : ""}`} />
-                </button>
-              )}
             </div>
+            {isHifz && (
+              <button
+                onClick={() => setShowAllSyllabus(!showAllSyllabus)}
+                className="flex items-center gap-2 mx-auto mt-8 text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+              >
+                {showAllSyllabus ? t("showLess") : t("showAllParas")}
+                <ChevronDown className={`w-4 h-4 transition-transform ${showAllSyllabus ? "rotate-180" : ""}`} />
+              </button>
+            )}
           </div>
         </section>
 
