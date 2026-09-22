@@ -824,7 +824,8 @@
     "improvement": "Peningkatan",
     "streak": "Streak",
     "tomorrowPlan": "Rencana Besok",
-    "noSchedule": "Belum ada jadwal. Catat Sabaq pertama Anda untuk memulai!"
+    "noSchedule": "Belum ada jadwal. Catat Sabaq pertama Anda untuk memulai!",
+    "averageScore": "Skor Rata-rata"
   },
   "kidsActivities": {
     "title": "Aktivitas Anak",
@@ -1016,7 +1017,21 @@
     "faazil": "Faazil",
     "studentEmail": "Email Siswa",
     "monthlyAmount": "Jumlah Bulanan",
-    "viewDetails": "Lihat Detail"
+    "viewDetails": "Lihat Detail",
+    "classesToday": "Kelas Hari Ini",
+    "upcomingClasses": "Kelas Mendatang",
+    "noUpcomingClasses": "Tidak ada kelas mendatang",
+    "noClassesToday": "Tidak ada kelas hari ini",
+    "quickActions": "Tindakan Cepat",
+    "viewAll": "Lihat Semua",
+    "noPendingActions": "Tidak ada tindakan tertunda",
+    "inProgress": "Sedang Berlangsung",
+    "noLessonsYet": "Belum ada pelajaran",
+    "noStudentsYet": "Belum ada siswa",
+    "noMatchingStudents": "Tidak ada siswa yang cocok",
+    "noTestsYet": "Belum ada tes",
+    "noCertificatesYet": "Belum ada sertifikat",
+    "noRevenueYet": "Belum ada pendapatan"
   },
   "payments": {
     "title": "Pembayaran & Langganan",
@@ -1278,7 +1293,7 @@
     "ourStoryTitle": "Kisah Kami",
     "ourStoryP1": "Tibyaan Academy lahir dari sebuah kesadaran sederhana namun kuat: jutaan Muslim di seluruh dunia sangat ingin belajar Al-Quran dan ilmu Islam — tetapi tidak memiliki akses ke guru yang berkualifikasi di komunitas lokal mereka.",
     "ourStoryP2": "Profesor Muhammad Tahir Hasni menyadari kesenjangan ini. Dia mengumpulkan tim ulama dan pendidik Islam yang berkualifikasi dan membangun Tibyaan Academy — platform di mana pembelajaran Islam yang otentik bertemu dengan teknologi modern.",
-    "ourStoryP3": "Hari ini, Tibyaan Academy melayani siswa dari lebih dari 20 negara, mulai dari anak-anak kecil yang belajar huruf Arab pertama mereka hingga para sarjana yang mengambil kursus Aalim lengkap.",
+    "ourStoryP3": "Hari ini, Tibyaan Academy melayani siswa dari lebih dari {countriesCount} negara, mulai dari anak-anak kecil yang belajar huruf Arab pertama mereka hingga para sarjana yang mengambil kursus Aalim lengkap.",
     "ourStoryHeading": "Dari Visi Menjadi Kenyataan",
     "visionTitle": "Visi Kami",
     "visionDesc": "Dunia di mana setiap Muslim memiliki akses ke guru Islam yang berkualifikasi dari rumah mereka, dalam bahasa mereka sendiri.",
@@ -1295,9 +1310,9 @@
     ],
     "teamSectionTitle": "Tim Ahli Kami",
     "teamSectionSubtitle": "Ulama dan pendidik berkualifikasi dari lembaga Islam terkemuka",
-    "statStudents": "2000+ Siswa",
-    "statCountries": "20+ Negara",
-    "statTeachers": "15+ Guru",
+    "statStudents": "{students} Siswa",
+    "statCountries": "{countries} Negara",
+    "statTeachers": "20+ Guru",
     "statYears": "3+ Tahun",
     "whatsappBtn": "WhatsApp"
   },
@@ -1464,7 +1479,16 @@
     "upcoming": "Akan Datang",
     "live": "Langsung",
     "completed": "Selesai",
-    "cancelled": "Dibatalkan"
+    "cancelled": "Dibatalkan",
+    "teacherTitle": "Lingkaran Dars Saya",
+    "teacherSubtitle": "Buat dan kelola lingkaran ilmu langsung Anda",
+    "noTeacherCircles": "Anda belum membuat lingkaran apa pun",
+    "circleCreated": "Lingkaran dibuat",
+    "circleTitles": "Judul Lingkaran",
+    "titlePlaceholder": "Judul",
+    "descriptionPlaceholder": "Apa yang akan dibahas lingkaran ini?",
+    "scheduledDate": "Tanggal",
+    "scheduledTime": "Waktu"
   },
   "parentReports": {
     "title": "Laporan WhatsApp Orang Tua",

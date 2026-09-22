@@ -23,7 +23,6 @@ interface CountryContent {
   cta_final_heading: string;
   cta_final_desc: string;
   cta_final_btn: string;
-  local_stats_msg: string;
   timezone_msg: string;
   courses: {
     title: string;
@@ -69,8 +68,7 @@ export function CountryPageTemplate({ locale, data }: Props) {
               {data.flag} {t.badge}
             </div>
             <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-6">{t.hero_heading}</h1>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-4">{t.hero_desc}</p>
-            <p className="text-sm text-emerald-600 font-medium mb-8">{t.local_stats_msg}</p>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">{t.hero_desc}</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 href="/signup"

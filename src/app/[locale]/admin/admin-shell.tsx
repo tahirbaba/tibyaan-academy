@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { useLocale } from "next-intl";
+import { signOut } from "@/app/[locale]/(auth)/actions";
 import { Link, usePathname } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "next-themes";
@@ -12,9 +14,7 @@ import {
   Bot,
   Star,
   Bell,
-  Video,
-  Disc,
-  UserCheck,
+  Video,  UserCheck,
   CalendarClock,
   Activity,
   Sun,
@@ -40,7 +40,6 @@ const navItems = [
   { key: "sidebarCourses", href: "/admin/courses", icon: BookOpen },
   { key: "sidebarVideos", href: "/admin/videos", icon: Video },
   { key: "sidebarContentReview", href: "/admin/content-review", icon: FileCheck },
-  { key: "sidebarRecordings", href: "/admin/recordings", icon: Disc },
   { key: "sidebarClassRecordings", href: "/admin/class-recordings", icon: Video },
   { key: "sidebarMatches", href: "/admin/matches", icon: UserCheck },
   { key: "sidebarScheduleRequests", href: "/admin/schedule-requests", icon: CalendarClock },
@@ -76,6 +75,7 @@ export function AdminShell({
   userInitial: string;
 }) {
   const t = useTranslations("admin");
+  const locale = useLocale();
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -210,11 +210,11 @@ export function AdminShell({
             </Button>
 
             {/* Logout */}
-            <Link href="/login">
-              <Button variant="ghost" size="sm">
+            <form action={signOut.bind(null, locale)}>
+              <Button type="submit" variant="ghost" size="sm">
                 <LogOut className="w-5 h-5" />
               </Button>
-            </Link>
+            </form>
           </div>
         </header>
 

@@ -1,5 +1,5 @@
 import type { NextConfig } from "next";
-import { PHASE_PRODUCTION_BUILD } from "next/constants";
+import { PHASE_DEVELOPMENT_SERVER, PHASE_PRODUCTION_BUILD } from "next/constants";
 import createNextIntlPlugin from "next-intl/plugin";
 
 const withNextIntl = createNextIntlPlugin();
@@ -43,6 +43,15 @@ const nextConfig: NextConfig = {
       {
         source: "/:locale/blog",
         destination: "/:locale/dars",
+        permanent: true,
+      },
+      // The student recordings pages were merged into one. /student/recordings
+      // rendered only teacher uploads and was linked from nowhere, so students
+      // never saw them; /student/class-recordings now shows both sources.
+      // Redirected rather than dropped so any existing link keeps working.
+      {
+        source: "/:locale/student/recordings",
+        destination: "/:locale/student/class-recordings",
         permanent: true,
       },
     ];
@@ -89,7 +98,37 @@ function assertSiteUrl(): void {
   }
 }
 
+
+/**
+ * Fail the build when a translation key used in the app is missing from any
+ * locale file. A missing key rendered as a raw key on live pages for months;
+ * the build passed because a missing message only shows at render time.
+ * Static keys only - dynamic call sites are listed in
+ * docs/phase-20-i18n-blind-spots.md.
+ */
+let translationsChecked = false;
+function assertTranslations(): void {
+  // Next loads this config more than once per build; check once per process.
+  if (translationsChecked) return;
+  translationsChecked = true;
+
+  const { execFileSync } = require("node:child_process");
+  try {
+    execFileSync(process.execPath, ["scripts/check-i18n.mjs"], { stdio: "inherit" });
+  } catch {
+    throw new Error(
+      "Translation check failed - see the missing keys above. " +
+        "Every key used in the app must exist in all five locale files."
+    );
+  }
+}
 export default function config(phase: string): NextConfig {
-  if (phase === PHASE_PRODUCTION_BUILD) assertSiteUrl();
+  if (phase === PHASE_PRODUCTION_BUILD) {
+    assertSiteUrl();
+    assertTranslations();
+  }
+  // In development the dev server calls this too, so a missing key is caught
+  // on the machine that introduced it rather than in production.
+  if (phase === PHASE_DEVELOPMENT_SERVER) assertTranslations();
   return withNextIntl(withPWA(nextConfig));
 }

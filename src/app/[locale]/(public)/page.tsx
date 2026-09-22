@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Navbar } from "@/components/shared/navbar";
 import { HeroSection } from "@/components/homepage/hero-section";
 import { FeaturesSection } from "@/components/homepage/features-section";
+import { HumanAiSection } from "@/components/homepage/human-ai-section";
 import { CoursesSection } from "@/components/homepage/courses-section";
 import { HowItWorksSection } from "@/components/homepage/how-it-works-section";
 import { TestimonialsSection } from "@/components/homepage/testimonials-section";
@@ -73,6 +74,7 @@ export default function HomePage() {
       <main className="flex-1">
         <HeroSection />
         <FeaturesSection />
+        <HumanAiSection />
         <CoursesSection />
         <TeacherVideosSection />
         <HowItWorksSection />

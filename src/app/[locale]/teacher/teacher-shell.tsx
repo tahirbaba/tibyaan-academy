@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { signOut } from "@/app/[locale]/(auth)/actions";
 import { Link, usePathname } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "next-themes";
@@ -19,9 +20,7 @@ import {
   Menu,
   X,
   LogOut,
-  ChevronLeft,
-  Bot,
-  TrendingUp,
+  ChevronLeft,  TrendingUp,
   FileText,
 } from "lucide-react";
 import { NotificationBell } from "@/components/shared/notification-bell";
@@ -34,7 +33,6 @@ const navItems = [
   { key: "sidebarTrackProgress", href: "/teacher/track-progress", icon: TrendingUp },
   { key: "sidebarTests", href: "/teacher/tests", icon: ClipboardCheck },
   { key: "sidebarTestsAssignments", href: "/teacher/tests-assignments", icon: FileText },
-  { key: "sidebarAIAssistant", href: "/teacher/ai-assistant", icon: Bot },
   { key: "sidebarVideos", href: "/teacher/videos", icon: Video },
   { key: "sidebarRecordings", href: "/teacher/recordings", icon: Disc },
   { key: "sidebarRevenue", href: "/teacher/revenue", icon: DollarSign },
@@ -185,11 +183,12 @@ export function TeacherShell({
               <Sun className="w-5 h-5 hidden dark:block" />
               <Moon className="w-5 h-5 dark:hidden" />
             </Button>
-            <Link href="/login">
-              <Button variant="ghost" size="sm">
+            {/* Logout */}
+            <form action={signOut.bind(null, locale)}>
+              <Button type="submit" variant="ghost" size="sm">
                 <LogOut className="w-5 h-5" />
               </Button>
-            </Link>
+            </form>
           </div>
         </header>
 

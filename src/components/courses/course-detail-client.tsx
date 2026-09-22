@@ -31,7 +31,7 @@ import {
   Star,
   ChevronDown,
 } from "lucide-react";
-import { getSyllabus } from "@/lib/data/course-syllabus";
+import { getSyllabusItems } from "@/lib/data/course-syllabus";
 
 type CourseKey = "nazra" | "hifz" | "arabic" | "aalim";
 
@@ -177,9 +177,9 @@ export default function CourseDetailClient() {
 
   const Icon = course.icon;
   const k = course.key;
-  const syllabus = getSyllabus(k);
+  const syllabus = getSyllabusItems(k);
   const isHifz = k === "hifz";
-  const visibleSyllabus = isHifz && !showAllSyllabus ? syllabus.slice(0, 5) : syllabus;
+  const visibleSyllabus = isHifz && !showAllSyllabus ? syllabus.slice(0, 8) : syllabus;
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -276,107 +276,63 @@ export default function CourseDetailClient() {
             >
               {t("syllabus")}
             </motion.h2>
-            <div className="mt-8 space-y-4">
-              {visibleSyllabus.map((section, i) => {
-                const hasMultiBooks = section.books && section.books.length > 0;
-                const hasSingleBook = !hasMultiBooks && !!section.bookImage;
-
-                return (
+            <div className="mt-8 grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {visibleSyllabus.map((item, i) => (
                 <motion.div
-                  key={section.id}
+                  key={item.key}
                   initial={{ opacity: 0, y: 15 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.4, delay: i * 0.05 }}
-                  className="p-5 rounded-xl bg-card border shadow-sm"
+                  transition={{ duration: 0.4, delay: (i % 4) * 0.05 }}
+                  className="flex flex-col p-4 rounded-xl bg-card border shadow-sm"
                 >
-                  {/* Section header */}
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                      <span className="text-xs font-bold text-primary">{section.id}</span>
-                    </div>
-                    <p className="text-sm font-semibold text-foreground">{t(section.titleKey)}</p>
-                  </div>
-
-                  {/* Single-book layout */}
-                  {hasSingleBook && (
-                    <div className="flex flex-col sm:flex-row items-start gap-4">
-                      <div className="shrink-0 text-center mx-auto sm:mx-0">
-                        {section.pdfUrl ? (
-                          <a href={section.pdfUrl} target="_blank" rel="noopener noreferrer" className="block group">
-                            <img
-                              src={section.bookImage!}
-                              alt={section.bookName ?? t(section.titleKey)}
-                              className="w-[260px] h-[340px] object-contain bg-muted/30 rounded-lg shadow border border-muted mx-auto group-hover:shadow-md transition-shadow"
-                              onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
-                            />
-                            <span className="inline-flex items-center gap-1 mt-2 px-2 py-0.5 rounded bg-primary/10 text-primary text-xs font-medium">
-                              📄 PDF کھولیں
-                            </span>
-                          </a>
-                        ) : (
-                          <img
-                            src={section.bookImage!}
-                            alt={section.bookName ?? t(section.titleKey)}
-                            className="w-[260px] h-[340px] object-contain bg-muted/30 rounded-lg shadow border border-muted mx-auto"
-                            onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
-                          />
-                        )}
-                      </div>
-                      <p className="text-sm text-muted-foreground mt-1">{t(section.descKey)}</p>
+                  {/* Fixed-shape frame. object-contain so a cover is scaled to
+                      fit rather than cropped or stretched, and every frame is
+                      the same size whatever the source image's proportions. */}
+                  {item.image && (
+                    <div className="relative w-full aspect-[3/4] rounded-lg bg-muted/30 border border-muted overflow-hidden">
+                      <img
+                        src={item.image}
+                        alt={item.titleText ?? t(item.titleKey!)}
+                        loading="lazy"
+                        className="absolute inset-0 w-full h-full object-contain p-2"
+                        onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                      />
                     </div>
                   )}
 
-                  {/* Multi-book responsive grid — fills full width, all cards equal size */}
-                  {hasMultiBooks && (
-                    <div className="grid gap-4 [grid-template-columns:repeat(auto-fill,minmax(200px,1fr))]">
-                      {section.books!.map((book) => (
-                        <div key={book.name} className="text-center">
-                          {book.pdfUrl ? (
-                            <a href={book.pdfUrl} target="_blank" rel="noopener noreferrer" className="block group">
-                              <img
-                                src={book.image}
-                                alt={book.name}
-                                className="w-full aspect-[2/3] object-contain bg-muted/30 rounded-lg shadow border border-muted group-hover:shadow-md transition-shadow"
-                                onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
-                              />
-                              <p className="text-xs font-medium text-foreground mt-2 leading-tight line-clamp-2 px-1">
-                                {book.name}
-                              </p>
-                              <span className="inline-flex items-center gap-0.5 mt-1.5 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-semibold">
-                                📄 PDF
-                              </span>
-                            </a>
-                          ) : (
-                            <>
-                              <img
-                                src={book.image}
-                                alt={book.name}
-                                className="w-full aspect-[2/3] object-contain bg-muted/30 rounded-lg shadow border border-muted"
-                                onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
-                              />
-                              <p className="text-xs font-medium text-foreground mt-2 leading-tight line-clamp-2 px-1">
-                                {book.name}
-                              </p>
-                            </>
-                          )}
-                        </div>
-                      ))}
-                    </div>
+                  <p className="mt-3 text-sm font-semibold text-foreground leading-snug line-clamp-2">
+                    {item.titleText ?? t(item.titleKey!)}
+                  </p>
+
+                  {item.subKey && (
+                    <p className="mt-1 text-xs text-muted-foreground leading-relaxed line-clamp-3">
+                      {t(item.subKey)}
+                    </p>
+                  )}
+
+                  {item.pdfUrl && (
+                    <a
+                      href={item.pdfUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-auto pt-3 self-start inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold hover:bg-primary/20 transition-colors"
+                    >
+                      PDF
+                    </a>
                   )}
                 </motion.div>
-                );
-              })}
-              {isHifz && (
-                <button
-                  onClick={() => setShowAllSyllabus(!showAllSyllabus)}
-                  className="flex items-center gap-2 mx-auto text-sm font-medium text-primary hover:text-primary/80 transition-colors"
-                >
-                  {showAllSyllabus ? t("showLess") : t("showAllParas")}
-                  <ChevronDown className={`w-4 h-4 transition-transform ${showAllSyllabus ? "rotate-180" : ""}`} />
-                </button>
-              )}
+              ))}
             </div>
+            {isHifz && (
+              <button
+                onClick={() => setShowAllSyllabus(!showAllSyllabus)}
+                className="flex items-center gap-2 mx-auto mt-8 text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+              >
+                {showAllSyllabus ? t("showLess") : t("showAllParas")}
+                <ChevronDown className={`w-4 h-4 transition-transform ${showAllSyllabus ? "rotate-180" : ""}`} />
+              </button>
+            )}
           </div>
         </section>
 

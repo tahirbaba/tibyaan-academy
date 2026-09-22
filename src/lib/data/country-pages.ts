@@ -1,4 +1,5 @@
 import type { CountryPageData } from "@/components/country/country-page-template";
+import { formatStat } from "@/lib/site-stats";
 
 export const UK_PAGE: CountryPageData = {
   flag: "🇬🇧",
@@ -65,7 +66,7 @@ export const UK_PAGE: CountryPageData = {
         "All courses are available online. Classes are scheduled at times convenient for UK time zones (GMT/BST).",
       testimonials_heading: "Trusted by UK Muslim Families",
       stats: [
-        { value: "500+", label: "UK Students" },
+        { value: formatStat("students"), label: "Students" },
         { value: "4.9★", label: "Average Rating" },
         { value: "5-day", label: "Free Trial" },
       ],
@@ -73,7 +74,6 @@ export const UK_PAGE: CountryPageData = {
       cta_final_desc:
         "5 days free — no credit card required. Experience live Quran teaching and AI-powered learning from the comfort of your home anywhere in the UK.",
       cta_final_btn: "Get Started Free",
-      local_stats_msg: "500+ Muslims in the UK are already learning with us",
       timezone_msg: "Classes available in UK time zones: GMT and BST",
       courses: [
         {
@@ -123,7 +123,7 @@ export const UK_PAGE: CountryPageData = {
         "تمام کورسز آن لائن دستیاب ہیں۔ کلاسز برطانیہ کے ٹائم زونز (GMT/BST) کے مطابق شیڈول کی جاتی ہیں۔",
       testimonials_heading: "برطانوی مسلم خاندانوں کا اعتماد",
       stats: [
-        { value: "500+", label: "برطانوی طلبا" },
+        { value: formatStat("students"), label: "طلبا" },
         { value: "4.9★", label: "اوسط ریٹنگ" },
         { value: "5 دن", label: "مفت ٹرائل" },
       ],
@@ -131,7 +131,6 @@ export const UK_PAGE: CountryPageData = {
       cta_final_desc:
         "5 دن مفت — کوئی کریڈٹ کارڈ ضروری نہیں۔ برطانیہ میں اپنے گھر کے آرام سے لائیو قرآن تعلیم اور AI سے چلنے والی تعلیم کا تجربہ کریں۔",
       cta_final_btn: "مفت شروع کریں",
-      local_stats_msg: "برطانیہ میں 500+ مسلمان پہلے سے ہمارے ساتھ سیکھ رہے ہیں",
       timezone_msg: "برطانوی ٹائم زونز میں کلاسز دستیاب: GMT اور BST",
       courses: [
         {
@@ -181,7 +180,7 @@ export const UK_PAGE: CountryPageData = {
         "جميع الدورات متاحة عبر الإنترنت. يتم جدولة الدروس في أوقات مناسبة للمناطق الزمنية في المملكة المتحدة.",
       testimonials_heading: "موثوق به من قِبَل العائلات المسلمة في المملكة المتحدة",
       stats: [
-        { value: "500+", label: "طلاب من المملكة المتحدة" },
+        { value: formatStat("students"), label: "طلاب" },
         { value: "4.9★", label: "متوسط التقييم" },
         { value: "5 أيام", label: "تجربة مجانية" },
       ],
@@ -189,7 +188,6 @@ export const UK_PAGE: CountryPageData = {
       cta_final_desc:
         "5 أيام مجاناً — لا حاجة لبطاقة ائتمان. استمتع بتعليم القرآن المباشر والتعلم بالذكاء الاصطناعي من راحة منزلك.",
       cta_final_btn: "ابدأ مجاناً",
-      local_stats_msg: "أكثر من 500 مسلم في المملكة المتحدة يتعلمون معنا بالفعل",
       timezone_msg: "الدروس متاحة في المناطق الزمنية للمملكة المتحدة: GMT و BST",
       courses: [
         {
@@ -239,7 +237,7 @@ export const UK_PAGE: CountryPageData = {
         "Tous les cours sont disponibles en ligne. Les cours sont planifiés aux heures pratiques pour les fuseaux horaires du Royaume-Uni (GMT/BST).",
       testimonials_heading: "Approuvé par les familles musulmanes du Royaume-Uni",
       stats: [
-        { value: "500+", label: "Étudiants UK" },
+        { value: formatStat("students"), label: "Étudiants" },
         { value: "4.9★", label: "Note moyenne" },
         { value: "5 jours", label: "Essai gratuit" },
       ],
@@ -247,7 +245,6 @@ export const UK_PAGE: CountryPageData = {
       cta_final_desc:
         "5 jours gratuits — aucune carte de crédit requise. Découvrez l'enseignement du Coran en direct et l'apprentissage IA depuis chez vous.",
       cta_final_btn: "Commencer gratuitement",
-      local_stats_msg: "Plus de 500 musulmans au Royaume-Uni apprennent déjà avec nous",
       timezone_msg: "Cours disponibles dans les fuseaux horaires britanniques : GMT et BST",
       courses: [
         {
@@ -297,7 +294,7 @@ export const UK_PAGE: CountryPageData = {
         "Semua kursus tersedia secara online. Kelas dijadwalkan pada waktu yang nyaman untuk zona waktu Inggris (GMT/BST).",
       testimonials_heading: "Dipercaya oleh Keluarga Muslim di Inggris",
       stats: [
-        { value: "500+", label: "Siswa UK" },
+        { value: formatStat("students"), label: "Siswa" },
         { value: "4.9★", label: "Rating Rata-rata" },
         { value: "5 Hari", label: "Uji Coba Gratis" },
       ],
@@ -305,7 +302,6 @@ export const UK_PAGE: CountryPageData = {
       cta_final_desc:
         "5 hari gratis — tidak perlu kartu kredit. Rasakan pengajaran Quran langsung dan pembelajaran bertenaga AI dari kenyamanan rumah Anda di Inggris.",
       cta_final_btn: "Mulai Gratis",
-      local_stats_msg: "Lebih dari 500 Muslim di Inggris sudah belajar bersama kami",
       timezone_msg: "Kelas tersedia di zona waktu Inggris: GMT dan BST",
       courses: [
         {
@@ -378,7 +374,7 @@ export const USA_PAGE: CountryPageData = {
         "All courses are available online. Classes are scheduled at times convenient for all US time zones.",
       testimonials_heading: "Trusted by Muslim Families Across the USA",
       stats: [
-        { value: "300+", label: "USA Students" },
+        { value: formatStat("students"), label: "Students" },
         { value: "4.9★", label: "Average Rating" },
         { value: "5-day", label: "Free Trial" },
       ],
@@ -386,7 +382,6 @@ export const USA_PAGE: CountryPageData = {
       cta_final_desc:
         "5 days free — no credit card required. Experience live Quran teaching and AI-powered learning from the comfort of your home.",
       cta_final_btn: "Get Started Free",
-      local_stats_msg: "300+ Muslims in the USA are already learning with us",
       timezone_msg: "Classes available in all US time zones: EST, CST, MST, PST",
       courses: [
         { slug: "nazra-quran", title: "Nazra Quran", desc: "Learn to read Quran with proper Tajweed.", price_label: "From $25/month" },
@@ -414,14 +409,13 @@ export const USA_PAGE: CountryPageData = {
       courses_desc: "تمام کورسز آن لائن دستیاب ہیں۔ تمام امریکی ٹائم زونز میں کلاسز دستیاب ہیں۔",
       testimonials_heading: "امریکی مسلم خاندانوں کا اعتماد",
       stats: [
-        { value: "300+", label: "امریکی طلبا" },
+        { value: formatStat("students"), label: "طلبا" },
         { value: "4.9★", label: "اوسط ریٹنگ" },
         { value: "5 دن", label: "مفت ٹرائل" },
       ],
       cta_final_heading: "امریکہ کے مسلم خاندانوں کے ساتھ قرآن سیکھیں",
       cta_final_desc: "5 دن مفت — کوئی کریڈٹ کارڈ ضروری نہیں۔",
       cta_final_btn: "مفت شروع کریں",
-      local_stats_msg: "امریکہ میں 300+ مسلمان پہلے سے ہمارے ساتھ سیکھ رہے ہیں",
       timezone_msg: "تمام امریکی ٹائم زونز میں کلاسز دستیاب: EST, CST, MST, PST",
       courses: [
         { slug: "nazra-quran", title: "ناظرہ قرآن", desc: "صحیح تجوید کے ساتھ قرآن پڑھنا سیکھیں۔", price_label: "صرف $25 ماہانہ سے" },
@@ -449,14 +443,13 @@ export const USA_PAGE: CountryPageData = {
       courses_desc: "جميع الدورات متاحة عبر الإنترنت في جميع المناطق الزمنية الأمريكية.",
       testimonials_heading: "موثوق به من قِبَل العائلات المسلمة في الولايات المتحدة",
       stats: [
-        { value: "300+", label: "طلاب أمريكيون" },
+        { value: formatStat("students"), label: "طلاب" },
         { value: "4.9★", label: "متوسط التقييم" },
         { value: "5 أيام", label: "تجربة مجانية" },
       ],
       cta_final_heading: "انضم إلى العائلات المسلمة في الولايات المتحدة",
       cta_final_desc: "5 أيام مجاناً — لا حاجة لبطاقة ائتمان.",
       cta_final_btn: "ابدأ مجاناً",
-      local_stats_msg: "أكثر من 300 مسلم في الولايات المتحدة يتعلمون معنا",
       timezone_msg: "الدروس متاحة في جميع المناطق الزمنية: EST, CST, MST, PST",
       courses: [
         { slug: "nazra-quran", title: "ناظرة القرآن", desc: "تعلم قراءة القرآن بتجويد صحيح.", price_label: "من 25 دولار/شهر" },
@@ -484,14 +477,13 @@ export const USA_PAGE: CountryPageData = {
       courses_desc: "Tous les cours sont disponibles en ligne dans tous les fuseaux horaires américains.",
       testimonials_heading: "Approuvé par les familles musulmanes aux États-Unis",
       stats: [
-        { value: "300+", label: "Étudiants USA" },
+        { value: formatStat("students"), label: "Étudiants" },
         { value: "4.9★", label: "Note moyenne" },
         { value: "5 jours", label: "Essai gratuit" },
       ],
       cta_final_heading: "Rejoignez les familles musulmanes aux États-Unis",
       cta_final_desc: "5 jours gratuits — aucune carte de crédit requise.",
       cta_final_btn: "Commencer gratuitement",
-      local_stats_msg: "Plus de 300 musulmans aux États-Unis apprennent déjà avec nous",
       timezone_msg: "Cours disponibles dans tous les fuseaux horaires américains: EST, CST, MST, PST",
       courses: [
         { slug: "nazra-quran", title: "Nazra Quran", desc: "Apprenez à lire le Coran avec un Tajweed correct.", price_label: "À partir de 25$/mois" },
@@ -519,14 +511,13 @@ export const USA_PAGE: CountryPageData = {
       courses_desc: "Semua kursus tersedia online di semua zona waktu AS.",
       testimonials_heading: "Dipercaya oleh Keluarga Muslim di Amerika Serikat",
       stats: [
-        { value: "300+", label: "Siswa AS" },
+        { value: formatStat("students"), label: "Siswa" },
         { value: "4.9★", label: "Rating Rata-rata" },
         { value: "5 Hari", label: "Uji Coba Gratis" },
       ],
       cta_final_heading: "Bergabunglah dengan Keluarga Muslim di AS",
       cta_final_desc: "5 hari gratis — tidak perlu kartu kredit.",
       cta_final_btn: "Mulai Gratis",
-      local_stats_msg: "Lebih dari 300 Muslim di AS sudah belajar bersama kami",
       timezone_msg: "Kelas tersedia di semua zona waktu AS: EST, CST, MST, PST",
       courses: [
         { slug: "nazra-quran", title: "Nazra Quran", desc: "Belajar membaca Quran dengan Tajweed yang benar.", price_label: "Mulai dari $25/bulan" },
@@ -546,7 +537,6 @@ function makeCountryPage(
     why_heading: string; features_en: string[];
     courses_heading: string; courses_desc: string;
     cta_final_heading: string; timezone_msg: string;
-    local_stats_msg: string;
   },
   testimonials?: CountryPageData["testimonials"]
 ): CountryPageData {
@@ -572,11 +562,10 @@ function makeCountryPage(
         courses_heading: enData.courses_heading,
         courses_desc: enData.courses_desc,
         testimonials_heading: "Trusted by Muslim Families",
-        stats: [{ value: "200+", label: "Students" }, { value: "4.9★", label: "Rating" }, { value: "5-day", label: "Free Trial" }],
+        stats: [{ value: formatStat("students"), label: "Students" }, { value: "4.9★", label: "Rating" }, { value: "5-day", label: "Free Trial" }],
         cta_final_heading: enData.cta_final_heading,
         cta_final_desc: "5 days free — no credit card required.",
         cta_final_btn: "Get Started Free",
-        local_stats_msg: enData.local_stats_msg,
         timezone_msg: enData.timezone_msg,
         courses: courses_en,
       },
@@ -591,11 +580,10 @@ function makeCountryPage(
         courses_heading: "دستیاب کورسز",
         courses_desc: "تمام کورسز آن لائن — اپنے ٹائم زون کے مطابق۔",
         testimonials_heading: "مسلم خاندانوں کا اعتماد",
-        stats: [{ value: "200+", label: "طلبا" }, { value: "4.9★", label: "ریٹنگ" }, { value: "5 دن", label: "مفت ٹرائل" }],
+        stats: [{ value: formatStat("students"), label: "طلبا" }, { value: "4.9★", label: "ریٹنگ" }, { value: "5 دن", label: "مفت ٹرائل" }],
         cta_final_heading: `${countryName.ur} کے مسلم خاندانوں کے ساتھ قرآن سیکھیں`,
         cta_final_desc: "5 دن مفت — کوئی کریڈٹ کارڈ ضروری نہیں۔",
         cta_final_btn: "مفت شروع کریں",
-        local_stats_msg: `${countryName.ur} میں 200+ مسلمان ہمارے ساتھ سیکھ رہے ہیں`,
         timezone_msg: "آپ کے ٹائم زون کے مطابق کلاسز دستیاب",
         courses: [
           { slug: "nazra-quran", title: "ناظرہ قرآن", desc: "صحیح تجوید کے ساتھ قرآن پڑھنا سیکھیں۔", price_label: "صرف $25 ماہانہ سے" },
@@ -615,11 +603,10 @@ function makeCountryPage(
         courses_heading: "الدورات المتاحة",
         courses_desc: "جميع الدورات متاحة عبر الإنترنت.",
         testimonials_heading: "موثوق به من العائلات المسلمة",
-        stats: [{ value: "200+", label: "طلاب" }, { value: "4.9★", label: "التقييم" }, { value: "5 أيام", label: "تجربة مجانية" }],
+        stats: [{ value: formatStat("students"), label: "طلاب" }, { value: "4.9★", label: "التقييم" }, { value: "5 أيام", label: "تجربة مجانية" }],
         cta_final_heading: `انضم إلى العائلات المسلمة في ${countryName.ar}`,
         cta_final_desc: "5 أيام مجاناً — لا حاجة لبطاقة ائتمان.",
         cta_final_btn: "ابدأ مجاناً",
-        local_stats_msg: `أكثر من 200 مسلم في ${countryName.ar} يتعلمون معنا`,
         timezone_msg: "الدروس متاحة وفق منطقتك الزمنية",
         courses: [
           { slug: "nazra-quran", title: "ناظرة القرآن", desc: "تعلم القراءة بتجويد صحيح.", price_label: "من 25 دولار/شهر" },
@@ -639,11 +626,10 @@ function makeCountryPage(
         courses_heading: "Cours disponibles",
         courses_desc: "Tous les cours sont disponibles en ligne.",
         testimonials_heading: "Approuvé par les familles musulmanes",
-        stats: [{ value: "200+", label: "Étudiants" }, { value: "4.9★", label: "Note" }, { value: "5 jours", label: "Essai" }],
+        stats: [{ value: formatStat("students"), label: "Étudiants" }, { value: "4.9★", label: "Note" }, { value: "5 jours", label: "Essai" }],
         cta_final_heading: `Rejoignez les familles musulmanes de ${countryName.fr}`,
         cta_final_desc: "5 jours gratuits — aucune carte de crédit requise.",
         cta_final_btn: "Commencer gratuitement",
-        local_stats_msg: `Plus de 200 musulmans en ${countryName.fr} apprennent déjà avec nous`,
         timezone_msg: "Cours disponibles selon votre fuseau horaire",
         courses: [
           { slug: "nazra-quran", title: "Nazra Quran", desc: "Apprenez à lire le Coran.", price_label: "À partir de 25$/mois" },
@@ -663,11 +649,10 @@ function makeCountryPage(
         courses_heading: "Kursus Tersedia",
         courses_desc: "Semua kursus tersedia secara online.",
         testimonials_heading: "Dipercaya oleh Keluarga Muslim",
-        stats: [{ value: "200+", label: "Siswa" }, { value: "4.9★", label: "Rating" }, { value: "5 Hari", label: "Uji Coba" }],
+        stats: [{ value: formatStat("students"), label: "Siswa" }, { value: "4.9★", label: "Rating" }, { value: "5 Hari", label: "Uji Coba" }],
         cta_final_heading: `Bergabunglah dengan Keluarga Muslim di ${countryName.id}`,
         cta_final_desc: "5 hari gratis — tidak perlu kartu kredit.",
         cta_final_btn: "Mulai Gratis",
-        local_stats_msg: `Lebih dari 200 Muslim di ${countryName.id} sudah belajar bersama kami`,
         timezone_msg: "Kelas tersedia sesuai zona waktu Anda",
         courses: [
           { slug: "nazra-quran", title: "Nazra Quran", desc: "Belajar membaca Quran.", price_label: "Mulai dari $25/bulan" },
@@ -693,7 +678,6 @@ export const UAE_PAGE = makeCountryPage(
     courses_desc: "All courses scheduled at UAE time (GST — Gulf Standard Time).",
     cta_final_heading: "Join Muslim Families in UAE Learning Quran",
     timezone_msg: "Classes available in UAE time zone: GST (Gulf Standard Time, UTC+4)",
-    local_stats_msg: "200+ Muslims in the UAE are already learning with us",
   }
 );
 
@@ -710,7 +694,6 @@ export const CANADA_PAGE = makeCountryPage(
     courses_desc: "All courses online, classes scheduled for Canadian time zones.",
     cta_final_heading: "Join Muslim Families in Canada Learning Quran",
     timezone_msg: "Classes available in all Canadian time zones: EST, CST, MST, PST",
-    local_stats_msg: "200+ Muslims in Canada are already learning with us",
   }
 );
 
@@ -727,7 +710,6 @@ export const AUSTRALIA_PAGE = makeCountryPage(
     courses_desc: "All courses online, scheduled at Australian time zones (AEDT, ACST, AWST).",
     cta_final_heading: "Join Muslim Families in Australia Learning Quran",
     timezone_msg: "Classes available in Australian time zones: AEDT, ACST, AWST",
-    local_stats_msg: "200+ Muslims in Australia are already learning with us",
   }
 );
 
@@ -744,7 +726,6 @@ export const INDONESIA_PAGE = makeCountryPage(
     courses_desc: "Semua kursus online, dijadwalkan untuk zona waktu Indonesia (WIB, WITA, WIT).",
     cta_final_heading: "Bergabunglah dengan Keluarga Muslim Indonesia",
     timezone_msg: "Kelas tersedia di zona waktu Indonesia: WIB, WITA, WIT",
-    local_stats_msg: "Lebih dari 300 Muslim Indonesia sudah belajar bersama kami",
   }
 );
 
@@ -761,7 +742,6 @@ export const GERMANY_PAGE = makeCountryPage(
     courses_desc: "All courses online, scheduled for Central European time zones (CET/CEST).",
     cta_final_heading: "Join Muslim Families in Germany Learning Quran",
     timezone_msg: "Classes available in German time zones: CET (UTC+1) and CEST (UTC+2)",
-    local_stats_msg: "150+ Muslims in Germany are already learning with us",
   }
 );
 
@@ -778,6 +758,5 @@ export const SAUDI_PAGE = makeCountryPage(
     courses_desc: "جميع الدورات متاحة عبر الإنترنت وفق توقيت المملكة العربية السعودية.",
     cta_final_heading: "انضم إلى العائلات المسلمة في المملكة لتعلم القرآن",
     timezone_msg: "الدروس متاحة وفق توقيت المملكة العربية السعودية (AST — UTC+3)",
-    local_stats_msg: "أكثر من 200 مسلم في المملكة يتعلمون معنا",
   }
 );

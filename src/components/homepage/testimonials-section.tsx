@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { formatStat } from "@/lib/site-stats";
 import { motion } from "framer-motion";
 import { Star } from "lucide-react";
 import InitialsAvatar from "@/components/shared/initials-avatar";
@@ -639,7 +640,7 @@ export function TestimonialsSection() {
           transition={{ duration: 0.5, delay: 0.1 }}
           className="mt-3 text-center text-muted-foreground"
         >
-          Real stories from our global community of 5,000+ students
+          Real stories from our global community of {formatStat("students")} students
         </motion.p>
       </div>
 

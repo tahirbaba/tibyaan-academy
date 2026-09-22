@@ -240,3 +240,56 @@ const syllabusMap: Record<string, SyllabusSection[]> = {
 export function getSyllabus(courseType: string): SyllabusSection[] {
   return syllabusMap[courseType] || [];
 }
+
+/**
+ * One syllabus card: an image, a title, a supporting line and an optional PDF.
+ *
+ * The four courses store their syllabus two different ways — Nazra and Hifz as
+ * one lesson/juz per section, Arabic and Aalim as a section holding several
+ * books — which is why the page used to render two different card shapes. This
+ * flattens both into a single uniform list so every card on every course page
+ * is the same size and sits in the same grid.
+ *
+ * A title is either a translation key or a literal: book names (Sahih Muslim,
+ * Nahw Meer) are proper nouns and are not translated.
+ */
+export interface SyllabusItem {
+  key: string;
+  image?: string;
+  titleKey?: string;
+  titleText?: string;
+  /** The lesson description, ayah range, or the section the book belongs to. */
+  subKey?: string;
+  pdfUrl?: string;
+}
+
+export function getSyllabusItems(courseType: string): SyllabusItem[] {
+  const items: SyllabusItem[] = [];
+
+  for (const section of getSyllabus(courseType)) {
+    if (section.books?.length) {
+      // Each book is its own card; the section title becomes its second line,
+      // so grouping information is kept rather than dropped.
+      for (const book of section.books) {
+        items.push({
+          key: `${section.id}-${book.name}`,
+          image: book.image,
+          titleText: book.name,
+          subKey: section.titleKey,
+          pdfUrl: book.pdfUrl,
+        });
+      }
+      continue;
+    }
+
+    items.push({
+      key: String(section.id),
+      image: section.bookImage,
+      titleKey: section.titleKey,
+      subKey: section.descKey,
+      pdfUrl: section.pdfUrl,
+    });
+  }
+
+  return items;
+}
