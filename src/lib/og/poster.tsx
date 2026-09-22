@@ -12,6 +12,30 @@ const GOLD = "#C9A84C";
 
 const FONT_DIR = path.join(process.cwd(), "src", "assets", "fonts");
 
+/**
+ * One treatment per category. All five are the same poster - same layout,
+ * same gold rule, same brand row - and differ only in the ground colour and
+ * the accent, so a row of them reads as one family.
+ *
+ * The accent is always light on a dark ground; contrast was checked at the
+ * size the title renders, not assumed.
+ */
+const CATEGORY_TREATMENTS = {
+  quran:  { from: "#1B4332", to: "#0E241A", accent: "#C9A84C" },
+  hadith: { from: "#1F3A5F", to: "#12233A", accent: "#D7B778" },
+  fiqh:   { from: "#4A3B16", to: "#2A2009", accent: "#E3C97E" },
+  seerah: { from: "#3E2A47", to: "#241729", accent: "#D9B8E8" },
+  dua:    { from: "#14403F", to: "#0A2524", accent: "#8FD6C4" },
+} as const;
+
+export type PosterCategory = keyof typeof CATEGORY_TREATMENTS;
+
+/** Unknown or missing category falls back to the house green. */
+function treatmentFor(category?: string | null) {
+  const key = category?.toLowerCase() as PosterCategory | undefined;
+  return (key && CATEGORY_TREATMENTS[key]) || { from: GREEN, to: GREEN_DEEP, accent: GOLD };
+}
+
 let cachedFonts: Array<{
   name: string;
   data: ArrayBuffer;
@@ -49,21 +73,44 @@ export interface PosterInput {
   title: string;
   category?: string | null;
   citation?: string | null;
+  /**
+   * The Arabic block, already extracted and validated by
+   * extractArabicBlock(). Pass null to render no Arabic - never a shortened
+   * version of a longer text.
+   */
+  arabic?: string | null;
+  /** Lower-case category key used to pick the colour treatment. */
+  categoryKey?: string | null;
 }
 
-function titleSize(title: string): number {
+function titleSize(title: string, hasArabic: boolean): number {
+  // With an Arabic block on the poster the title gets less room.
+  if (hasArabic) {
+    if (title.length > 75) return 34;
+    if (title.length > 45) return 40;
+    return 46;
+  }
   if (title.length > 110) return 44;
   if (title.length > 75) return 52;
   if (title.length > 45) return 62;
   return 72;
 }
 
+function arabicSize(text: string): number {
+  if (text.length > 160) return 34;
+  if (text.length > 100) return 40;
+  if (text.length > 55) return 48;
+  return 56;
+}
+
 /**
  * One template for every dars and blog poster: logo mark, category label,
  * title, and the citation line, on the brand green.
  */
-export async function renderPoster({ title, category, citation }: PosterInput) {
+export async function renderPoster({ title, category, citation, arabic, categoryKey }: PosterInput) {
   const fonts = await loadFonts();
+  const t = treatmentFor(categoryKey ?? category);
+  const hasArabic = !!arabic;
 
   return new ImageResponse(
     (
@@ -75,7 +122,7 @@ export async function renderPoster({ title, category, citation }: PosterInput) {
           flexDirection: "column",
           justifyContent: "space-between",
           padding: "64px 72px",
-          background: `linear-gradient(135deg, ${GREEN} 0%, ${GREEN_DEEP} 100%)`,
+          background: `linear-gradient(135deg, ${t.from} 0%, ${t.to} 100%)`,
           // Both faces listed so a mixed Arabic/English title renders fully.
           fontFamily: "Noto Sans, Cairo",
         }}
@@ -88,7 +135,7 @@ export async function renderPoster({ title, category, citation }: PosterInput) {
             left: 0,
             width: "100%",
             height: 10,
-            background: GOLD,
+            background: t.accent,
           }}
         />
 
@@ -99,11 +146,11 @@ export async function renderPoster({ title, category, citation }: PosterInput) {
               width: 64,
               height: 64,
               borderRadius: 18,
-              background: GOLD,
+              background: t.accent,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              color: GREEN,
+              color: t.to,
               fontSize: 38,
               fontWeight: 700,
             }}
@@ -114,7 +161,7 @@ export async function renderPoster({ title, category, citation }: PosterInput) {
             <span style={{ color: "#FFFFFF", fontSize: 30, fontWeight: 700 }}>
               Tibyaan Academy
             </span>
-            <span style={{ color: GOLD, fontSize: 19, fontWeight: 600 }}>
+            <span style={{ color: t.accent, fontSize: 19, fontWeight: 600 }}>
               Quran &amp; Islamic Sciences
             </span>
           </div>
@@ -129,8 +176,8 @@ export async function renderPoster({ title, category, citation }: PosterInput) {
                 alignSelf: "flex-start",
                 padding: "8px 22px",
                 borderRadius: 999,
-                border: `2px solid ${GOLD}`,
-                color: GOLD,
+                border: `2px solid ${t.accent}`,
+                color: t.accent,
                 fontSize: 22,
                 fontWeight: 700,
                 textTransform: "uppercase",
@@ -144,7 +191,7 @@ export async function renderPoster({ title, category, citation }: PosterInput) {
           <div
             style={{
               color: "#FFFFFF",
-              fontSize: titleSize(title),
+              fontSize: titleSize(title, hasArabic),
               fontWeight: 700,
               lineHeight: 1.2,
               display: "flex",
@@ -152,6 +199,35 @@ export async function renderPoster({ title, category, citation }: PosterInput) {
           >
             {title}
           </div>
+
+          {/* The Arabic block, when the dars carries one. Rendered whole or
+              not at all - extractArabicBlock() returns null rather than a
+              shortened text, so nothing here can cut an ayah. */}
+          {arabic ? (
+            <div
+              style={{
+                display: "flex",
+                direction: "rtl",
+                borderRight: `4px solid ${t.accent}`,
+                paddingRight: 22,
+                marginTop: 4,
+              }}
+            >
+              <span
+                style={{
+                  color: "#FFFFFF",
+                  fontFamily: "Cairo",
+                  fontSize: arabicSize(arabic),
+                  fontWeight: 700,
+                  lineHeight: 1.75,
+                  textAlign: "right",
+                  display: "flex",
+                }}
+              >
+                {arabic}
+              </span>
+            </div>
+          ) : null}
         </div>
 
         {/* Citation */}
@@ -164,7 +240,7 @@ export async function renderPoster({ title, category, citation }: PosterInput) {
             paddingTop: 24,
           }}
         >
-          <div style={{ width: 6, height: 34, background: GOLD, borderRadius: 3, display: "flex" }} />
+          <div style={{ width: 6, height: 34, background: t.accent, borderRadius: 3, display: "flex" }} />
           <span
             style={{
               color: "rgba(255,255,255,0.85)",
