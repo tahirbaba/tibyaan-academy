@@ -13,6 +13,19 @@ const GOLD = "#C9A84C";
 const FONT_DIR = path.join(process.cwd(), "src", "assets", "fonts");
 
 /**
+ * Arabic on posters is OFF.
+ *
+ * satori renders Arabic unjoined and with the words in reverse order, so an
+ * ayah would be published wrong. Correct shaping needs HarfBuzz, which is a
+ * separate piece of work; until that lands and has been checked by eye, the
+ * poster carries title, category and citation only.
+ *
+ * Set POSTER_ARABIC_ENABLED=true to turn it back on. Do not set it on
+ * production until the shaping has been verified against real ayat.
+ */
+const ARABIC_ENABLED = process.env.POSTER_ARABIC_ENABLED === "true";
+
+/**
  * One treatment per category. All five are the same poster - same layout,
  * same gold rule, same brand row - and differ only in the ground colour and
  * the accent, so a row of them reads as one family.
@@ -47,10 +60,19 @@ let cachedFonts: Array<{
  * Latin and Arabic faces are both loaded explicitly — satori has no system
  * fonts, so an unlisted script renders as empty boxes. Read once per lambda.
  *
- * Cairo is the Arabic face because satori cannot shape most Naskh fonts:
- * Noto Naskh Arabic, Noto Sans Arabic, Amiri and Scheherazade all fail with
- * "lookupType: 5 - substFormat: 3 is not yet supported". Cairo and Tajawal
- * were the two that rendered. Verify any replacement before swapping it in.
+ * WHAT WAS ACTUALLY TESTED, and what was not:
+ *
+ * Tested: Noto Naskh Arabic, Noto Sans Arabic, Amiri and Scheherazade throw
+ * "lookupType: 5 - substFormat: 3 is not yet supported" under satori and
+ * produce nothing. Cairo and Tajawal return glyphs instead of empty boxes.
+ *
+ * NOT tested, and NOT true: that those glyphs are correct. They are not.
+ * satori has no complex-script shaping, so Arabic comes out unjoined and in
+ * reversed word order whatever font is supplied - this is not a font problem
+ * and no font choice fixes it. Proven by rendering samples and reading them:
+ * see docs/poster-samples/ and POSTER_ARABIC_ENABLED below.
+ *
+ * "It rendered" is not "it is correct". Do not read one as the other.
  */
 async function loadFonts() {
   if (cachedFonts) return cachedFonts;
@@ -110,7 +132,10 @@ function arabicSize(text: string): number {
 export async function renderPoster({ title, category, citation, arabic, categoryKey }: PosterInput) {
   const fonts = await loadFonts();
   const t = treatmentFor(categoryKey ?? category);
-  const hasArabic = !!arabic;
+  // The flag wins over the caller: nothing can put Arabic on a poster while
+  // the shaping is known to be wrong.
+  const safeArabic = ARABIC_ENABLED ? arabic : null;
+  const hasArabic = !!safeArabic;
 
   return new ImageResponse(
     (
@@ -123,7 +148,9 @@ export async function renderPoster({ title, category, citation, arabic, category
           justifyContent: "space-between",
           padding: "64px 72px",
           background: `linear-gradient(135deg, ${t.from} 0%, ${t.to} 100%)`,
-          // Both faces listed so a mixed Arabic/English title renders fully.
+          // Both faces listed so a title containing Arabic produces glyphs
+          // rather than empty boxes. Note that Arabic in a TITLE is subject to
+          // the same shaping fault described above; titles are English today.
           fontFamily: "Noto Sans, Cairo",
         }}
       >
@@ -203,7 +230,7 @@ export async function renderPoster({ title, category, citation, arabic, category
           {/* The Arabic block, when the dars carries one. Rendered whole or
               not at all - extractArabicBlock() returns null rather than a
               shortened text, so nothing here can cut an ayah. */}
-          {arabic ? (
+          {safeArabic ? (
             <div
               style={{
                 display: "flex",
@@ -217,14 +244,14 @@ export async function renderPoster({ title, category, citation, arabic, category
                 style={{
                   color: "#FFFFFF",
                   fontFamily: "Cairo",
-                  fontSize: arabicSize(arabic),
+                  fontSize: arabicSize(safeArabic),
                   fontWeight: 700,
                   lineHeight: 1.75,
                   textAlign: "right",
                   display: "flex",
                 }}
               >
-                {arabic}
+                {safeArabic}
               </span>
             </div>
           ) : null}

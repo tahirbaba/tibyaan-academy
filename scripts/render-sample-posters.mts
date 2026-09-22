@@ -76,14 +76,25 @@ async function main() {
     const file = path.join(OUT, `${s.key}.png`);
     await writeFile(file, buffer);
 
+    // Two separate facts. "extracted" is what the rule found in the text;
+    // "rendered" is what actually reached the image, which the flag can veto.
+    // Reporting only the first is how a disabled feature gets mistaken for a
+    // working one.
+    const rendered = process.env.POSTER_ARABIC_ENABLED === "true" && !!arabic;
     console.log(
-      `${s.key.padEnd(7)} ${String(buffer.length).padStart(7)} bytes  arabic: ${
-        arabic ? `yes (${arabic.length} chars)` : "none"
-      }`
+      `${s.key.padEnd(7)} ${String(buffer.length).padStart(7)} bytes  ` +
+        `arabic extracted: ${arabic ? `yes (${arabic.length} chars)` : "no"}  ` +
+        `rendered: ${rendered ? "YES" : "no"}`
     );
   }
 
   console.log(`\nWritten to ${OUT}`);
+  if (process.env.POSTER_ARABIC_ENABLED !== "true") {
+    console.log(
+      "POSTER_ARABIC_ENABLED is not set, so no poster carries Arabic.\n" +
+        "That is the intended state until HarfBuzz shaping lands and is checked."
+    );
+  }
 }
 
 main().catch((error) => {
