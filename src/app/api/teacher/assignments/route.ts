@@ -15,7 +15,12 @@ export async function GET(request: NextRequest) {
     if (!dbUser || dbUser.role !== "teacher") return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
     const assignments = await db
-      .select({ assignment: testsAssignments, student: users })
+      // Named columns, not the whole users row: the teacher needs to know who
+      // the student is, not their auth metadata.
+      .select({
+        assignment: testsAssignments,
+        student: { id: users.id, fullName: users.fullName, email: users.email },
+      })
       .from(testsAssignments)
       .innerJoin(users, eq(testsAssignments.studentId, users.id))
       .where(eq(testsAssignments.teacherId, authUser.id))
@@ -39,7 +44,8 @@ export async function POST(request: NextRequest) {
     const [dbUser] = await db.select().from(users).where(eq(users.id, authUser.id)).limit(1);
     if (!dbUser || dbUser.role !== "teacher") return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
-    const { studentId, type, title, description, frequency, dueDate } = await request.json();
+    const { studentId, type, title, description, frequency, dueDate, attachmentPath } =
+      await request.json();
     if (!studentId || !type || !title) {
       return NextResponse.json({ error: "studentId, type, title are required" }, { status: 400 });
     }
@@ -55,6 +61,7 @@ export async function POST(request: NextRequest) {
         frequency: frequency ?? "once",
         dueDate: dueDate ? new Date(dueDate) : null,
         status: "pending",
+        attachmentPath: attachmentPath ?? null,
       })
       .returning();
 

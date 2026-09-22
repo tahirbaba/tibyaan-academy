@@ -42,12 +42,13 @@ export async function getPresignedUploadUrl(
   key: string,
   contentType: string,
   expiresIn = 3600,
-  bucket = VIDEOS_BUCKET
+  bucket = VIDEOS_BUCKET,
+  bucketOptions: BucketOptions = {}
 ): Promise<string> {
   const supabase = getAdminClient();
 
   // Ensure bucket exists before generating a signed URL
-  await ensureBucket(bucket);
+  await ensureBucket(bucket, bucketOptions);
 
   const { data, error } = await supabase.storage
     .from(bucket)
@@ -77,13 +78,25 @@ export async function getPresignedDownloadUrl(
 /**
  * Ensure a storage bucket exists (creates if missing)
  */
-async function ensureBucket(bucket: string) {
+export type BucketOptions = {
+  /**
+   * Public buckets serve every object to anyone holding the URL, with no auth
+   * check at all. Only pass true for content that is genuinely public.
+   * Defaults to true to preserve the behaviour of the buckets that already
+   * exist (videos, recordings, course-pdfs, avatars) — changing those here
+   * would not alter the live buckets anyway, since this only runs on create.
+   */
+  publicBucket?: boolean;
+  fileSizeLimit?: number;
+};
+
+async function ensureBucket(bucket: string, options: BucketOptions = {}) {
   const supabase = getAdminClient();
   const { data } = await supabase.storage.getBucket(bucket);
   if (!data) {
     await supabase.storage.createBucket(bucket, {
-      public: true,
-      fileSizeLimit: 524288000, // 500MB
+      public: options.publicBucket ?? true,
+      fileSizeLimit: options.fileSizeLimit ?? 524288000, // 500MB
     });
   }
 }
