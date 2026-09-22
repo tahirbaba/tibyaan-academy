@@ -5,6 +5,7 @@ import { blogPosts, dailyDars } from "@/lib/db/schema";
 import { createClient } from "@/lib/supabase/server";
 import { REVIEW_QUEUE_STATUSES } from "@/lib/content/publication";
 import { renderPostContent } from "@/lib/markdown";
+import { generateAndStorePoster, type PosterResult } from "@/lib/og/store-poster";
 
 type PostType = "dars" | "blog";
 
@@ -151,5 +152,23 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  return NextResponse.json({ success: true, ...updated[0] });
+  // The poster is made once, here, rather than on every page view and every
+  // time a social crawler calls. Only on approval of a dars, and only after
+  // the approval itself has committed.
+  let poster: PosterResult | null = null;
+  if (type === "dars" && action === "approve") {
+    poster = await generateAndStorePoster(slug);
+  }
+
+  // Reported, never silent: a failed poster leaves the dars published with no
+  // stored image, which the page handles by falling back to the on-demand
+  // route — but the admin is told it happened rather than left to find out.
+  return NextResponse.json({
+    success: true,
+    ...updated[0],
+    ...(poster ? { poster } : {}),
+    ...(poster && !poster.ok
+      ? { warning: `Published, but the poster could not be generated: ${poster.reason}` }
+      : {}),
+  });
 }

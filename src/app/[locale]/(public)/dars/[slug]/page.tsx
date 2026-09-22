@@ -50,6 +50,7 @@ export async function generateMetadata({
   let description =
     "Read Islamic educational content from Tibyaan Academy — Quran, Hadith, Fiqh, Seerah & Dua.";
   let publishedAt: Date | undefined;
+  let storedPoster: string | undefined;
 
   try {
     const db = getDb();
@@ -74,14 +75,17 @@ export async function generateMetadata({
       if (rawTitle) title = rawTitle;
       if (rawContent) description = truncate(stripHtml(rawContent), 160);
       publishedAt = post.publishedAt ?? undefined;
+      storedPoster = post.posterUrl ?? undefined;
     }
   } catch {
     // DB unavailable at build time
   }
 
-  // Rendered on demand by /api/og/dars/[slug] — also the plain URL to grab for
-  // manual posting.
-  const posterUrl = `${BASE_URL}/api/og/dars/${slug}`;
+  // The poster stored when the dars was approved. Anything approved before
+  // posters were stored has none, and falls back to the on-demand route, which
+  // renders the same image. Either way it is a plain URL that can be opened
+  // and saved by hand.
+  const posterUrl = storedPoster ?? `${BASE_URL}/api/og/dars/${slug}`;
 
   return {
     title: title.includes("Tibyaan") ? title : `${title} | Tibyaan Academy`,
@@ -171,6 +175,17 @@ export default async function DarsDetailPage({
         </Link>
 
         <article>
+          {/* The poster, at the top of the page. Stored one when there is one,
+              otherwise the on-demand route renders the same image. */}
+          <div className="relative w-full aspect-[1200/630] rounded-xl overflow-hidden border bg-muted mb-6">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={post.posterUrl ?? `/api/og/dars/${post.slug}`}
+              alt=""
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+          </div>
+
           <div className="flex items-center gap-3 mb-4">
             <span className={`px-3 py-1 rounded-full text-xs font-medium ${categoryColors[post.category] ?? "bg-muted"}`}>
               {categoryLabels[post.category]?.[locale] ?? post.category}

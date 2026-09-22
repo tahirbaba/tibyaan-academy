@@ -112,7 +112,20 @@ export default async function DarsListPage({
             const title = (post[titleKey] as string) || post.titleEn || "Untitled";
             return (
               <Link key={post.id} href={`/dars/${post.slug}`} className="block h-full">
-                <div className="h-full rounded-xl border bg-card p-5 hover:bg-muted/30 hover:border-emerald-600/40 transition-colors group">
+                <div className="h-full rounded-xl border bg-card overflow-hidden hover:bg-muted/30 hover:border-emerald-600/40 transition-colors group">
+                  {/* The stored poster when the dars has one, otherwise the
+                      on-demand route — so cards still work for anything
+                      approved before posters were stored. */}
+                  <div className="relative w-full aspect-[1200/630] bg-muted">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={post.posterUrl ?? `/api/og/dars/${post.slug}`}
+                      alt=""
+                      loading="lazy"
+                      className="absolute inset-0 w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="p-5">
                   <div className="flex flex-col gap-3">
                     <div className="flex-1">
                       <div className="flex flex-wrap items-center gap-2 mb-2">
@@ -133,6 +146,7 @@ export default async function DarsListPage({
                         <p className="text-xs text-muted-foreground mt-1">{post.sourceReference}</p>
                       )}
                     </div>
+                  </div>
                   </div>
                 </div>
               </Link>

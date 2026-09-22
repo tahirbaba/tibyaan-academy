@@ -845,6 +845,8 @@ export const dailyDars = pgTable("daily_dars", {
   reviewNote: text("review_note"),
   isPublished: boolean("is_published").notNull().default(false),
   publishedAt: timestamp("published_at", { withTimezone: true }),
+  /** Poster generated at approval. NULL falls back to the on-demand route. */
+  posterUrl: text("poster_url"),
   viewCount: integer("view_count").notNull().default(0),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
