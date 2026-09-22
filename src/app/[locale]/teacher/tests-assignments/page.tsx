@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { ClipboardCheck, Plus, Inbox, X, Clock, CheckCircle2 } from "lucide-react";
+import { ClipboardCheck, Plus, Inbox, X, Clock, CheckCircle2, Paperclip, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 type Student = { id: string; name: string };
@@ -14,6 +14,8 @@ type Assignment = {
     frequency: string;
     dueDate: string | null;
     status: string;
+    completedAt: string | null;
+    attachmentPath: string | null;
     teacherGrade: string | null;
     teacherFeedback: string | null;
     createdAt: string;
@@ -45,7 +47,9 @@ export default function TeacherTestsAssignmentsPage() {
     frequency: "once",
     dueDate: "",
   });
+  const [file, setFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [filterStudent, setFilterStudent] = useState("all");
 
   const load = useCallback(async () => {
@@ -73,20 +77,51 @@ export default function TeacherTestsAssignmentsPage() {
   const submit = async () => {
     if (!form.studentId || !form.title) return;
     setSubmitting(true);
+    setError(null);
     try {
+      // The file goes up first. If it fails the assignment is not created at
+      // all, rather than silently arriving without the attachment the teacher
+      // believed they had sent.
+      let attachmentPath: string | undefined;
+      if (file) {
+        const signRes = await fetch("/api/teacher/assignments/upload", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ contentType: file.type }),
+        });
+        const signed = await signRes.json();
+        if (!signRes.ok) throw new Error(signed.error ?? "That file type is not accepted");
+        if (file.size > signed.maxBytes) {
+          throw new Error(`That file is too large (max ${Math.round(signed.maxBytes / 1024 / 1024)}MB)`);
+        }
+
+        const put = await fetch(signed.uploadUrl, {
+          method: "PUT",
+          headers: { "Content-Type": file.type },
+          body: file,
+        });
+        if (!put.ok) throw new Error("The file could not be uploaded");
+        attachmentPath = signed.path;
+      }
+
       const res = await fetch("/api/teacher/assignments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...form,
           dueDate: form.dueDate || undefined,
+          attachmentPath,
         }),
       });
-      if (res.ok) {
-        setShowForm(false);
-        setForm({ studentId: "", type: "assignment", title: "", description: "", frequency: "once", dueDate: "" });
-        await load();
-      }
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "The assignment could not be saved");
+
+      setShowForm(false);
+      setForm({ studentId: "", type: "assignment", title: "", description: "", frequency: "once", dueDate: "" });
+      setFile(null);
+      await load();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "The assignment could not be saved");
     } finally {
       setSubmitting(false);
     }
@@ -169,8 +204,29 @@ export default function TeacherTestsAssignmentsPage() {
                 className="w-full px-3 py-2 rounded-lg border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" />
             </div>
           </div>
+          <div className="mt-4">
+            <label className="text-xs font-medium text-muted-foreground mb-1 block">
+              Attachment (optional)
+            </label>
+            <input
+              type="file"
+              accept=".pdf,.jpg,.jpeg,.png,.webp,.mp3,.m4a,.doc,.docx"
+              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+              className="block w-full text-xs text-muted-foreground file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-medium file:bg-muted file:text-foreground"
+            />
+            <p className="mt-1 text-[11px] text-muted-foreground">
+              PDF, image, audio or Word document, up to 20MB.
+            </p>
+          </div>
+
+          {error && (
+            <div className="mt-4 rounded-lg border border-red-300 bg-red-50 dark:bg-red-950/30 px-4 py-2 text-sm text-red-700 dark:text-red-300">
+              {error}
+            </div>
+          )}
+
           <div className="flex gap-3 justify-end">
-            <Button variant="outline" onClick={() => setShowForm(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => { setShowForm(false); setError(null); }}>Cancel</Button>
             <Button onClick={submit} disabled={submitting || !form.studentId || !form.title}
               className="bg-amber-600 hover:bg-amber-700 text-white">
               {submitting ? "Saving..." : "Assign"}
@@ -207,6 +263,11 @@ export default function TeacherTestsAssignmentsPage() {
           {filtered.map((item) => {
             const status = statusConfig[item.assignment.status as keyof typeof statusConfig] ?? statusConfig.pending;
             const type = typeConfig[item.assignment.type as keyof typeof typeConfig] ?? typeConfig.assignment;
+            const isComplete = item.assignment.status !== "pending";
+            const isOverdue =
+              !isComplete &&
+              !!item.assignment.dueDate &&
+              new Date(item.assignment.dueDate) < new Date();
             return (
               <div key={item.assignment.id} className="rounded-xl border bg-card p-4">
                 <div className="flex flex-col sm:flex-row sm:items-start gap-3">
@@ -217,12 +278,34 @@ export default function TeacherTestsAssignmentsPage() {
                     </div>
                     <p className="text-xs text-muted-foreground">Student: {item.student.fullName}</p>
                     {item.assignment.description && <p className="text-sm text-muted-foreground">{item.assignment.description}</p>}
-                    {item.assignment.dueDate && <p className="text-xs text-muted-foreground">Due: {new Date(item.assignment.dueDate).toLocaleDateString()}</p>}
+                    {item.assignment.dueDate && (
+                      <p className={`flex items-center gap-1 text-xs ${isOverdue ? "text-red-600 font-medium" : "text-muted-foreground"}`}>
+                        {isOverdue && <AlertTriangle className="w-3 h-3" />}
+                        Due: {new Date(item.assignment.dueDate).toLocaleDateString()}
+                        {isOverdue && " — Overdue"}
+                      </p>
+                    )}
+                    {item.assignment.attachmentPath && (
+                      <p className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <Paperclip className="w-3 h-3" />
+                        Attachment sent
+                      </p>
+                    )}
                     {item.assignment.teacherGrade && <p className="text-xs font-medium text-emerald-700 dark:text-emerald-400">Grade: {item.assignment.teacherGrade}</p>}
                   </div>
-                  <span className={`shrink-0 inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${status.bg} ${status.color}`}>
-                    {status.label}
-                  </span>
+                  <div className="shrink-0 flex flex-col items-start sm:items-end gap-1">
+                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${status.bg} ${status.color}`}>
+                      {isComplete ? <CheckCircle2 className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
+                      {isComplete ? "Completed" : "Not completed"}
+                    </span>
+                    {isComplete && (
+                      <span className="text-[11px] text-muted-foreground">
+                        {item.assignment.completedAt
+                          ? new Date(item.assignment.completedAt).toLocaleString()
+                          : "time not recorded"}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
             );
