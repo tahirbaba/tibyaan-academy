@@ -1158,6 +1158,13 @@ export const testsAssignments = pgTable("tests_assignments", {
   frequency: assignmentFrequencyEnum("frequency").notNull().default("once"),
   dueDate: timestamp("due_date", { withTimezone: true }),
   status: assignmentStatusEnum("status").notNull().default("pending"),
+  /** When the student marked it done. NULL on rows completed before Phase 7. */
+  completedAt: timestamp("completed_at", { withTimezone: true }),
+  /**
+   * Storage object path for the teacher's optional file, not a URL: the bucket
+   * is private and the app signs a short-lived URL on read.
+   */
+  attachmentPath: text("attachment_path"),
   teacherGrade: varchar("teacher_grade", { length: 100 }),
   teacherFeedback: text("teacher_feedback"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
