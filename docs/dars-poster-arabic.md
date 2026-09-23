@@ -6,8 +6,9 @@ happen.
 
 ## How to get Arabic onto a poster
 
-Put the ayah or dua in a **markdown blockquote** in the Arabic content, on its
-own, with nothing else in it:
+**Two forms work. A blockquote is preferred; a bold line is the fallback.**
+
+### Preferred — a blockquote
 
 ```markdown
 > بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ
@@ -15,9 +16,36 @@ own, with nothing else in it:
 The explanation follows here, outside the quote.
 ```
 
-Nothing else is treated as the Arabic block. Prose is never scanned for an
-ayah, and never will be: guessing which span of a paragraph is scripture is
-how a truncated ayah ends up on a shareable image.
+### Also accepted — a line that is nothing but bold
+
+This is how the dars are written today, so it works as written:
+
+```markdown
+## النص العربي
+
+**اللَّهُمَّ افْتَحْ لِي أَبْوَابَ رَحْمَتِكَ**
+
+## النطق الصوتي
+```
+
+The **whole line** must be the bold span. A bold phrase inside a sentence is
+prose, not a marked-out ayah, and is ignored:
+
+```markdown
+يقال **اللهم** عند الدخول      <- ignored, and correctly so
+```
+
+### Which one is used
+
+1. If the content has a qualifying blockquote, that is used.
+2. Otherwise the **first** qualifying bold line is used.
+
+Only ever one. Several bold ayat are never joined together — that would invent
+a passage that appears nowhere in the dars. If you want a particular one on
+the poster, make it a blockquote, or put it first.
+
+Prose is never scanned for an ayah, and never will be: guessing which span of
+a paragraph is scripture is how a truncated ayah ends up on a shareable image.
 
 ## The rule that catches people: the block must be Arabic and nothing else
 
@@ -30,6 +58,7 @@ That means none of these inside the quote:
 | Do not | Instead |
 |---|---|
 | `> بِسْمِ ٱللَّهِ ... (1:1)` | put `1:1` in the dars **source reference** field |
+| `**اللهم افتح (2:255)**` | same — ASCII digits and brackets blank the poster |
 | `> ... ٱلرَّحِيمِ [Quran 1:1]` | same — the citation prints on the poster already |
 | `> Bismillah — بِسْمِ ٱللَّهِ` | keep transliteration out of the block |
 | `> ٱلرَّحِيمِ.` (ASCII full stop) | use Arabic punctuation, or none |
@@ -52,7 +81,7 @@ rather than from inside the quote.
 All of these are intentional, and all of them mean "no Arabic", never partial
 Arabic:
 
-- **No blockquote in the Arabic content.** Nothing to render.
+- **No blockquote and no bold-only line.** Nothing to render.
 - **The block is mixed Arabic and English.** Treated as a translation or a
   commentary, not the ayah.
 - **The block is longer than 220 characters.** A long passage would have to be
