@@ -32,8 +32,19 @@ function isArabicText(text: string): boolean {
   const letters = [...stripped].filter((ch) => /\p{L}/u.test(ch));
   if (letters.length === 0) return false;
 
-  // The whole block must be Arabic. A mixed line is a translation or a
-  // commentary, not the ayah itself.
+  /**
+   * The whole block must be Arabic. A mixed line is a translation or a
+   * commentary, not the ayah itself.
+   *
+   * There is a second, harder reason this rule cannot be relaxed. The poster
+   * shapes Arabic with an ~39KB Cairo *Arabic subset*, which carries no Latin
+   * glyphs. One Latin character in the block makes every Latin character
+   * .notdef, and shapeArabicToSvg() then refuses the whole block — so the
+   * poster silently comes out with no Arabic on it and no other symptom.
+   *
+   * If a dars needs a verse number or a reference, it belongs on the source
+   * line, not inside the quoted block. See docs/dars-poster-arabic.md.
+   */
   return letters.every((ch) => ARABIC_LETTER.test(ch));
 }
 

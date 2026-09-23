@@ -119,10 +119,35 @@ export async function shapeArabicToSvg(
 
     if (!infos.length || infos.length !== positions.length) return null;
 
-    // Hard refusal. glyph id 0 is .notdef — the font has no glyph for that
-    // character, and rendering it would put an empty box in an ayah.
-    if (infos.some((g) => g.codepoint === 0)) {
-      console.warn("Arabic shaping produced .notdef; rendering no Arabic for this poster.");
+    /**
+     * Hard refusal. glyph id 0 is .notdef — the font has no glyph for that
+     * character, and rendering it would put an empty box in an ayah.
+     *
+     * THE COMMON CAUSE IS A LATIN CHARACTER IN AN ARABIC BLOCK.
+     *
+     * The font here is a Cairo *Arabic subset* of ~39KB. It carries no Latin
+     * glyphs at all, so a single ASCII character in the block — a verse number
+     * like "2:255", a reference, a bracket, even a stray full stop — makes
+     * every one of those characters .notdef and the whole block is refused.
+     * The poster then renders with no Arabic, and nothing else looks wrong.
+     *
+     * If that happens, the fix is in the dars text: keep the Arabic block pure
+     * Arabic and put any reference on the source line instead. Do not remove
+     * this check, and do not "fix" it by swapping in a full Cairo — that would
+     * change every glyph id and the shaping would need verifying again from
+     * scratch. See docs/dars-poster-arabic.md.
+     *
+     * extractArabicBlock() already rejects mixed blocks before they reach
+     * here, so this is the second line of defence, not the first.
+     */
+    const notdef = infos.filter((g) => g.codepoint === 0).length;
+    if (notdef > 0) {
+      console.warn(
+        `Arabic shaping produced ${notdef} .notdef glyph(s) — the Arabic font subset has ` +
+          `no glyph for something in this text. The usual cause is a Latin character ` +
+          `(a verse number, a reference, a bracket) inside the Arabic block. ` +
+          `Rendering no Arabic for this poster. Text: ${JSON.stringify(text.slice(0, 80))}`
+      );
       return null;
     }
 
