@@ -1,9 +1,13 @@
 import { ImageResponse } from "next/og";
+import { shapeArabicToSvg, svgToDataUri } from "@/lib/og/shape-arabic";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 
 export const OG_WIDTH = 1200;
 export const OG_HEIGHT = 630;
+
+/** The title block is narrower than the page; the Arabic must fit inside it. */
+const TITLE_BLOCK_WIDTH = 1000;
 
 // Brand palette — kept in sync with globals.css.
 const GREEN = "#1B4332";
@@ -135,7 +139,20 @@ export async function renderPoster({ title, category, citation, arabic, category
   // The flag wins over the caller: nothing can put Arabic on a poster while
   // the shaping is known to be wrong.
   const safeArabic = ARABIC_ENABLED ? arabic : null;
-  const hasArabic = !!safeArabic;
+
+  // Shaped here rather than in the JSX so that a shaping refusal — .notdef, a
+  // missing font, HarfBuzz failing to load — lands before layout, and the
+  // poster is laid out as one that simply has no Arabic.
+  // The Arabic sits inside the title block, which is capped at 1000px — not
+  // the full 1056 the page padding leaves. Less the accent rule and its
+  // gutter (4 + 22), that is 974. The shaper scales the line down to fit
+  // this, or refuses. Measured against the rendered proofs, not assumed.
+  const ARABIC_MAX_WIDTH = TITLE_BLOCK_WIDTH - 26;
+
+  const shaped = safeArabic
+    ? await shapeArabicToSvg(safeArabic, arabicSize(safeArabic), ARABIC_MAX_WIDTH)
+    : null;
+  const hasArabic = !!shaped;
 
   return new ImageResponse(
     (
@@ -195,7 +212,7 @@ export async function renderPoster({ title, category, citation, arabic, category
         </div>
 
         {/* Title block */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 22, maxWidth: 1000 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 22, maxWidth: TITLE_BLOCK_WIDTH }}>
           {category ? (
             <div
               style={{
@@ -230,29 +247,27 @@ export async function renderPoster({ title, category, citation, arabic, category
           {/* The Arabic block, when the dars carries one. Rendered whole or
               not at all - extractArabicBlock() returns null rather than a
               shortened text, so nothing here can cut an ayah. */}
-          {safeArabic ? (
+          {shaped ? (
             <div
               style={{
                 display: "flex",
-                direction: "rtl",
+                justifyContent: "flex-end",
                 borderRight: `4px solid ${t.accent}`,
                 paddingRight: 22,
                 marginTop: 4,
               }}
             >
-              <span
-                style={{
-                  color: "#FFFFFF",
-                  fontFamily: "Cairo",
-                  fontSize: arabicSize(safeArabic),
-                  fontWeight: 700,
-                  lineHeight: 1.75,
-                  textAlign: "right",
-                  display: "flex",
-                }}
-              >
-                {safeArabic}
-              </span>
+              {/* Outlines, not text. satori is handed the shaped result as an
+                  image, so it can neither re-lay-out nor substitute a font
+                  for it — the two things that produced the reversed, unjoined
+                  Arabic before. */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={svgToDataUri(shaped.svg)}
+                width={shaped.width}
+                height={shaped.height}
+                alt=""
+              />
             </div>
           ) : null}
         </div>
