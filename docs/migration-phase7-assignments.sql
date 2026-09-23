@@ -1,5 +1,10 @@
 -- =============================================================================
--- Phase 7 — tests_assignments: completion and attachment      (NOT YET RUN)
+-- Phase 7 — tests_assignments: completion and attachment      (BRANCH-VERIFIED)
+--
+-- VERIFIED 2026-09-24 on a Neon branch cloned from production, with real
+-- data, run twice: second pass changed nothing. Approved for production,
+-- but only alongside the deploy and only after a fresh verified backup.
+-- Still NOT RUN on production.
 -- =============================================================================
 -- Adds two columns to an existing table. Nothing is dropped, nothing is
 -- rewritten, no enum is altered, no existing value is touched.

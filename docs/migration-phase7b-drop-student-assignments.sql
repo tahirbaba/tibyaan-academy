@@ -1,5 +1,10 @@
 -- =============================================================================
--- Phase 7b — drop the unused student_assignments table        (NOT YET RUN)
+-- Phase 7b — drop the unused student_assignments table        (BRANCH-VERIFIED)
+--
+-- VERIFIED 2026-09-24 on a Neon branch cloned from production, with real
+-- data, run twice: second pass changed nothing. Approved for production,
+-- but only alongside the deploy and only after a fresh verified backup.
+-- Still NOT RUN on production.
 -- =============================================================================
 -- student_assignments backed three pages and one API route that were never
 -- linked from any sidebar. Verified empty in production on 2026-09-23:

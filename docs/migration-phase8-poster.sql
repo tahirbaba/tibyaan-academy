@@ -1,5 +1,10 @@
 -- =============================================================================
--- Phase 8 — daily_dars: stored poster                          (NOT YET RUN)
+-- Phase 8 — daily_dars: stored poster                          (BRANCH-VERIFIED)
+--
+-- VERIFIED 2026-09-24 on a Neon branch cloned from production, with real
+-- data, run twice: second pass changed nothing. Approved for production,
+-- but only alongside the deploy and only after a fresh verified backup.
+-- Still NOT RUN on production.
 -- =============================================================================
 -- Adds one nullable column. Nothing is dropped, no enum is altered, no
 -- existing value is touched, no dars text is read or modified.
