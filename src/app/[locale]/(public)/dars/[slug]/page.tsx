@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getDarsBySlug } from "@/lib/db/dars-queries";
 import { getDb } from "@/lib/db";
 import { dailyDars } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
@@ -53,14 +54,7 @@ export async function generateMetadata({
   let storedPoster: string | undefined;
 
   try {
-    const db = getDb();
-    const result = await db
-      .select()
-      .from(dailyDars)
-      .where(eq(dailyDars.slug, slug))
-      .limit(1);
-
-    const post = result[0];
+    const post = await getDarsBySlug(slug, "dars detail metadata");
     if (post && post.status === "published") {
       const rawTitle = getLocalizedField(
         post as unknown as Record<string, unknown>,
@@ -115,15 +109,10 @@ export default async function DarsDetailPage({
   params: Promise<{ locale: string; slug: string }>;
 }) {
   const { locale, slug } = await params;
-  const db = getDb();
-
-  const result = await db
-    .select()
-    .from(dailyDars)
-    .where(eq(dailyDars.slug, slug))
-    .limit(1);
-
-  const post = result[0];
+  // Not caught: a real query failure must reach the error boundary rather
+  // than be turned into a 404, which would tell Google the dars is gone.
+  // getDarsBySlug survives a missing recoverable column on its own.
+  const post = await getDarsBySlug(slug, "dars detail page");
   if (!post || post.status !== "published") notFound();
 
   const title =

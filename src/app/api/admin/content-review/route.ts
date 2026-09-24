@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getDarsBySlug } from "@/lib/db/dars-queries";
 import { and, desc, eq, inArray } from "drizzle-orm";
 import { getDb } from "@/lib/db";
 import { blogPosts, dailyDars } from "@/lib/db/schema";
@@ -36,7 +37,10 @@ export async function GET(request: NextRequest) {
   if (slug && type) {
     const rows =
       type === "dars"
-        ? await db.select().from(dailyDars).where(eq(dailyDars.slug, slug)).limit(1)
+        // Not a bare select(): that asks for every column in the schema, so a
+        // column the migrations have not created yet breaks the whole review
+        // queue and nothing can be approved. See lib/db/dars-queries.ts.
+        ? [await getDarsBySlug(slug, "admin content review")].filter(Boolean)
         : await db.select().from(blogPosts).where(eq(blogPosts.slug, slug)).limit(1);
 
     if (!rows[0]) return NextResponse.json({ error: "Not found" }, { status: 404 });
