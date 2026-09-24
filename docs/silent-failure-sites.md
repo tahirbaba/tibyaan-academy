@@ -107,6 +107,19 @@ Not yet fixed. Ordered by what the lie costs, worst first.
 
 ---
 
+## The other half of this incident
+
+The dars list showed an empty shelf because its query failed; the query failed
+because a column existed in the Drizzle schema but not yet in the database. The
+swallow is what made it invisible, but the schema/migration ordering is what
+broke it in the first place. Both rules matter, and they are different rules.
+
+**See `docs/schema-and-migrations.md`** — a schema change and its migration
+ship together, and a bare `select()` on a table whose schema may be ahead of
+the database is the shape to avoid.
+
+---
+
 ## How to find them again
 
 ```bash

@@ -309,6 +309,18 @@ Custom CSS variables: `--color-islamic-green`, `--color-islamic-gold` + light/da
 - **Components**: `"use client"` for interactive components. Server components by default.
 - **Imports**: Use `@/` alias. Use `@/i18n/navigation` for localized routing (never `next/link` directly).
 - **Database**: Always use `getDb()` from `@/lib/db`. Schema in `src/lib/db/schema.ts`.
+- **Schema changes ship with their migration — always.** Adding a column to
+  `schema.ts` makes every query ask for it, so an unmigrated database rejects
+  the *whole* query (`42703`) and every page using it fails. In Sept 2026 one
+  nullable column took out every dars page in all five locales. Read
+  `docs/schema-and-migrations.md` before touching `schema.ts`.
+- **Avoid a bare `db.select()`** on a table whose schema may be ahead of the
+  database — it requests every column in the schema, including one added
+  minutes ago. Name the columns you need. It also stops you shipping a joined
+  `users` row complete with somebody's email address.
+- **A `catch` around a query must be louder, not quieter.** Alert and rethrow;
+  never fall through to an empty list. A 500 gets reported, a clean empty page
+  gets believed. See `docs/silent-failure-sites.md`.
 - **Auth pattern**: Server — `const supabase = await createClient(); const { data: { user } } = await supabase.auth.getUser();`
 - **API auth pattern**: Check `supabase.auth.getUser()`, return 401 if no user. Admin routes check `user.user_metadata?.role`.
 - **Styling**: Use `cn()` from `@/lib/utils` for conditional classes. Islamic green/gold palette.
