@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { sendFailureAlert } from "@/lib/alerts";
 import { redirect } from "next/navigation";
 import { getTeacherRevenue } from "@/lib/db/teacher-queries";
 import { RevenueClient } from "./revenue-client";
@@ -29,8 +30,20 @@ export default async function TeacherRevenuePage({
       planType: r.subscription.planType,
       monthlyAmount: parseFloat(r.subscription.amountUsd ?? "0"),
     }));
-  } catch (err) {
-    console.error("Failed to load revenue:", err);
+  } catch (error) {
+    // Alert and rethrow — never fall through to earnings = [].
+    //
+    // This page renders money. A caught error here showed the teacher a
+    // confident $0 earned, which is indistinguishable from genuinely having
+    // earned nothing, so nobody would ever report it. A teacher quietly
+    // believing they are owed nothing is the worst outcome available here.
+    await sendFailureAlert({
+      source: "/teacher/revenue",
+      summary: "The revenue query failed — a teacher would otherwise have been shown $0 earned.",
+      error,
+      context: { teacherId: user.id },
+    });
+    throw error;
   }
 
   return <RevenueClient earnings={earnings} />;
