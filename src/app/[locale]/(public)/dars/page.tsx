@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { getDb } from "@/lib/db";
-import { dailyDars } from "@/lib/db/schema";
-import { desc, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
+import { listDars, type DarsRow } from "@/lib/db/dars-queries";
+import { sendFailureAlert } from "@/lib/alerts";
 import { Link } from "@/i18n/navigation";
 import { BookOpen, Calendar } from "lucide-react";
 import { localeMetadataAlternates, absoluteUrl } from "@/lib/site-config";
@@ -54,21 +54,39 @@ export default async function DarsListPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  const db = getDb();
 
-  let posts: Array<typeof dailyDars.$inferSelect> = [];
+  /**
+   * Deliberately NOT wrapped in a try/catch.
+   *
+   * It used to be, and the catch set posts to [] — so when the query started
+   * failing (poster_url missing from the database) this page returned HTTP 200
+   * with "No dars posts yet. Check back soon!" while 55 published dars sat in
+   * the table. A 500 gets noticed; a clean empty page does not, and Google
+   * reads the cheerful one as the truth.
+   *
+   * A failure here must reach the error boundary and alert, not be dressed up
+   * as an empty shelf. Genuinely having no dars is a different thing, and the
+   * page still says so when the query succeeds and returns nothing.
+   *
+   * listDars() already survives a missing recoverable column on its own, so
+   * this throws only for real faults.
+   */
+  let posts;
   try {
-    posts = await db
-      .select()
-      .from(dailyDars)
-      .where(publishedDars())
-      .orderBy(desc(dailyDars.publishedAt))
-      .limit(50);
-  } catch (err) {
-    console.error("Failed to load dars:", err);
+    posts = await listDars(publishedDars(), 50, "dars list page");
+  } catch (error) {
+    // Alert, then rethrow. The catch exists to make the failure louder, never
+    // to absorb it: the page still errors and the error boundary still shows.
+    await sendFailureAlert({
+      source: "/dars list page",
+      summary: "The dars list query failed — the page is erroring for every visitor.",
+      error,
+      context: { locale },
+    });
+    throw error;
   }
 
-  const titleKey = `title${locale.charAt(0).toUpperCase() + locale.slice(1)}` as keyof typeof posts[0];
+  const titleKey = `title${locale.charAt(0).toUpperCase() + locale.slice(1)}` as keyof DarsRow;
 
   const pageTitle: Record<string, string> = {
     en: "Daily Dars",
@@ -112,7 +130,20 @@ export default async function DarsListPage({
             const title = (post[titleKey] as string) || post.titleEn || "Untitled";
             return (
               <Link key={post.id} href={`/dars/${post.slug}`} className="block h-full">
-                <div className="h-full rounded-xl border bg-card p-5 hover:bg-muted/30 hover:border-emerald-600/40 transition-colors group">
+                <div className="h-full rounded-xl border bg-card overflow-hidden hover:bg-muted/30 hover:border-emerald-600/40 transition-colors group">
+                  {/* The stored poster when the dars has one, otherwise the
+                      on-demand route — so cards still work for anything
+                      approved before posters were stored. */}
+                  <div className="relative w-full aspect-[1200/630] bg-muted">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={post.posterUrl ?? `/api/og/dars/${post.slug}`}
+                      alt=""
+                      loading="lazy"
+                      className="absolute inset-0 w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="p-5">
                   <div className="flex flex-col gap-3">
                     <div className="flex-1">
                       <div className="flex flex-wrap items-center gap-2 mb-2">
@@ -133,6 +164,7 @@ export default async function DarsListPage({
                         <p className="text-xs text-muted-foreground mt-1">{post.sourceReference}</p>
                       )}
                     </div>
+                  </div>
                   </div>
                 </div>
               </Link>

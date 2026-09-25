@@ -15,7 +15,12 @@ export async function GET() {
     if (!dbUser || dbUser.role !== "student") return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
     const assignments = await db
-      .select({ assignment: testsAssignments, teacher: users })
+      // The student is shown the teachers name only. Selecting the whole
+      // users row handed them the teachers email address as well.
+      .select({
+        assignment: testsAssignments,
+        teacher: { id: users.id, fullName: users.fullName },
+      })
       .from(testsAssignments)
       .innerJoin(users, eq(testsAssignments.teacherId, users.id))
       .where(eq(testsAssignments.studentId, authUser.id))

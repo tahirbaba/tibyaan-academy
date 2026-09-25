@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { FileText, Inbox, Clock, CheckCircle2, AlertTriangle } from "lucide-react";
+import { FileText, Inbox, Clock, CheckCircle2, AlertTriangle, Paperclip, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 type Assignment = {
@@ -13,6 +13,8 @@ type Assignment = {
     frequency: string;
     dueDate: string | null;
     status: string;
+    completedAt: string | null;
+    attachmentPath: string | null;
     teacherGrade: string | null;
     teacherFeedback: string | null;
     createdAt: string;
@@ -35,6 +37,46 @@ export default function StudentTestsAssignmentsPage() {
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | "test" | "assignment">("all");
+  const [busyId, setBusyId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  async function markDone(id: string) {
+    setBusyId(id);
+    setError(null);
+    try {
+      const res = await fetch(`/api/student/assignments/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "complete" }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Could not mark it done");
+
+      setAssignments((prev) =>
+        prev.map((a) =>
+          a.assignment.id === id ? { ...a, assignment: { ...a.assignment, ...data.assignment } } : a
+        )
+      );
+    } catch (e) {
+      // Shown to the student. A silent failure here would leave them
+      // believing work was submitted when it was not.
+      setError(e instanceof Error ? e.message : "Could not mark it done");
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function openAttachment(id: string) {
+    setError(null);
+    try {
+      const res = await fetch(`/api/assignments/attachment/${id}`);
+      const data = await res.json();
+      if (!res.ok || !data.url) throw new Error(data.error ?? "Could not open the file");
+      window.open(data.url, "_blank", "noopener,noreferrer");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not open the file");
+    }
+  }
 
   useEffect(() => {
     fetch("/api/student/assignments")
@@ -73,6 +115,12 @@ export default function StudentTestsAssignmentsPage() {
         ))}
       </div>
 
+      {error && (
+        <div className="rounded-lg border border-red-300 bg-red-50 dark:bg-red-950/30 px-4 py-2 text-sm text-red-700 dark:text-red-300">
+          {error}
+        </div>
+      )}
+
       {loading ? (
         <div className="text-center py-16 text-muted-foreground">Loading...</div>
       ) : filtered.length === 0 ? (
@@ -100,7 +148,18 @@ export default function StudentTestsAssignmentsPage() {
                     </div>
                     <p className="text-xs text-muted-foreground">Teacher: {item.teacher.fullName}</p>
                     {item.assignment.description && (
-                      <p className="text-sm text-muted-foreground">{item.assignment.description}</p>
+                      <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                        {item.assignment.description}
+                      </p>
+                    )}
+                    {item.assignment.attachmentPath && (
+                      <button
+                        onClick={() => openAttachment(item.assignment.id)}
+                        className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:underline"
+                      >
+                        <Paperclip className="w-3.5 h-3.5" />
+                        Open attachment
+                      </button>
                     )}
                     {item.assignment.dueDate && (
                       <div className={`flex items-center gap-1 text-xs ${isOverdue ? "text-red-600" : "text-muted-foreground"}`}>
@@ -116,11 +175,27 @@ export default function StudentTestsAssignmentsPage() {
                       <p className="text-xs text-muted-foreground italic">Feedback: {item.assignment.teacherFeedback}</p>
                     )}
                   </div>
-                  <div className="shrink-0">
+                  <div className="shrink-0 flex flex-col items-start sm:items-end gap-2">
                     <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${status.bg} ${status.color}`}>
                       <StatusIcon className="w-3 h-3" />
                       {status.label}
                     </span>
+                    {item.assignment.status === "pending" ? (
+                      <button
+                        onClick={() => markDone(item.assignment.id)}
+                        disabled={busyId === item.assignment.id}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:opacity-90 disabled:opacity-60 transition-opacity"
+                      >
+                        {busyId === item.assignment.id && <Loader2 className="w-3 h-3 animate-spin" />}
+                        Mark done
+                      </button>
+                    ) : (
+                      <span className="text-[11px] text-muted-foreground">
+                        {item.assignment.completedAt
+                          ? `Done ${new Date(item.assignment.completedAt).toLocaleDateString()}`
+                          : "Done"}
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>

@@ -2,6 +2,7 @@ import { eq } from "drizzle-orm";
 import { getDb } from "@/lib/db";
 import { dailyDars } from "@/lib/db/schema";
 import { renderPoster } from "@/lib/og/poster";
+import { extractArabicBlock } from "@/lib/og/arabic-excerpt";
 
 // Node runtime: the poster reads font files from disk.
 export const runtime = "nodejs";
@@ -22,7 +23,9 @@ export async function GET(
 
   let title = "Daily Dars";
   let category: string | null = null;
+  let categoryKey: string | null = null;
   let citation: string | null = null;
+  let arabic: string | null = null;
 
   try {
     const db = getDb();
@@ -31,6 +34,7 @@ export async function GET(
         titleEn: dailyDars.titleEn,
         category: dailyDars.category,
         sourceReference: dailyDars.sourceReference,
+        contentAr: dailyDars.contentAr,
       })
       .from(dailyDars)
       .where(eq(dailyDars.slug, slug))
@@ -38,12 +42,17 @@ export async function GET(
 
     if (rows[0]) {
       title = rows[0].titleEn || title;
+      categoryKey = rows[0].category;
       category = CATEGORY_LABELS[rows[0].category] ?? rows[0].category;
       citation = rows[0].sourceReference;
+      // Null when the dars has no delimited Arabic block, or when the block
+      // is longer than the poster can hold. Either way: no Arabic, never a
+      // cut one.
+      arabic = extractArabicBlock(rows[0].contentAr);
     }
   } catch {
     // Fall back to the generic poster rather than failing the share preview.
   }
 
-  return renderPoster({ title, category, citation });
+  return renderPoster({ title, category, categoryKey, citation, arabic });
 }

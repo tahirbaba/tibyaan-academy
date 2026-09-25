@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { sendFailureAlert } from "@/lib/alerts";
 import { redirect } from "next/navigation";
 import { getDb } from "@/lib/db";
 import { users } from "@/lib/db/schema";
@@ -51,8 +52,20 @@ export default async function StudentProgressPage({
       notes: (r.notes as string | null) ?? null,
       sessionDate: new Date(r.session_date as string).toISOString(),
     }));
-  } catch (err) {
-    console.error("Failed to load progress:", err);
+  } catch (error) {
+    // Alert and rethrow — never fall through to entries = [].
+    //
+    // An empty progress page tells a student, and the parent reading over
+    // their shoulder, that no work has been recorded. If the query simply
+    // failed, that is a lie that looks like a fact: their teacher HAS been
+    // recording sessions. Fail visibly instead.
+    await sendFailureAlert({
+      source: "/student/progress",
+      summary: "The progress query failed — a student would otherwise have been shown no progress at all.",
+      error,
+      context: { studentId: user.id },
+    });
+    throw error;
   }
 
   return <StudentProgressClient entries={entries} />;
