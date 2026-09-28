@@ -120,6 +120,30 @@ the database is the shape to avoid.
 
 ---
 
+## A DNS edit can take the whole site down with every check still green
+
+On 28 Sep 2026 the apex and www records for tibyaanacademy.com were deleted
+by accident while unrelated records were being added at the registrar. For
+roughly an hour the site was unreachable to everyone, and:
+
+  * the build was green
+  * the deploy was READY
+  * the application was running and answering on its .vercel.app URL
+  * no alert fired, because nothing had failed — the app was fine
+
+Nothing in the platform was broken. The platform simply could not be reached.
+Every signal we had was measuring the wrong thing.
+
+**Any liveness check must fetch the real domain from outside.** Not the
+deployment URL, not localhost, not an internal health call — those all stay
+green in exactly this scenario. The check has to answer "can a stranger on the
+internet load tibyaanacademy.com", which is the only question that matters,
+and it must alert when the answer is no.
+
+Corollary for anything resolved by name: a cached resolver will keep answering
+after the record is gone, so a check that passes on one machine proves nothing
+about the others.
+
 ## The same pattern outside the app: pipes hide exit codes
 
 `next build | grep …` reports the exit status of **grep**, not the build. On
