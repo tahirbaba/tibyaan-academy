@@ -42,7 +42,19 @@ export const SUPPORT_EMAIL =
  * SUPPORT_EMAIL stays as it is: it is the real mailbox people write TO, and it
  * is where alerts are delivered. Only the From: has to be on the domain.
  */
-export const MAIL_FROM_ADDRESS = process.env.MAIL_FROM_ADDRESS ?? "noreply@tibyaanacademy.com";
+const DEFAULT_MAIL_FROM_ADDRESS = "noreply@tibyaanacademy.com";
+
+/**
+ * Trimmed, and empty is treated as unset.
+ *
+ * `??` alone only falls back on undefined, so a variable present-but-blank —
+ * easy to create in a dashboard, and invisible afterwards because the value is
+ * stored as sensitive and cannot be read back — would produce an address of ""
+ * and silently disable every alert. The failure mode this whole change exists
+ * to remove must not be reachable through a blank text box.
+ */
+export const MAIL_FROM_ADDRESS =
+  process.env.MAIL_FROM_ADDRESS?.trim() || DEFAULT_MAIL_FROM_ADDRESS;
 
 /** From: header for transactional mail, e.g. `Tibyaan Academy <noreply@…>`. */
 export const MAIL_FROM = `${SITE_NAME} <${MAIL_FROM_ADDRESS}>`;

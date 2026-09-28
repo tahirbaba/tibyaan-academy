@@ -3,6 +3,7 @@ import {
   MAIL_FROM,
   MAIL_FROM_ADDRESS,
   SITE_NAME,
+  SITE_URL,
   mailFromIsUnsendable,
 } from "@/lib/site-config";
 
@@ -155,7 +156,9 @@ export async function sendFailureAlert(alert: FailureAlert): Promise<AlertDelive
     lastDeliveryFailure = null;
     return { delivered: true };
   } catch (err) {
-    return fail(err instanceof Error ? err.message : String(err));
+    const reason = err instanceof Error ? err.message : String(err);
+    fail(reason);
+    return { delivered: false, reason };
   }
 }
 
@@ -194,4 +197,68 @@ export function inngestFailureHandler(functionId: string) {
       context: originalEvent ? { triggeringEvent: originalEvent } : undefined,
     });
   };
+}
+
+/**
+ * The weekly canary: proof that the alerting channel still carries mail.
+ *
+ * Sent on a schedule whether or not anything is wrong. Its purpose is to give
+ * silence a meaning — a Monday with no canary means the channel is broken,
+ * which is information you cannot get from an inbox that is quiet because
+ * nothing failed.
+ *
+ * Uses the same From:, the same key and the same provider as a real alert, so
+ * it proves the path that matters rather than a parallel one that might work
+ * when the real one does not.
+ */
+export async function sendCanary(): Promise<
+  { delivered: true; sentTo: string } | { delivered: false; reason: string }
+> {
+  const channel = alertChannelStatus();
+  if (!channel.ok) {
+    return { delivered: false, reason: channel.reason ?? "alerting channel unavailable" };
+  }
+
+  const body = [
+    "Alerting is working. Nothing has failed.",
+    "",
+    "This message is sent every Monday to prove that failure alerts can reach",
+    "you. If a Monday passes with no message like this one, the alerting",
+    "channel itself is broken — treat that absence as the alarm.",
+    "",
+    `Sent:      ${new Date().toISOString()}`,
+    `From:      ${MAIL_FROM}`,
+    `Delivered: ${SUPPORT_EMAIL}`,
+    `Health:    ${SITE_URL}/api/health`,
+  ].join("\n");
+
+  try {
+    const response = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: MAIL_FROM,
+        to: SUPPORT_EMAIL,
+        subject: `[${SITE_NAME}] Weekly check: alerting is working`,
+        text: body,
+      }),
+    });
+
+    if (!response.ok) {
+      const detail = await response.text().catch(() => "");
+      const reason = `Canary rejected (HTTP ${response.status}): ${detail.slice(0, 300)}`;
+      fail(reason);
+      return { delivered: false, reason };
+    }
+
+    lastDeliveryFailure = null;
+    return { delivered: true, sentTo: SUPPORT_EMAIL };
+  } catch (err) {
+    const reason = err instanceof Error ? err.message : String(err);
+    fail(reason);
+    return { delivered: false, reason };
+  }
 }
