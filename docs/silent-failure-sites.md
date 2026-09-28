@@ -120,6 +120,61 @@ the database is the shape to avoid.
 
 ---
 
+## A confident explanation is not a verified one
+
+On 28 Sep 2026 a real failure alert was refused by Resend with a 403,
+"domain is not verified". The reasonable explanation was that the DNS outage
+minutes earlier had knocked the domain out of verified status. It was
+reasonable, it fit the timeline — and it was **wrong**. The domain had been
+verified since 26 September and never lapsed. The actual cause: the API key in
+production belonged to a *different Resend account* from the one that owns the
+verified domain. The wrong account will reject the send no matter what the
+right account's dashboard says.
+
+Five things on 29 Sep 2026 alone passed while the thing they checked had
+failed, or explained a failure without checking:
+
+1. **Backup verification** compared empty strings — CRLF made every table name
+   invalid, `2>/dev/null` hid it, and 44/44 "matched" while querying nothing.
+2. **The `arabic: yes` sample script** reported extraction succeeded while the
+   flag meant nothing was rendered.
+3. **A piped build** (`next build | grep`) reported grep's exit code, so a
+   build that died out of memory reported success.
+4. **A DNS edit** took the whole site down while build, deploy and app were all
+   green (below).
+5. **A confident explanation** of the Resend 403 that fit the evidence and was
+   still wrong.
+
+The rule for all five: **a check that cannot fail proves nothing, and an
+explanation that was not tested is a guess wearing a lab coat.** Before trusting
+a green result, ask what it would show if the thing had failed. Before trusting
+an explanation, verify it against the source — here, the account the key
+actually belongs to — not against a story that merely fits.
+
+## A DNS edit can take the whole site down with every check still green
+
+On 28 Sep 2026 the apex and www records for tibyaanacademy.com were deleted
+by accident while unrelated records were being added at the registrar. For
+roughly an hour the site was unreachable to everyone, and:
+
+  * the build was green
+  * the deploy was READY
+  * the application was running and answering on its .vercel.app URL
+  * no alert fired, because nothing had failed — the app was fine
+
+Nothing in the platform was broken. The platform simply could not be reached.
+Every signal we had was measuring the wrong thing.
+
+**Any liveness check must fetch the real domain from outside.** Not the
+deployment URL, not localhost, not an internal health call — those all stay
+green in exactly this scenario. The check has to answer "can a stranger on the
+internet load tibyaanacademy.com", which is the only question that matters,
+and it must alert when the answer is no.
+
+Corollary for anything resolved by name: a cached resolver will keep answering
+after the record is gone, so a check that passes on one machine proves nothing
+about the others.
+
 ## The same pattern outside the app: pipes hide exit codes
 
 `next build | grep …` reports the exit status of **grep**, not the build. On
