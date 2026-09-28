@@ -1,8 +1,51 @@
 import { getDb } from "@/lib/db";
 import { agentLogs } from "@/lib/db/schema";
+import { sendFailureAlert } from "@/lib/alerts";
 import type { AgentName, AgentResult, AgentTask } from "./types";
 
 const ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages";
+
+/**
+ * A durable Claude error — a bad or mis-scoped key, a 4xx that will keep
+ * failing until a human changes the configuration — must reach a person on the
+ * FIRST occurrence, not the hundredth. For four months the daily dars agent
+ * failed every morning with "API key is not scoped to a workspace" and logged
+ * it to a table nobody reads; nothing a person would see was produced.
+ *
+ * Deduplicated per process so a burst of failing requests (every AI Ustaz
+ * message with a bad key, say) sends one alert, not one per request. A fresh
+ * lambda re-arms it, which is the right cadence: it means "this is still
+ * broken" rather than going silent after the first ever alert.
+ */
+const alertedConfigErrors = new Set<string>();
+
+/** 4xx except 429 means the request itself is wrong — config, not load. */
+function isDurableConfigError(message: string): boolean {
+  const m = message.match(/Claude API error (\d{3})/);
+  if (!m) return message.includes("ANTHROPIC_API_KEY not set");
+  const status = Number(m[1]);
+  return status >= 400 && status < 500 && status !== 429;
+}
+
+async function alertDurableApiError(agent: string, taskType: string, message: string): Promise<void> {
+  if (!isDurableConfigError(message)) return;
+
+  // Key the dedupe on the status/shape, not the full body, so the same fault
+  // from different agents still collapses to one alert.
+  const key = message.match(/Claude API error \d{3}/)?.[0] ?? "ANTHROPIC_API_KEY not set";
+  if (alertedConfigErrors.has(key)) return;
+  alertedConfigErrors.add(key);
+
+  await sendFailureAlert({
+    source: `agent:${agent}`,
+    summary: `Claude API is failing with a configuration error (${key})`,
+    error: new Error(message),
+    context: {
+      taskType,
+      meaning: "This will keep failing on every call until the key or its scope is fixed.",
+    },
+  });
+}
 
 interface ClaudeMessage {
   role: "user" | "assistant";
@@ -53,6 +96,9 @@ export abstract class BaseAgent {
         durationMs,
         errorMessage
       );
+
+      // Loud on the first occurrence, for the errors a human must fix.
+      await alertDurableApiError(this.name, task.type, errorMessage);
 
       return {
         taskId: task.id,
