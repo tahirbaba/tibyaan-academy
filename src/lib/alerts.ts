@@ -1,4 +1,11 @@
-import { SUPPORT_EMAIL, MAIL_FROM, SITE_NAME } from "@/lib/site-config";
+import {
+  SUPPORT_EMAIL,
+  MAIL_FROM,
+  MAIL_FROM_ADDRESS,
+  SITE_NAME,
+  SITE_URL,
+  mailFromIsUnsendable,
+} from "@/lib/site-config";
 
 /**
  * Failure alerting: one email to SUPPORT_EMAIL when a scheduled job fails.
@@ -45,7 +52,44 @@ function escapeHtml(value: string): string {
  * Never throws and never rejects — alerting must not be able to fail the job it
  * is reporting on, or turn one failure into two.
  */
-export async function sendFailureAlert(alert: FailureAlert): Promise<void> {
+/**
+ * Outcome of an alert attempt.
+ *
+ * sendFailureAlert no longer returns void. A caller that cannot tell whether
+ * the warning was delivered cannot escalate, and an undelivered warning is
+ * worse than the failure it was describing — it looks like all is well.
+ */
+export type AlertDelivery =
+  | { delivered: true }
+  | { delivered: false; reason: string };
+
+/** Remembered so /api/health can report that the alerting channel is down. */
+let lastDeliveryFailure: { at: string; reason: string } | null = null;
+
+/**
+ * The state of the alerting channel itself, for /api/health.
+ *
+ * This is the answer to "who warns you that the warning failed": the health
+ * endpoint goes degraded the moment alerting cannot deliver, so the channel is
+ * observable without waiting for something else to break first.
+ */
+export function alertChannelStatus(): { ok: boolean; reason?: string; at?: string } {
+  if (mailFromIsUnsendable()) {
+    return {
+      ok: false,
+      reason: `MAIL_FROM_ADDRESS (${MAIL_FROM_ADDRESS}) is on a domain no mail provider will send from`,
+    };
+  }
+  if (!process.env.RESEND_API_KEY) {
+    return { ok: false, reason: "RESEND_API_KEY is not set" };
+  }
+  if (lastDeliveryFailure) {
+    return { ok: false, reason: lastDeliveryFailure.reason, at: lastDeliveryFailure.at };
+  }
+  return { ok: true };
+}
+
+export async function sendFailureAlert(alert: FailureAlert): Promise<AlertDelivery> {
   const { source, summary, error, context } = alert;
 
   const detail = describeError(error);
@@ -62,8 +106,17 @@ export async function sendFailureAlert(alert: FailureAlert): Promise<void> {
 
   const resendKey = process.env.RESEND_API_KEY;
   if (!resendKey) {
-    console.error("[alert] RESEND_API_KEY not set — alert email not sent.");
-    return;
+    return fail("RESEND_API_KEY is not set");
+  }
+
+  // Checked before the request rather than after the rejection, so the log
+  // names the cause instead of quoting a provider error nobody reads.
+  if (mailFromIsUnsendable()) {
+    return fail(
+      `MAIL_FROM_ADDRESS is ${MAIL_FROM_ADDRESS} — a free-mail domain cannot be verified, ` +
+        `so the provider refuses every send. Set MAIL_FROM_ADDRESS to an address on a ` +
+        `domain verified with Resend.`
+    );
   }
 
   const body = [
@@ -95,15 +148,36 @@ export async function sendFailureAlert(alert: FailureAlert): Promise<void> {
     });
 
     if (!response.ok) {
-      console.error(
-        "[alert] Resend rejected the alert email:",
-        response.status,
-        await response.text()
-      );
+      const detail = await response.text().catch(() => "");
+      return fail(`Resend rejected the alert (HTTP ${response.status}): ${detail.slice(0, 300)}`);
     }
+
+    // Delivered. Clear any remembered failure so health recovers by itself.
+    lastDeliveryFailure = null;
+    return { delivered: true };
   } catch (err) {
-    console.error("[alert] Failed to send alert email:", err);
+    const reason = err instanceof Error ? err.message : String(err);
+    fail(reason);
+    return { delivered: false, reason };
   }
+}
+
+/**
+ * Records an undelivered alert and returns the failure.
+ *
+ * Logs at error level with a distinctive, greppable prefix, and remembers the
+ * reason so /api/health reports the channel as down until a send succeeds.
+ * The wording is deliberate: the point is that a failure is now unreported,
+ * not merely that an email bounced.
+ */
+function fail(reason: string): AlertDelivery {
+  lastDeliveryFailure = { at: new Date().toISOString(), reason };
+  console.error(
+    "[alert-undelivered] An alert could not be delivered, so the failure it " +
+      "was reporting is now unreported. Reason: " +
+      reason
+  );
+  return { delivered: false, reason };
 }
 
 /**
@@ -123,4 +197,68 @@ export function inngestFailureHandler(functionId: string) {
       context: originalEvent ? { triggeringEvent: originalEvent } : undefined,
     });
   };
+}
+
+/**
+ * The weekly canary: proof that the alerting channel still carries mail.
+ *
+ * Sent on a schedule whether or not anything is wrong. Its purpose is to give
+ * silence a meaning — a Monday with no canary means the channel is broken,
+ * which is information you cannot get from an inbox that is quiet because
+ * nothing failed.
+ *
+ * Uses the same From:, the same key and the same provider as a real alert, so
+ * it proves the path that matters rather than a parallel one that might work
+ * when the real one does not.
+ */
+export async function sendCanary(): Promise<
+  { delivered: true; sentTo: string } | { delivered: false; reason: string }
+> {
+  const channel = alertChannelStatus();
+  if (!channel.ok) {
+    return { delivered: false, reason: channel.reason ?? "alerting channel unavailable" };
+  }
+
+  const body = [
+    "Alerting is working. Nothing has failed.",
+    "",
+    "This message is sent every Monday to prove that failure alerts can reach",
+    "you. If a Monday passes with no message like this one, the alerting",
+    "channel itself is broken — treat that absence as the alarm.",
+    "",
+    `Sent:      ${new Date().toISOString()}`,
+    `From:      ${MAIL_FROM}`,
+    `Delivered: ${SUPPORT_EMAIL}`,
+    `Health:    ${SITE_URL}/api/health`,
+  ].join("\n");
+
+  try {
+    const response = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: MAIL_FROM,
+        to: SUPPORT_EMAIL,
+        subject: `[${SITE_NAME}] Weekly check: alerting is working`,
+        text: body,
+      }),
+    });
+
+    if (!response.ok) {
+      const detail = await response.text().catch(() => "");
+      const reason = `Canary rejected (HTTP ${response.status}): ${detail.slice(0, 300)}`;
+      fail(reason);
+      return { delivered: false, reason };
+    }
+
+    lastDeliveryFailure = null;
+    return { delivered: true, sentTo: SUPPORT_EMAIL };
+  } catch (err) {
+    const reason = err instanceof Error ? err.message : String(err);
+    fail(reason);
+    return { delivered: false, reason };
+  }
 }

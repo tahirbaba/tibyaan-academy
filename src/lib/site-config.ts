@@ -29,8 +29,57 @@ export const SITE_NAME = "Tibyaan Academy";
 export const SUPPORT_EMAIL =
   process.env.SUPPORT_EMAIL ?? "academytibyaan@gmail.com";
 
-/** From: header for transactional mail, e.g. `Tibyaan Academy <...>`. */
-export const MAIL_FROM = `${SITE_NAME} <${SUPPORT_EMAIL}>`;
+/**
+ * The address outgoing mail is sent FROM.
+ *
+ * This must be on a domain verified with the mail provider. It previously used
+ * SUPPORT_EMAIL, which is a gmail.com address — Resend rejects any send from a
+ * free-mail domain, because nobody can prove ownership of gmail.com. Every
+ * failure alert this platform produced between 11 and 19 September was refused
+ * for that reason and dropped with a console.error, which is how the dars cron
+ * failing every morning reached nobody.
+ *
+ * SUPPORT_EMAIL stays as it is: it is the real mailbox people write TO, and it
+ * is where alerts are delivered. Only the From: has to be on the domain.
+ */
+const DEFAULT_MAIL_FROM_ADDRESS = "noreply@tibyaanacademy.com";
+
+/**
+ * Trimmed, and empty is treated as unset.
+ *
+ * `??` alone only falls back on undefined, so a variable present-but-blank —
+ * easy to create in a dashboard, and invisible afterwards because the value is
+ * stored as sensitive and cannot be read back — would produce an address of ""
+ * and silently disable every alert. The failure mode this whole change exists
+ * to remove must not be reachable through a blank text box.
+ */
+export const MAIL_FROM_ADDRESS =
+  process.env.MAIL_FROM_ADDRESS?.trim() || DEFAULT_MAIL_FROM_ADDRESS;
+
+/** From: header for transactional mail, e.g. `Tibyaan Academy <noreply@…>`. */
+export const MAIL_FROM = `${SITE_NAME} <${MAIL_FROM_ADDRESS}>`;
+
+/** Domains no mail provider will ever let you send FROM. */
+const UNSENDABLE_FROM_DOMAINS = [
+  "gmail.com",
+  "googlemail.com",
+  "yahoo.com",
+  "outlook.com",
+  "hotmail.com",
+  "live.com",
+  "icloud.com",
+  "aol.com",
+];
+
+/**
+ * True when MAIL_FROM_ADDRESS could never be accepted by the provider. Checked
+ * at send time so the cause is named in the logs, and surfaced by /api/health
+ * so a broken alerting channel is visible without waiting for a failure.
+ */
+export function mailFromIsUnsendable(): boolean {
+  const domain = MAIL_FROM_ADDRESS.split("@")[1]?.toLowerCase() ?? "";
+  return domain === "" || UNSENDABLE_FROM_DOMAINS.includes(domain);
+}
 
 /** @deprecated use SUPPORT_EMAIL */
 export const ADMIN_EMAIL = SUPPORT_EMAIL;

@@ -120,6 +120,24 @@ the database is the shape to avoid.
 
 ---
 
+## The same pattern outside the app: pipes hide exit codes
+
+`next build | grep …` reports the exit status of **grep**, not the build. On
+28 Sep 2026 a build died with `FATAL ERROR: Zone Allocation failed - process
+out of memory` and the run was reported as **exit code 0**. Deploying on the
+strength of that would have shipped from a half-written `.next`.
+
+Any build, test or migration whose result you intend to trust must not be
+piped. Capture the status first, then filter:
+
+```bash
+npm run build > /tmp/build.log 2>&1; echo "EXIT: $?"   # right
+npm run build 2>&1 | grep -i error                     # WRONG: grep's status
+```
+
+Same family as everything else here: a check that can report success while
+doing nothing, or while the thing it checked actually failed.
+
 ## How to find them again
 
 ```bash
