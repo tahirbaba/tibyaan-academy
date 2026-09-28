@@ -120,6 +120,37 @@ the database is the shape to avoid.
 
 ---
 
+## A confident explanation is not a verified one
+
+On 28 Sep 2026 a real failure alert was refused by Resend with a 403,
+"domain is not verified". The reasonable explanation was that the DNS outage
+minutes earlier had knocked the domain out of verified status. It was
+reasonable, it fit the timeline — and it was **wrong**. The domain had been
+verified since 26 September and never lapsed. The actual cause: the API key in
+production belonged to a *different Resend account* from the one that owns the
+verified domain. The wrong account will reject the send no matter what the
+right account's dashboard says.
+
+Five things on 29 Sep 2026 alone passed while the thing they checked had
+failed, or explained a failure without checking:
+
+1. **Backup verification** compared empty strings — CRLF made every table name
+   invalid, `2>/dev/null` hid it, and 44/44 "matched" while querying nothing.
+2. **The `arabic: yes` sample script** reported extraction succeeded while the
+   flag meant nothing was rendered.
+3. **A piped build** (`next build | grep`) reported grep's exit code, so a
+   build that died out of memory reported success.
+4. **A DNS edit** took the whole site down while build, deploy and app were all
+   green (below).
+5. **A confident explanation** of the Resend 403 that fit the evidence and was
+   still wrong.
+
+The rule for all five: **a check that cannot fail proves nothing, and an
+explanation that was not tested is a guess wearing a lab coat.** Before trusting
+a green result, ask what it would show if the thing had failed. Before trusting
+an explanation, verify it against the source — here, the account the key
+actually belongs to — not against a story that merely fits.
+
 ## A DNS edit can take the whole site down with every check still green
 
 On 28 Sep 2026 the apex and www records for tibyaanacademy.com were deleted
