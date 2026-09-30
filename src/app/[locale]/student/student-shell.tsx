@@ -26,12 +26,14 @@ import {
   Users2,
   FileText,
   AlertCircle,
+  Bell,
 } from "lucide-react";
 import { NotificationBell } from "@/components/shared/notification-bell";
 import { signOut } from "@/app/[locale]/(auth)/actions";
 
 const navItems = [
   { key: "sidebarDashboard", href: "/student/dashboard", icon: LayoutDashboard },
+  { key: "sidebarNotifications", href: "/student/notifications", icon: Bell },
   { key: "sidebarMyCourses", href: "/student/courses", icon: BookOpen },
   { key: "sidebarAIUstaz", href: "/student/ai-ustaz", icon: Bot },
   { key: "sidebarHifzTracker", href: "/student/hifz-tracker", icon: Brain },

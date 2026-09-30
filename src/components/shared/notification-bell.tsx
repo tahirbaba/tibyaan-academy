@@ -38,10 +38,19 @@ export function NotificationBell() {
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   useEffect(() => {
-    fetch("/api/notifications")
-      .then((res) => res.json())
-      .then((d) => setNotifications(d.notifications ?? []))
-      .catch(() => {});
+    const refresh = () =>
+      fetch("/api/notifications")
+        .then((res) => res.json())
+        .then((d) => setNotifications(d.notifications ?? []))
+        .catch(() => {});
+
+    refresh();
+
+    // The notifications page and the bell show the same data. When one marks
+    // something read, the other must reflect it — otherwise marking read on
+    // the page leaves the badge stuck. They sync through this event.
+    window.addEventListener("notifications:changed", refresh);
+    return () => window.removeEventListener("notifications:changed", refresh);
   }, []);
 
   useEffect(() => {
@@ -59,12 +68,14 @@ export function NotificationBell() {
     setNotifications((prev) =>
       prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
     );
+    window.dispatchEvent(new Event("notifications:changed"));
   };
 
   const markAllRead = async () => {
     const unread = notifications.filter((n) => !n.isRead);
     await Promise.all(unread.map((n) => fetch(`/api/notifications/${n.id}`, { method: "PATCH" })));
     setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+    window.dispatchEvent(new Event("notifications:changed"));
   };
 
   return (

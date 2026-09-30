@@ -762,7 +762,8 @@
     "sidebarDarsCircles": "Lingkaran Dars",
     "syllabusOverview": "Silabus Kursus",
     "showAllParas": "Tampilkan 30 Juz",
-    "showLess": "Tampilkan Lebih Sedikit"
+    "showLess": "Tampilkan Lebih Sedikit",
+    "sidebarNotifications": "Notifikasi"
   },
   "aiUstaz": {
     "title": "Ustaz AI",
@@ -1031,7 +1032,8 @@
     "noMatchingStudents": "Tidak ada siswa yang cocok",
     "noTestsYet": "Belum ada tes",
     "noCertificatesYet": "Belum ada sertifikat",
-    "noRevenueYet": "Belum ada pendapatan"
+    "noRevenueYet": "Belum ada pendapatan",
+    "sidebarNotifications": "Notifikasi"
   },
   "payments": {
     "title": "Pembayaran & Langganan",

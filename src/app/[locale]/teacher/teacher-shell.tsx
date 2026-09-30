@@ -22,6 +22,7 @@ import {
   LogOut,
   ChevronLeft,  TrendingUp,
   FileText,
+  Bell,
 } from "lucide-react";
 import { NotificationBell } from "@/components/shared/notification-bell";
 
@@ -32,6 +33,7 @@ const navItems = [
   { key: "sidebarLessons", href: "/teacher/lessons", icon: BookOpen },
   { key: "sidebarTrackProgress", href: "/teacher/track-progress", icon: TrendingUp },
   { key: "sidebarTests", href: "/teacher/tests", icon: ClipboardCheck },
+  { key: "sidebarNotifications", href: "/teacher/notifications", icon: Bell },
   { key: "sidebarTestsAssignments", href: "/teacher/tests-assignments", icon: FileText },
   { key: "sidebarVideos", href: "/teacher/videos", icon: Video },
   { key: "sidebarRecordings", href: "/teacher/recordings", icon: Disc },
