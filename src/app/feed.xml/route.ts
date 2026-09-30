@@ -1,46 +1,105 @@
 import { getDb } from "@/lib/db";
-import { blogPosts } from "@/lib/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { blogPosts, dailyDars } from "@/lib/db/schema";
+import { desc } from "drizzle-orm";
 
 import { SITE_URL } from "@/lib/site-config";
-import { publishedBlogPosts } from "@/lib/content/publication";
+import { publishedBlogPosts, publishedDars } from "@/lib/content/publication";
+import { sendFailureAlert } from "@/lib/alerts";
+
+/**
+ * Once an hour, like the sitemap. Without it the feed was generated at build
+ * time and never saw content published through the review flow afterwards.
+ */
+export const revalidate = 3600;
+
+type FeedItem = {
+  title: string;
+  link: string;
+  description: string;
+  date: Date;
+};
 
 export async function GET() {
   try {
     const db = getDb();
-    const posts = await db
-      .select()
-      .from(blogPosts)
-      .where(publishedBlogPosts())
-      .orderBy(desc(blogPosts.publishedAt))
-      .limit(50);
 
-    const items = posts
-      .map((post) => {
-        const title = escapeXml(post.titleEn || post.titleUr || "Untitled");
-        const description = escapeXml(post.metaDescriptionEn || post.metaDescriptionUr || "");
-        const link = `${SITE_URL}/en/blog/${post.slug}`;
-        const pubDate = post.publishedAt
-          ? new Date(post.publishedAt).toUTCString()
-          : new Date(post.createdAt).toUTCString();
+    // Dars is the content this site actually publishes; the blog has produced
+    // nothing. The feed was blog-only by accident, not intent — both belong.
+    const [posts, dars] = await Promise.all([
+      db
+        .select()
+        .from(blogPosts)
+        .where(publishedBlogPosts())
+        .orderBy(desc(blogPosts.publishedAt))
+        .limit(50),
+      db
+        .select()
+        .from(dailyDars)
+        .where(publishedDars())
+        .orderBy(desc(dailyDars.publishedAt))
+        .limit(50),
+    ]);
 
-        return `    <item>
-      <title>${title}</title>
-      <link>${link}</link>
-      <description>${description}</description>
-      <pubDate>${pubDate}</pubDate>
-      <guid isPermaLink="true">${link}</guid>
+    const items: FeedItem[] = [
+      ...posts.map((p) => ({
+        title: p.titleEn || p.titleUr || "Untitled",
+        link: `${SITE_URL}/en/blog/${p.slug}`,
+        description: p.metaDescriptionEn || p.metaDescriptionUr || "",
+        date: p.publishedAt ?? p.createdAt,
+      })),
+      ...dars.map((d) => ({
+        title: d.titleEn || d.titleUr || "Daily Dars",
+        link: `${SITE_URL}/en/dars/${d.slug}`,
+        description: d.sourceReference || "",
+        date: d.publishedAt ?? d.createdAt,
+      })),
+    ]
+      .sort((a, b) => b.date.getTime() - a.date.getTime())
+      .slice(0, 50);
+
+    return new Response(renderRss(items), {
+      headers: {
+        "Content-Type": "application/xml; charset=utf-8",
+        "Cache-Control": "public, max-age=3600, s-maxage=3600",
+      },
+    });
+  } catch (error) {
+    // A feed reader should not break on a transient DB blip, so a valid empty
+    // feed is still served — but the failure is NOT swallowed: it alerts, the
+    // same as any other job, rather than quietly serving an empty shelf.
+    console.error("RSS feed generation error:", error);
+    await sendFailureAlert({
+      source: "/feed.xml",
+      summary: "The RSS feed query failed — an empty feed was served instead.",
+      error,
+    });
+
+    return new Response(renderRss([]), {
+      headers: { "Content-Type": "application/xml; charset=utf-8" },
+    });
+  }
+}
+
+function renderRss(items: FeedItem[]): string {
+  const body = items
+    .map(
+      (i) => `    <item>
+      <title>${escapeXml(i.title)}</title>
+      <link>${i.link}</link>
+      <description>${escapeXml(i.description)}</description>
+      <pubDate>${new Date(i.date).toUTCString()}</pubDate>
+      <guid isPermaLink="true">${i.link}</guid>
       <category>islamic-education</category>
-    </item>`;
-      })
-      .join("\n");
+    </item>`
+    )
+    .join("\n");
 
-    const rss = `<?xml version="1.0" encoding="UTF-8"?>
+  return `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Tibyaan Academy Blog</title>
-    <link>${SITE_URL}/en/blog</link>
-    <description>Islamic Education Insights, Quran Learning Tips, and Hifz Guidance from Tibyaan Academy</description>
+    <title>Tibyaan Academy</title>
+    <link>${SITE_URL}/en/dars</link>
+    <description>Daily Dars and articles from Tibyaan Academy — Quran, Hadith, Fiqh, Seerah and Dua</description>
     <language>en</language>
     <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
     <atom:link href="${SITE_URL}/feed.xml" rel="self" type="application/rss+xml"/>
@@ -49,33 +108,9 @@ export async function GET() {
       <title>Tibyaan Academy</title>
       <link>${SITE_URL}</link>
     </image>
-${items}
+${body}
   </channel>
 </rss>`;
-
-    return new Response(rss, {
-      headers: {
-        "Content-Type": "application/xml; charset=utf-8",
-        "Cache-Control": "public, max-age=3600, s-maxage=3600",
-      },
-    });
-  } catch (error) {
-    console.error("RSS feed generation error:", error);
-
-    // Return a minimal valid RSS feed on error
-    const fallback = `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0">
-  <channel>
-    <title>Tibyaan Academy Blog</title>
-    <link>${SITE_URL}/en/blog</link>
-    <description>Islamic Education Insights from Tibyaan Academy</description>
-  </channel>
-</rss>`;
-
-    return new Response(fallback, {
-      headers: { "Content-Type": "application/xml; charset=utf-8" },
-    });
-  }
 }
 
 function escapeXml(str: string): string {
