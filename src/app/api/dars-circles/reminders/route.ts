@@ -7,8 +7,31 @@ import { withCron } from "@/lib/cron-auth";
  * GET /api/dars-circles/reminders — Cron endpoint
  * Find circles starting within 1 hour and send email reminders to enrolled students.
  */
+/**
+ * Off unless DARS_CIRCLE_REMINDERS_ENABLED is exactly "true".
+ *
+ * These reminders send email to real students. The cron was disabled for four
+ * months (the project-wide dashboard toggle), so before it sends again the
+ * content and recipients need review. An env flag, not the dashboard toggle,
+ * because the toggle is project-wide and would also stop dars and blog.
+ * Unset means "does not send"; the job runs and reports that it is paused.
+ * Takes effect only after the deploy whose build sees the variable.
+ */
+function remindersEnabled(): boolean {
+  return process.env.DARS_CIRCLE_REMINDERS_ENABLED === "true";
+}
+
 async function runCircleReminders() {
   try {
+    if (!remindersEnabled()) {
+      return NextResponse.json({
+        paused: true,
+        message:
+          "Dars-circle reminders are paused. Set DARS_CIRCLE_REMINDERS_ENABLED=true and redeploy to send.",
+        count: 0,
+      });
+    }
+
     const upcomingCircles = await getUpcomingReminders();
 
     if (upcomingCircles.length === 0) {

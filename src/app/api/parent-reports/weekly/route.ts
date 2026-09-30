@@ -8,8 +8,31 @@ import { withCron } from "@/lib/cron-auth";
 
 // Cron endpoint: GET /api/parent-reports/weekly
 // Runs every Sunday at 8 AM UTC
+/**
+ * Off unless PARENT_REPORTS_ENABLED is exactly "true".
+ *
+ * These reports send WhatsApp messages to real parents. Silent for four
+ * months (the project-wide dashboard toggle); before they resume, the report
+ * content and the recipient list need review — a wrong message to a parent
+ * costs more than a week of silence. An env flag rather than the dashboard
+ * toggle, which is project-wide. Unset means "does not send".
+ * Takes effect only after the deploy whose build sees the variable.
+ */
+function reportsEnabled(): boolean {
+  return process.env.PARENT_REPORTS_ENABLED === "true";
+}
+
 async function runWeeklyParentReports() {
   try {
+    if (!reportsEnabled()) {
+      return NextResponse.json({
+        paused: true,
+        message:
+          "Weekly parent reports are paused. Set PARENT_REPORTS_ENABLED=true and redeploy to send.",
+        sent: 0,
+      });
+    }
+
     const db = getDb();
 
     // Find all students with parent whatsapp numbers

@@ -25,6 +25,24 @@ const nextConfig: NextConfig = {
   reactCompiler: true,
   compress: true,
   poweredByHeader: false,
+  /**
+   * Force the poster fonts into every function bundle that renders a poster.
+   *
+   * poster.tsx reads them with path.join(process.cwd(), "src/assets/fonts", …),
+   * a dynamic path Next's file tracing cannot follow — so a route that renders
+   * a poster gets a bundle with no font files, readFile throws, and the poster
+   * fails. The /api/og/dars route happened to work; the content-review route
+   * (which stores the poster on approval) is a different bundle and did not,
+   * which is why the first dars in four months published with no stored poster.
+   *
+   * Listing the fonts here traces them into these routes explicitly. NOTE: this
+   * is the hypothesised fix — it is not confirmed until the re-generate
+   * endpoint reports a real error naming the fonts, or a stored poster appears.
+   */
+  outputFileTracingIncludes: {
+    "/api/admin/content-review": ["./src/assets/fonts/**"],
+    "/api/admin/dars/[slug]/regenerate-poster": ["./src/assets/fonts/**"],
+  },
   images: {
     formats: ["image/avif", "image/webp"],
     minimumCacheTTL: 60,

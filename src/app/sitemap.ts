@@ -3,6 +3,17 @@ import type { MetadataRoute } from "next";
 import { SITE_URL as BASE_URL, SITE_LOCALES } from "@/lib/site-config";
 import { publishedBlogPosts, publishedDars } from "@/lib/content/publication";
 
+/**
+ * Regenerate at most once an hour.
+ *
+ * Without this the sitemap is generated once at build time, so a dars approved
+ * after a deploy stayed absent from the sitemap until someone happened to
+ * redeploy — invisible to Google in the meantime. An hour is the floor worth
+ * having: Google does not recrawl faster than that, and it keeps this off the
+ * database on every crawler hit.
+ */
+export const revalidate = 3600;
+
 const locales = [...SITE_LOCALES];
 
 // A sitemap must list only URLs that resolve. "/blog" is deliberately absent:

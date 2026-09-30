@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { sendFailureAlert } from "@/lib/alerts";
 import { getDarsBySlug } from "@/lib/db/dars-queries";
 import { and, desc, eq, inArray } from "drizzle-orm";
 import { getDb } from "@/lib/db";
@@ -162,6 +163,23 @@ export async function POST(request: NextRequest) {
   let poster: PosterResult | null = null;
   if (type === "dars" && action === "approve") {
     poster = await generateAndStorePoster(slug);
+
+    // Loud, not only visible. The client shows the warning on the queue, but a
+    // reviewer who navigates away would miss it — so a failed poster also
+    // emails, the same way a failed cron does. This is the failure that
+    // published the first dars in four months with no stored image and told
+    // no one, because the warning was dropped client-side.
+    if (!poster.ok) {
+      await sendFailureAlert({
+        source: "content-review:poster",
+        summary: `Dars "${slug}" published, but its poster failed to generate`,
+        error: new Error(poster.reason),
+        context: {
+          slug,
+          consequence: "The page falls back to rendering the poster on demand; nothing is stored.",
+        },
+      });
+    }
   }
 
   // Reported, never silent: a failed poster leaves the dars published with no
