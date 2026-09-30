@@ -93,11 +93,24 @@ export type BucketOptions = {
 async function ensureBucket(bucket: string, options: BucketOptions = {}) {
   const supabase = getAdminClient();
   const { data } = await supabase.storage.getBucket(bucket);
-  if (!data) {
-    await supabase.storage.createBucket(bucket, {
-      public: options.publicBucket ?? true,
-      fileSizeLimit: options.fileSizeLimit ?? 524288000, // 500MB
-    });
+  if (data) return;
+
+  // createBucket's error used to be discarded, so a bucket that failed to
+  // create looked created — and the upload then failed with the confusing
+  // "Bucket not found", far from the real cause. The error is surfaced now.
+  // If the reason is that the service role cannot create buckets, the bucket
+  // must be made once by hand in Supabase; this at least says so plainly.
+  const { error } = await supabase.storage.createBucket(bucket, {
+    public: options.publicBucket ?? true,
+    fileSizeLimit: options.fileSizeLimit ?? 524288000, // 500MB
+  });
+
+  // "already exists" is not a failure — a concurrent create won the race.
+  if (error && !/exist/i.test(error.message)) {
+    throw new Error(
+      `Could not create storage bucket "${bucket}": ${error.message}. ` +
+        `If this is a permissions error, create the bucket once in the Supabase dashboard.`
+    );
   }
 }
 
