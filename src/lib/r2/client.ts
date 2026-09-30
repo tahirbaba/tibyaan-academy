@@ -121,12 +121,18 @@ export async function uploadToStorage(
   key: string,
   body: Buffer | Uint8Array,
   contentType: string,
-  bucket = VIDEOS_BUCKET
+  bucket = VIDEOS_BUCKET,
+  bucketOptions: BucketOptions = {}
 ): Promise<string> {
   const supabase = getAdminClient();
 
-  // Auto-create bucket if it doesn't exist
-  await ensureBucket(bucket);
+  // Auto-create bucket if it doesn't exist. bucketOptions matters here: the
+  // default 500MB fileSizeLimit exceeds the Supabase project's global limit, so
+  // an auto-create with the default is rejected ("object exceeded the maximum
+  // allowed size") — which is why every bucket so far was made by hand. A
+  // caller uploading small files should pass a small limit so the create
+  // succeeds.
+  await ensureBucket(bucket, bucketOptions);
 
   const { error } = await supabase.storage
     .from(bucket)

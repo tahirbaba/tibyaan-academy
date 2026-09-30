@@ -67,7 +67,14 @@ export async function generateAndStorePoster(slug: string): Promise<PosterResult
     // Same key every time for a given dars: re-approving replaces the poster
     // rather than leaving orphaned copies behind.
     const key = `${slug}.png`;
-    await uploadToStorage(key, bytes, "image/png", POSTER_BUCKET);
+    // Public (it is the social preview image) and a small size limit — a poster
+    // is ~100KB. The 500MB default would exceed the project's global file-size
+    // limit and the bucket auto-create would be rejected. 5MB is ample and well
+    // under any reasonable global cap.
+    await uploadToStorage(key, bytes, "image/png", POSTER_BUCKET, {
+      publicBucket: true,
+      fileSizeLimit: 5 * 1024 * 1024,
+    });
 
     const url = getPublicUrl(key, POSTER_BUCKET);
 
