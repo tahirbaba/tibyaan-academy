@@ -207,3 +207,79 @@ pattern.
 Client components are excluded: there the failure is usually visible as a
 stuck spinner or an error state, and an empty list is not passed off as truth
 in the same way. They are still worth reviewing, just not by this script.
+
+---
+
+# More of the same, found 29–30 Sep 2026
+
+## A 200 with a `warning` field nobody reads is worse than a failure
+
+`/api/admin/content-review` returned `{ success: true, warning: "Published, but
+the poster could not be generated: …" }` when a dars was approved but its poster
+failed to store. The admin client checked `if (!res.ok)` — a 200 passes — called
+`onDone()`, and **never read `warning`**. The reviewer saw success. The first
+dars published in four months has no stored poster and nobody was told.
+
+A failure at least stops someone. A success-with-an-ignored-warning teaches
+everyone that the operation worked. It is the more dangerous of the two.
+
+Rule: a partial success is a failure until the caller has proven it surfaced the
+partial part. If a route can return `warning`, `notified: false`, `sent`, or any
+"it mostly worked" field, the client must render it — or the route should not
+pretend it was a 200.
+
+### The three found by audit (29 Sep)
+
+1. `admin/content-review` — poster `warning` ignored client-side. (fixed here)
+2. `student/assignments/[id]` — returns `notified: false` when the teacher
+   notification fails to write; the student UI ignores it, so a completed
+   assignment silently never reaches the teacher. **Live since Phase 7.**
+3. `notifications/send` — reports `sent: <intended count>` while the actual
+   sends sit in a swallowed try/catch; returns `success: true` even if every
+   send failed. (dead route, deleted here)
+
+## Setting an environment variable changes nothing until the next deploy
+
+Three times now a secret was changed in Vercel and did not take effect until a
+redeploy: the Anthropic key (changed 18 Sep, live 21 Sep), the Resend key, and
+`ADMIN_SECRET` (set to a random value 30 Sep, still not live — production runs
+the old value until the next deploy).
+
+The gap between "I changed it" and "it took effect" is where people stop
+believing the change happened. After changing any environment variable, either
+redeploy or state plainly that it is not yet live. A changed-but-not-deployed
+secret is a change that has not happened.
+
+## A check that cannot tell "destroyed" from "hidden" is not a check
+
+Reading a Vercel env var back through the API returns an empty value for any
+`sensitive`-typed variable — whether it is genuinely empty or merely hidden.
+On 30 Sep this reported `len=0` for three secrets I had just set to real
+values, and would have reported the identical `len=0` had I actually blanked
+them (which, minutes earlier, I had). The read cannot distinguish the two
+states it most needs to, so it proves nothing. The only trustworthy check was
+behavioural: does the key authenticate, does the send deliver.
+
+## This platform cannot audit its own secrets for weak patterns
+
+Every secret is stored `sensitive` or `encrypted`, so their values cannot be
+read back — not by an operator, not by a script. That privacy is correct, and
+its cost is that there is **no way to scan the project's secrets for weak or
+predictable values**. `ADMIN_SECRET` was `tibyaan-admin-secret-2024` — brand +
+role + year — and nothing in the system could have flagged it; it was caught
+only because a human recognised it.
+
+What it would take to close this, none of which exists today:
+- a written generation standard (e.g. `openssl rand -hex 32` for every secret
+  that is not an externally-issued key), enforced at set time rather than
+  audited after;
+- a rotation record — when each secret was last changed and by whom — kept
+  outside the secret store, since the values themselves are deliberately
+  unreadable;
+- for externally-issued keys (Anthropic, Resend, Stripe), a note of which
+  account/workspace each belongs to, because the value cannot be inspected to
+  tell (the Resend 403 was exactly this: the key belonged to a different
+  account than the verified domain).
+
+Until those exist, the honest position is the one taken on 30 Sep: *I cannot
+see the values, so I will not claim they are safe.*
