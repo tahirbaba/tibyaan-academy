@@ -67,6 +67,15 @@ export async function GET() {
     // A feed reader should not break on a transient DB blip, so a valid empty
     // feed is still served — but the failure is NOT swallowed: it alerts, the
     // same as any other job, rather than quietly serving an empty shelf.
+    //
+    // NOTE FOR THE BUILD LOG: you will see this line —
+    //   "RSS feed generation error: No database connection string was provided"
+    // — during `next build`. That is EXPECTED and harmless: the build prerenders
+    // this route with no DATABASE_URL, the catch runs, and an empty feed is
+    // served. At runtime on Vercel the DB is present and the feed populates via
+    // the hourly revalidate above. It is not a build failure. Do not "fix" it by
+    // removing this catch — that is the thing keeping a real runtime DB blip
+    // from breaking every feed reader.
     console.error("RSS feed generation error:", error);
     await sendFailureAlert({
       source: "/feed.xml",
