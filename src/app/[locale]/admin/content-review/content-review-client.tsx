@@ -55,6 +55,10 @@ export function ContentReviewClient() {
   const [items, setItems] = useState<QueueItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<QueueItem | null>(null);
+  // A warning from the last approve — the item published but something (the
+  // poster) did not. Held here so it stays visible on the queue rather than
+  // vanishing with the detail view.
+  const [actionWarning, setActionWarning] = useState<string | null>(null);
 
   const loadQueue = useCallback(async () => {
     setLoading(true);
@@ -78,8 +82,9 @@ export function ContentReviewClient() {
       <ReviewDetail
         item={selected}
         onBack={() => setSelected(null)}
-        onDone={() => {
+        onDone={(warning) => {
           setSelected(null);
+          setActionWarning(warning ?? null);
           loadQueue();
         }}
       />
@@ -104,6 +109,22 @@ export function ContentReviewClient() {
           {loading ? "—" : items.length}
         </span>
       </header>
+
+      {actionWarning && (
+        <div className="flex items-start gap-2 rounded-xl border border-amber-300 bg-amber-50 dark:bg-amber-900/20 px-4 py-3">
+          <span className="text-amber-700 dark:text-amber-300 text-sm flex-1">
+            {actionWarning}
+          </span>
+          <button
+            type="button"
+            onClick={() => setActionWarning(null)}
+            className="text-amber-700 dark:text-amber-300 shrink-0"
+            aria-label="Dismiss"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
 
       {loading ? (
         <div className="py-20 flex justify-center">
@@ -169,7 +190,7 @@ function ReviewDetail({
 }: {
   item: QueueItem;
   onBack: () => void;
-  onDone: () => void;
+  onDone: (warning?: string) => void;
 }) {
   const [detail, setDetail] = useState<DetailItem | null>(null);
   const [html, setHtml] = useState("");
@@ -224,7 +245,10 @@ function ReviewDetail({
         setError(data.error ?? "Something went wrong.");
         return;
       }
-      onDone();
+      // A 200 can still carry a warning — the item published but a side effect
+      // (e.g. the poster) failed. Pass it up so it is shown on the queue,
+      // rather than dropped, which taught everyone the operation fully worked.
+      onDone(typeof data.warning === "string" ? data.warning : undefined);
     } catch {
       setError("Network error — try again.");
     } finally {
