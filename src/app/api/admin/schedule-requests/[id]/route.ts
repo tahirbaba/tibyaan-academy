@@ -200,7 +200,11 @@ export async function PATCH(
         },
         {
           userId:  teacherId,
-          type:    "match_request" as const,
+          // match_accepted, not match_request: the student is already assigned,
+          // nothing for the teacher to action. The other path that sends this
+          // same "New Student Assigned" used match_accepted, so the two were
+          // the same event under two types — one title, one type now.
+          type:    "match_accepted" as const,
           titleEn: "New Student Assigned",
           titleUr: "آپ کے پاس ایک نیا طالب علم تفویض ہوا ہے",
           titleAr: "تم تعيين طالب علم جديد إليك",

@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { sendFailureAlert } from "@/lib/alerts";
 import { createClient } from "@/lib/supabase/server";
 import { getDb } from "@/lib/db";
 import { users, testsAssignments, notifications } from "@/lib/db/schema";
@@ -78,7 +79,21 @@ export async function PATCH(
       });
     } catch (error) {
       notified = false;
-      console.error("Assignment completion notification failed:", error);
+      // Loud, not just logged. The student's completion committed and their UI
+      // is correct; what failed is the teacher being told, which the student
+      // cannot fix and should not be burdened with. It reaches support instead,
+      // on the first occurrence — this path had never fired in production, and
+      // the point is to hear about it the first time it does, not the hundredth.
+      await sendFailureAlert({
+        source: "student/assignments:complete",
+        summary: "A student completed an assignment but the teacher notification failed to write",
+        error,
+        context: {
+          assignmentId: id,
+          teacherId: item.teacherId,
+          consequence: "The completion is recorded; the teacher was not notified.",
+        },
+      });
     }
 
     return NextResponse.json({ assignment: updated, notified });

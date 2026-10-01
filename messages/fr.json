@@ -762,7 +762,8 @@
     "sidebarDarsCircles": "Cercles de Dars",
     "syllabusOverview": "Programme du cours",
     "showAllParas": "Afficher les 30 Paras",
-    "showLess": "Afficher moins"
+    "showLess": "Afficher moins",
+    "sidebarNotifications": "Notifications"
   },
   "aiUstaz": {
     "title": "Ustaz IA",
@@ -1031,7 +1032,8 @@
     "noMatchingStudents": "Aucun élève correspondant",
     "noTestsYet": "Aucun test pour le moment",
     "noCertificatesYet": "Aucun certificat pour le moment",
-    "noRevenueYet": "Aucun revenu pour le moment"
+    "noRevenueYet": "Aucun revenu pour le moment",
+    "sidebarNotifications": "Notifications"
   },
   "payments": {
     "title": "Paiements et Abonnement",

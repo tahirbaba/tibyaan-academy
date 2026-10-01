@@ -762,7 +762,8 @@
     "sidebarDarsCircles": "حلقات الدرس",
     "syllabusOverview": "المنهج الدراسي",
     "showAllParas": "عرض جميع الأجزاء الثلاثين",
-    "showLess": "عرض أقل"
+    "showLess": "عرض أقل",
+    "sidebarNotifications": "الإشعارات"
   },
   "aiUstaz": {
     "title": "أستاذ AI",
@@ -1031,7 +1032,8 @@
     "noMatchingStudents": "لا يوجد طلاب مطابقون",
     "noTestsYet": "لا توجد اختبارات بعد",
     "noCertificatesYet": "لا توجد شهادات بعد",
-    "noRevenueYet": "لا توجد إيرادات بعد"
+    "noRevenueYet": "لا توجد إيرادات بعد",
+    "sidebarNotifications": "الإشعارات"
   },
   "payments": {
     "title": "المدفوعات والاشتراك",
