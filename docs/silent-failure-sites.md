@@ -283,3 +283,23 @@ What it would take to close this, none of which exists today:
 
 Until those exist, the honest position is the one taken on 30 Sep: *I cannot
 see the values, so I will not claim they are safe.*
+
+## Two hand-typed lists of the same thing, disagreeing (Phase 6)
+
+The Hifz tracker held the 114 surah names twice: once in the entry-form dropdown
+and once (implicitly, by number) elsewhere, both typed by hand. They had drifted
+apart — the form said "Ta-Ha", "As-Saf", "Aal-e-Imran" where the other spelling
+was "Taha", "As-Saff", "Aal-E-Imran". A student would pick a name on the form and
+see a different spelling of it on the tracker, with nothing flagging that the two
+were meant to be the same list.
+
+This is the silent-failure pattern applied to data rather than control flow: two
+sources of the same truth, no check that they agree, so they diverge and only a
+reader notices. The fix is the general one — a single source. Both now derive
+from src/lib/quran/metadata.ts, which additionally proves itself arithmetically
+at import, so the names, the counts and the juz boundaries cannot drift from each
+other or from 6236.
+
+Rule: the same fact must live in exactly one place. A second hand-typed copy of
+anything — surah names, a fee, a status enum, a figure — is a divergence waiting
+to happen, and nothing will report it when it does.
