@@ -6,30 +6,21 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
 import {
+  SURAHS as QURAN_SURAHS,
+  TOTAL_AYAT,
+  TOTAL_SURAHS,
+  juzForAyah,
+  juzAyahCount,
+} from "@/lib/quran/metadata";
+import {
   BookOpen, Flame, ChevronLeft, ChevronRight,
   Save, Calendar, BarChart3, TrendingUp, Loader2,
 } from "lucide-react";
 
-const SURAHS = [
-  "Al-Fatiha","Al-Baqarah","Aal-e-Imran","An-Nisa","Al-Ma'idah","Al-An'am",
-  "Al-A'raf","Al-Anfal","At-Tawbah","Yunus","Hud","Yusuf","Ar-Ra'd","Ibrahim",
-  "Al-Hijr","An-Nahl","Al-Isra","Al-Kahf","Maryam","Ta-Ha","Al-Anbiya",
-  "Al-Hajj","Al-Mu'minun","An-Nur","Al-Furqan","Ash-Shu'ara","An-Naml",
-  "Al-Qasas","Al-Ankabut","Ar-Rum","Luqman","As-Sajdah","Al-Ahzab","Saba",
-  "Fatir","Ya-Sin","As-Saffat","Sad","Az-Zumar","Ghafir","Fussilat",
-  "Ash-Shura","Az-Zukhruf","Ad-Dukhan","Al-Jathiyah","Al-Ahqaf","Muhammad",
-  "Al-Fath","Al-Hujurat","Qaf","Adh-Dhariyat","At-Tur","An-Najm","Al-Qamar",
-  "Ar-Rahman","Al-Waqi'ah","Al-Hadid","Al-Mujadila","Al-Hashr","Al-Mumtahanah",
-  "As-Saf","Al-Jumu'ah","Al-Munafiqun","At-Taghabun","At-Talaq","At-Tahrim",
-  "Al-Mulk","Al-Qalam","Al-Haqqah","Al-Ma'arij","Nuh","Al-Jinn","Al-Muzzammil",
-  "Al-Muddaththir","Al-Qiyamah","Al-Insan","Al-Mursalat","An-Naba","An-Nazi'at",
-  "Abasa","At-Takwir","Al-Infitar","Al-Mutaffifin","Al-Inshiqaq","Al-Buruj",
-  "At-Tariq","Al-A'la","Al-Ghashiyah","Al-Fajr","Al-Balad","Ash-Shams",
-  "Al-Layl","Ad-Duha","Ash-Sharh","At-Tin","Al-Alaq","Al-Qadr","Al-Bayyinah",
-  "Az-Zalzalah","Al-Adiyat","Al-Qari'ah","At-Takathur","Al-Asr","Al-Humazah",
-  "Al-Fil","Quraysh","Al-Ma'un","Al-Kawthar","Al-Kafirun","An-Nasr",
-  "Al-Masad","Al-Ikhlas","Al-Falaq","An-Nas",
-];
+// One source of truth: the entry-form surah list is derived from the verified
+// Tanzil dataset, not a second hand-typed copy (the old one had "Ta-Ha" where
+// the dataset has "Taha", among others). Index i maps to surah i+1.
+const SURAHS = QURAN_SURAHS.map((s) => s.transliteration);
 
 type HifzRecord = {
   id: string;
@@ -71,6 +62,10 @@ export default function HifzTrackerPage() {
   const [fromAyah, setFromAyah] = useState("");
   const [toAyah, setToAyah] = useState("");
   const [type, setType] = useState<"sabaq" | "sabqi" | "manzil">("sabaq");
+  // The ring fills from 0 to the real percentage once, after load. Kept in
+  // state (starting at 0) so the SVG's CSS transition has a change to animate;
+  // rendering the final value straight away would just snap to it.
+  const [ringPct, setRingPct] = useState(0);
   const [assessment, setAssessment] = useState<"good" | "okay" | "difficult" | "">("");
   const [notes, setNotes] = useState("");
   const [calMonth, setCalMonth] = useState(today.getMonth());
@@ -134,23 +129,54 @@ export default function HifzTrackerPage() {
   const firstDay = getFirstDayOfMonth(calMonth, calYear);
   const monthName = new Date(calYear, calMonth).toLocaleDateString("en", { month: "long", year: "numeric" });
 
-  const totalAyaat = 6236;
+  const totalAyaat = TOTAL_AYAT;
   const memorizedPct = Math.min(100, Math.round((stats.totalAyaatMemorized / totalAyaat) * 100));
 
-  // Per-juz progress is not derived here. The previous version poured the total
-  // memorised ayah count into equal 1/30 blocks starting at Juz 1, so a student
-  // with ~156 ayaat showed 75% on Juz 1 while the overall figure read 0%. The two
-  // numbers measured different things and the map did not reflect which juz the
-  // entries were actually for.
+  // Animate the ring to the real percentage once data has loaded. A frame's
+  // delay lets the browser paint 0 first, so the CSS transition runs.
+  useEffect(() => {
+    if (loading) return;
+    const id = requestAnimationFrame(() => setRingPct(memorizedPct));
+    return () => cancelAnimationFrame(id);
+  }, [loading, memorizedPct]);
+
+  // Per-juz progress, derived from the verified Tanzil juz boundaries.
   //
-  // Showing a real percentage needs a verified surah-to-juz ayah mapping, which is
-  // Phase 6 and is not invented here. Until that dataset is chosen, a juz shows a
-  // percentage only where real entries exist for it - which is currently none, as
-  // hifz_tracker records carry surah and ayah but no juz.
-  const juzData = Array.from({ length: 30 }, (_, i) => ({
-    juz: i + 1,
-    memorized: null as number | null,
-  }));
+  // For each memorised (sabaq) record, every ayah in its range is placed in its
+  // real juz via juzForAyah — a record that crosses a juz boundary is split
+  // correctly. Ayaat are de-duplicated per juz (a student may log overlapping
+  // ranges), so a juz can never exceed 100%. A juz shows a percentage ONLY when
+  // it has entries; otherwise it stays null (blank), never a fabricated number.
+  // This is what replaced the old "75% on Juz 1" bug, which poured the whole
+  // total into Juz 1 regardless of which juz the ayaat were actually in.
+  // Unique key for a (surah, ayah) pair; ayah counts are all < 1000.
+  const globalKey = (surah: number, ayah: number) => surah * 1000 + ayah;
+  const memorisedByJuz = new Map<number, Set<number>>();
+  for (const r of records) {
+    if (r.type !== "sabaq") continue;
+    const from = Math.min(r.ayahFrom, r.ayahTo);
+    const to = Math.max(r.ayahFrom, r.ayahTo);
+    for (let a = from; a <= to; a++) {
+      let juz: number;
+      try {
+        juz = juzForAyah(r.surahNumber, a);
+      } catch {
+        continue; // a malformed record must not break the whole map
+      }
+      if (!memorisedByJuz.has(juz)) memorisedByJuz.set(juz, new Set());
+      memorisedByJuz.get(juz)!.add(globalKey(r.surahNumber, a));
+    }
+  }
+
+  const juzData = Array.from({ length: 30 }, (_, i) => {
+    const juz = i + 1;
+    const count = memorisedByJuz.get(juz)?.size ?? 0;
+    return {
+      juz,
+      // null where there are no entries — the map shows a percentage only then.
+      memorized: count > 0 ? Math.min(100, Math.round((count / juzAyahCount(juz)) * 100)) : null,
+    };
+  });
 
   if (loading) {
     return (
@@ -185,7 +211,7 @@ export default function HifzTrackerPage() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           { label: t("ayaatMemorized"), value: `${stats.totalAyaatMemorized}/${totalAyaat}`, extra: `${memorizedPct}%` },
-          { label: t("surahsComplete"), value: String(stats.uniqueSurahs), extra: "/114" },
+          { label: t("surahsComplete"), value: String(stats.uniqueSurahs), extra: `/${TOTAL_SURAHS}` },
           { label: t("averageScore"), value: stats.avgScore > 0 ? `${stats.avgScore}%` : "—", extra: "" },
           { label: t("streak"), value: String(stats.streak), extra: "days" },
         ].map((stat, i) => (
@@ -213,7 +239,7 @@ export default function HifzTrackerPage() {
             <svg className="w-full h-full -rotate-90" viewBox="0 0 120 120">
               <circle cx="60" cy="60" r="52" fill="none" stroke="currentColor" strokeWidth="10" className="text-muted/50" />
               <circle cx="60" cy="60" r="52" fill="none" stroke="currentColor" strokeWidth="10"
-                strokeDasharray={`${memorizedPct * 3.27} ${327 - memorizedPct * 3.27}`}
+                strokeDasharray={`${ringPct * 3.27} ${327 - ringPct * 3.27}`}
                 strokeLinecap="round" className="text-primary transition-all duration-1000" />
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
@@ -231,23 +257,31 @@ export default function HifzTrackerPage() {
           <h3 className="text-lg font-semibold text-foreground mb-4">{t("todaysTasks")}</h3>
           <div className="space-y-3">
             {(["sabaq", "sabqi", "manzil"] as const).map((taskType) => {
-              const colors = { sabaq: "emerald", sabqi: "blue", manzil: "amber" } as const;
+              // Full class strings, not `bg-${c}-50` — Tailwind only keeps
+              // classes it can see as literal text at build time, so the
+              // interpolated versions were purged and these cards rendered with
+              // no colour at all. Each variant is spelled out so it survives.
+              const styles = {
+                sabaq: { card: "bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800", icon: "bg-emerald-100 dark:bg-emerald-900", iconFg: "text-emerald-600", badge: "bg-emerald-600" },
+                sabqi: { card: "bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800", icon: "bg-blue-100 dark:bg-blue-900", iconFg: "text-blue-600", badge: "bg-blue-600" },
+                manzil: { card: "bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800", icon: "bg-amber-100 dark:bg-amber-900", iconFg: "text-amber-600", badge: "bg-amber-600" },
+              } as const;
               const icons = { sabaq: BookOpen, sabqi: BarChart3, manzil: Calendar };
-              const c = colors[taskType];
+              const st = styles[taskType];
               const Icon = icons[taskType];
               const todayRecords = records.filter(
                 (r) => r.type === taskType && new Date(r.createdAt).toISOString().slice(0, 10) === today.toISOString().slice(0, 10)
               );
               return (
-                <div key={taskType} className={`flex items-center gap-4 p-4 rounded-xl bg-${c}-50 dark:bg-${c}-950/30 border border-${c}-200 dark:border-${c}-800`}>
-                  <div className={`w-10 h-10 rounded-lg bg-${c}-100 dark:bg-${c}-900 flex items-center justify-center shrink-0`}>
-                    <Icon className={`w-5 h-5 text-${c}-600`} />
+                <div key={taskType} className={`flex items-center gap-4 p-4 rounded-xl border ${st.card}`}>
+                  <div className={`w-10 h-10 rounded-lg ${st.icon} flex items-center justify-center shrink-0`}>
+                    <Icon className={`w-5 h-5 ${st.iconFg}`} />
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
                       <p className="font-semibold text-foreground capitalize">{taskType}</p>
                       {todayRecords.length > 0 && (
-                        <Badge className={`bg-${c}-600 text-white text-xs`}>{todayRecords.length} done</Badge>
+                        <Badge className={`${st.badge} text-white text-xs`}>{todayRecords.length} done</Badge>
                       )}
                     </div>
                     <p className="text-sm text-muted-foreground">
