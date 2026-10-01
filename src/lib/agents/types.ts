@@ -4,7 +4,6 @@ export type AgentName =
   | "ustaz-agent"
   | "moderation-agent"
   | "matching-agent"
-  | "notification-agent"
   | "tajweed-agent"
   | "teacher-assistant-agent"
   | "scheduling-agent";
@@ -20,14 +19,11 @@ export type TaskType =
   | "moderate_content"
   | "score_match"
   | "suggest_teachers"
-  | "send_notification"
-  | "send_email"
   | "analyze_tajweed"
   | "generate_lesson_plan"
   | "generate_quiz"
   | "analyze_student_progress"
-  | "suggest_schedule"
-  | "send_whatsapp";
+  | "suggest_schedule";
 
 export interface AgentTask {
   id: string;

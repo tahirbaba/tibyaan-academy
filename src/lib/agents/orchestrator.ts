@@ -3,7 +3,6 @@ import { SeoAgent } from "./seo-agent";
 import { UstazAgent } from "./ustaz-agent";
 import { ModerationAgent } from "./moderation-agent";
 import { MatchingAgent } from "./matching-agent";
-import { NotificationAgent } from "./notification-agent";
 import { TajweedAgent } from "./tajweed-agent";
 import { TeacherAssistantAgent } from "./teacher-assistant-agent";
 import { SchedulingAgent } from "./scheduling-agent";
@@ -27,14 +26,11 @@ const TASK_ROUTING: Record<TaskType, AgentName> = {
   moderate_content: "moderation-agent",
   score_match: "matching-agent",
   suggest_teachers: "matching-agent",
-  send_notification: "notification-agent",
-  send_email: "notification-agent",
   analyze_tajweed: "tajweed-agent",
   generate_lesson_plan: "teacher-assistant-agent",
   generate_quiz: "teacher-assistant-agent",
   analyze_student_progress: "teacher-assistant-agent",
   suggest_schedule: "scheduling-agent",
-  send_whatsapp: "notification-agent",
 };
 
 const agents: Record<AgentName, BaseAgent> = {
@@ -43,7 +39,6 @@ const agents: Record<AgentName, BaseAgent> = {
   "ustaz-agent": new UstazAgent(),
   "moderation-agent": new ModerationAgent(),
   "matching-agent": new MatchingAgent(),
-  "notification-agent": new NotificationAgent(),
   "tajweed-agent": new TajweedAgent(),
   "teacher-assistant-agent": new TeacherAssistantAgent(),
   "scheduling-agent": new SchedulingAgent(),
