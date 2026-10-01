@@ -283,3 +283,24 @@ What it would take to close this, none of which exists today:
 
 Until those exist, the honest position is the one taken on 30 Sep: *I cannot
 see the values, so I will not claim they are safe.*
+
+## A probe that returns the same answer for two different states (my own, 30 Sep)
+
+While diagnosing the poster failure I probed the storage bucket by requesting
+`…/object/public/dars-posters/probe.bin` and got 400 — the same code the
+working buckets returned — and concluded "the bucket exists." It did not. The
+real error, once `ensureBucket` stopped swallowing it, was that `createBucket`
+had failed and the bucket was never there: Supabase returns 400 on that public
+path for **both** "bucket missing" and "object missing", so the probe could not
+tell the two apart. I had added a sixth unreliable check to this register while
+hunting the fifth — and this one was mine.
+
+The lesson is the same as the `len=0` one above: before trusting a check, ask
+what it returns in each state you care about. If it returns the same thing for
+"fine" and "broken", it is not a check. The only probe that settled the bucket
+question was the one that tried the actual operation and read the actual error.
+
+Related swallow fixed at the same time: `ensureBucket` discarded
+`createBucket`'s error, so a bucket that failed to create looked created and
+the upload then failed with the confusing "Bucket not found" far from the real
+cause. The error is surfaced now.
