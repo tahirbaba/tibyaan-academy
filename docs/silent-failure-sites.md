@@ -323,3 +323,22 @@ other or from 6236.
 Rule: the same fact must live in exactly one place. A second hand-typed copy of
 anything — surah names, a fee, a status enum, a figure — is a divergence waiting
 to happen, and nothing will report it when it does.
+
+## Knowing a risk is not avoiding it: never chain a merge into a deploy (2 Oct)
+
+Deploying phase-6-hifz, I ran `git merge … && vercel deploy --prod` as one
+command. The merge hit a conflict in this very file — a conflict I had predicted
+in the message immediately before — and because the commands were chained, a
+production deploy went out from the conflicted working tree. The damage was
+contained only by luck: the conflict was in a non-built docs file, so the code
+was correct. Had it been a code file, production would have shipped from a
+half-merged, conflict-marked source.
+
+Predicting a risk and avoiding it are different acts, and the gap between them is
+exactly where haste does its damage. The fix is procedural, not clever:
+
+- Never chain a merge (or rebase, or cherry-pick) into a deploy. Merge, confirm
+  the tree is clean (`git status`), build, THEN deploy — as separate steps whose
+  results you read.
+- A deploy archives the working tree, not a commit. A dirty or conflicted tree
+  deploys dirty. Confirm the tree is what you think before `--prod`.
