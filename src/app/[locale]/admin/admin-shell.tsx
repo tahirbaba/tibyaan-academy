@@ -31,6 +31,7 @@ import {
   RefreshCw,
   ClipboardList,
   FileCheck,
+  Mail,
 } from "lucide-react";
 import { NotificationBell } from "@/components/shared/notification-bell";
 
@@ -51,6 +52,7 @@ const navItems = [
   { key: "sidebarAIMonitor", href: "/admin/ai-monitor", icon: Bot },
   { key: "sidebarReviews", href: "/admin/reviews", icon: Star },
   { key: "sidebarNotifications", href: "/admin/notifications", icon: Bell },
+  { key: "sidebarEmailDelivery", href: "/admin/email-delivery", icon: Mail },
   {
     key: "sidebarParentReports",
     href: "/admin/parent-reports",

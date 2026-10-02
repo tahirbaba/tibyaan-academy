@@ -1194,7 +1194,8 @@
     "status": "Statut",
     "noResults": "Aucun résultat trouvé",
     "sidebarEnrollmentRequests": "Demandes d'inscription",
-    "sidebarContentReview": "Révision du contenu"
+    "sidebarContentReview": "Révision du contenu",
+    "sidebarEmailDelivery": "Livraison des e-mails"
   },
   "notifications": {
     "title": "Notifications",

@@ -1194,7 +1194,8 @@
     "status": "Status",
     "noResults": "Tidak ada hasil",
     "sidebarEnrollmentRequests": "Permintaan Pendaftaran",
-    "sidebarContentReview": "Tinjauan Konten"
+    "sidebarContentReview": "Tinjauan Konten",
+    "sidebarEmailDelivery": "Pengiriman Email"
   },
   "notifications": {
     "title": "Notifikasi",

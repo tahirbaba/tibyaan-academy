@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import { users, studentProfiles, parentReports } from "@/lib/db/schema";
-import { eq, isNotNull } from "drizzle-orm";
+import { eq, isNotNull, and } from "drizzle-orm";
 import { generateWeeklyReport } from "@/lib/whatsapp/generate-report";
 import { sendWhatsAppMessage } from "@/lib/whatsapp/send-message";
 import { withCron } from "@/lib/cron-auth";
@@ -43,7 +43,7 @@ async function runWeeklyParentReports() {
       })
       .from(studentProfiles)
       .innerJoin(users, eq(studentProfiles.userId, users.id))
-      .where(isNotNull(studentProfiles.parentWhatsapp));
+      .where(and(isNotNull(studentProfiles.parentWhatsapp), eq(users.isBanned, false)));
 
     let sent = 0;
     let failed = 0;

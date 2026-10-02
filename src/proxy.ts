@@ -64,6 +64,16 @@ export async function proxy(request: NextRequest) {
     const { user } = await updateSession(request, intlResponse);
     const role = user?.user_metadata?.role as string | undefined;
 
+    // A disabled account's open session is blocked here, with no DB query — the
+    // flag is mirrored into auth metadata when the account is disabled. The
+    // login check catches a fresh sign-in; this catches a session that was
+    // already open when the account was disabled.
+    if (user?.user_metadata?.disabled === true && isProtectedRoute) {
+      const loginUrl = new URL(`/${locale}/login`, request.url);
+      loginUrl.searchParams.set("disabled", "1");
+      return NextResponse.redirect(loginUrl);
+    }
+
     // Not logged in trying to access protected route → redirect to login
     if (!user && isProtectedRoute) {
       const loginUrl = new URL(`/${locale}/login`, request.url);

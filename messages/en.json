@@ -1183,7 +1183,8 @@
     "status": "Status",
     "noResults": "No results found",
     "sidebarEnrollmentRequests": "Enrollment Requests",
-    "sidebarContentReview": "Content Review"
+    "sidebarContentReview": "Content Review",
+    "sidebarEmailDelivery": "Email Delivery"
   },
   "notifications": {
     "title": "Notifications",

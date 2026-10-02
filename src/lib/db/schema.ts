@@ -1673,3 +1673,37 @@ export const enrollmentRequests = pgTable("enrollment_requests", {
   status: varchar("status", { length: 50 }).notNull().default("pending"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
+
+// ========================
+// EMAIL_EVENTS — observability for verification/reset mail
+// ========================
+// Built in with the verification gate, not after it: a verification email that
+// silently never arrives loses a student who will never write to say so. Every
+// send is recorded here, and Resend webhook events (delivered/bounced/complained)
+// update the row — so silence can mean "delivered and fine", never "no idea".
+export const emailEventStatusEnum = pgEnum("email_event_status", [
+  "sent", // accepted by Resend on send
+  "delivered",
+  "bounced",
+  "complained", // marked as spam by the recipient
+  "rejected", // refused at send time (bad address, etc.)
+]);
+
+export const emailEvents = pgTable("email_events", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  // Nullable: an email may be sent before (or without) a user row, e.g. a
+  // resend requested by address from the sign-in page. ON DELETE SET NULL so a
+  // deleted user does not erase the delivery record.
+  userId: uuid("user_id").references(() => users.id, { onDelete: "set null" }),
+  recipient: varchar("recipient", { length: 320 }).notNull(),
+  // "verification" | "password_reset" — kept as text, no enum, so a new mail
+  // type does not need a migration.
+  type: varchar("type", { length: 50 }).notNull(),
+  status: emailEventStatusEnum("status").notNull().default("sent"),
+  /** Resend message id, to correlate a webhook event back to the send. */
+  providerId: varchar("provider_id", { length: 255 }),
+  /** Bounce/rejection reason, when the provider gives one. */
+  detail: text("detail"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});

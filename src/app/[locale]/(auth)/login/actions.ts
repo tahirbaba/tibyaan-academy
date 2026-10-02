@@ -23,9 +23,22 @@ export async function loginWithEmail(formData: FormData) {
     return { error: error.message };
   }
 
+  const dbUser = await getUserById(data.user.id).catch(() => null);
+
+  // A disabled account cannot sign in. The flag was displayed and set for
+  // months but enforced nowhere — "banned" users signed in normally. Enforced
+  // here now: authenticate first (so we never reveal whether an email exists
+  // to a wrong password), then refuse a banned account and drop the session.
+  if (dbUser?.isBanned) {
+    await supabase.auth.signOut();
+    return {
+      error:
+        "This account has been disabled. If you think this is a mistake, please contact support.",
+    };
+  }
+
   // Sync role from Neon DB to Supabase metadata
   // This ensures proxy.ts always has the correct role
-  const dbUser = await getUserById(data.user.id).catch(() => null);
   const dbRole = dbUser?.role;
   const metadataRole = data.user.user_metadata?.role as string | undefined;
 
