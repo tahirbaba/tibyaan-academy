@@ -1194,7 +1194,8 @@
     "status": "الحالة",
     "noResults": "لا توجد نتائج",
     "sidebarEnrollmentRequests": "طلبات التسجيل",
-    "sidebarContentReview": "مراجعة المحتوى"
+    "sidebarContentReview": "مراجعة المحتوى",
+    "sidebarEmailDelivery": "تسليم البريد"
   },
   "notifications": {
     "title": "الإشعارات",

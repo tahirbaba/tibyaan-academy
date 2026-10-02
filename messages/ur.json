@@ -1183,7 +1183,8 @@
     "status": "حیثیت",
     "noResults": "کوئی نتائج نہیں ملے",
     "sidebarEnrollmentRequests": "داخلہ درخواستیں",
-    "sidebarContentReview": "مواد کا جائزہ"
+    "sidebarContentReview": "مواد کا جائزہ",
+    "sidebarEmailDelivery": "ای میل ڈیلیوری"
   },
   "notifications": {
     "title": "اطلاعات",
