@@ -2,6 +2,13 @@
 
 @AGENTS.md
 
+> **Read `docs/working-agreement.md` before starting work** — how this live
+> repository is actually run (diagnose before fixing; plan then wait; nothing to
+> main or production without approval; one concern per commit; migrations only
+> alongside a deploy after a verified backup; stop when something is larger than
+> it looks; report your own mistakes). Then `docs/silent-failure-sites.md` — the
+> register of code that reports success while producing nothing.
+
 ## Overview
 
 **Tibyaan Academy** is a modern digital Madrasah (Islamic school) for Quran & Islamic Sciences.
