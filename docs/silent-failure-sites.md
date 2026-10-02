@@ -342,3 +342,24 @@ exactly where haste does its damage. The fix is procedural, not clever:
   results you read.
 - A deploy archives the working tree, not a commit. A dirty or conflicted tree
   deploys dirty. Confirm the tree is what you think before `--prod`.
+
+## A control that is displayed but never enforced: is_banned (Phase 2)
+
+The admin Users page has a Ban/Unban button. It sets users.is_banned, shows a
+"banned" badge, and reads back correctly. It does nothing. No code enforces the
+flag: login (signInWithPassword) does not check it, the middleware does not check
+it, and the parent-report and reminder recipient queries do not exclude it. A
+"banned" user signs in normally, still appears everywhere, and still receives any
+scheduled email.
+
+This is the silent-failure pattern applied to a control rather than a check: an
+affordance that looks like it does something, is trusted to, and is inert. An
+admin who "bans" an account believes it is handled; it is not. Worse than no
+button, because no button would at least not lie.
+
+Rule: a control that changes a stored value but is enforced nowhere is not a
+feature — it is a false assurance. Either wire it end to end (the value is read
+and acted on everywhere it should be) or do not offer it. Enforcing is_banned —
+block login, exclude from every email and scheduled job, keep visible in admin —
+is Phase 2 work, because "disable" must mean disabled before an account is
+disabled on the strength of it.
