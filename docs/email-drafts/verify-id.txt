@@ -1,0 +1,24 @@
+Subjek: Konfirmasi email Anda — Tibyaan Academy
+
+السلام عليكم
+
+Akun Anda sudah siap — ini langkah terakhir.
+
+Terima kasih telah membuat akun di Tibyaan Academy. Silakan konfirmasi alamat
+email ini untuk mengaktifkan akun Anda:
+
+[ Konfirmasi email saya ]
+
+Atau tempel tautan ini di browser Anda:
+https://tibyaanacademy.com/id/verify?token=YOUR_TOKEN
+
+Tautan ini kedaluwarsa dalam 24 jam. Jika kedaluwarsa, Anda dapat meminta yang
+baru dari halaman masuk.
+
+Jika Anda tidak membuat akun ini, abaikan saja email ini.
+
+Tidak menemukannya? Periksa folder spam atau sampah Anda, dan tandai "bukan
+spam" agar pesan kami sampai kepada Anda.
+
+— Tibyaan Academy · Al-Quran dan Ilmu-Ilmu Islam
+noreply@tibyaanacademy.com

@@ -1,0 +1,24 @@
+Subject: Confirm your email — Tibyaan Academy
+
+السلام عليكم
+
+Your account is ready — this is the last step.
+
+Thank you for creating an account with Tibyaan Academy. Please confirm this
+email address to activate your account:
+
+[ Confirm my email ]
+
+Or paste this link into your browser:
+https://tibyaanacademy.com/en/verify?token=YOUR_TOKEN
+
+This link expires in 24 hours. If it expires, you can request a new one from
+the sign-in page.
+
+If you didn't create this account, you can ignore this email.
+
+Can't find it? Check your spam or junk folder, and mark it "not spam" so our
+messages reach you.
+
+— Tibyaan Academy · Quran & Islamic Sciences
+noreply@tibyaanacademy.com

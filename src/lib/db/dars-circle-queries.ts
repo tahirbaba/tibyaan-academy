@@ -296,7 +296,7 @@ export async function getCircleEnrolledStudents(circleId: string) {
     })
     .from(darsCircleEnrollments)
     .innerJoin(users, eq(darsCircleEnrollments.studentId, users.id))
-    .where(eq(darsCircleEnrollments.circleId, circleId));
+    .where(and(eq(darsCircleEnrollments.circleId, circleId), eq(users.isBanned, false)));
 }
 
 /**

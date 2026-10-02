@@ -1,5 +1,6 @@
+import { eq, or } from "drizzle-orm";
 import { getDb } from "@/lib/db";
-import { emailEvents } from "@/lib/db/schema";
+import { emailEvents, users } from "@/lib/db/schema";
 import { MAIL_FROM, mailFromIsUnsendable, MAIL_FROM_ADDRESS } from "@/lib/site-config";
 import { sendFailureAlert } from "@/lib/alerts";
 
@@ -46,6 +47,28 @@ export async function sendTrackedEmail(opts: {
       console.error("[tracked-send] could not record email_events row:", e);
     }
   };
+
+  // A disabled account receives no mail — not verification, not reset, not
+  // reports. This is the email side of "disabled", which matters most: a banned
+  // person must not keep getting messages from us. Checked by id when known,
+  // otherwise by address.
+  try {
+    const [match] = await db
+      .select({ isBanned: users.isBanned })
+      .from(users)
+      .where(userId ? eq(users.id, userId) : or(eq(users.email, to)))
+      .limit(1);
+    if (match?.isBanned) {
+      await record("rejected", null, "recipient account is disabled");
+      // Not alerted: this is a deliberate suppression, not a failure.
+      return { ok: false, reason: "recipient account is disabled" };
+    }
+  } catch (e) {
+    // If the check itself fails, do not silently send to a possibly-banned
+    // address; report and refuse, since the point is not to mail the disabled.
+    console.error("[tracked-send] ban check failed; refusing to send:", e);
+    return { ok: false, reason: "could not verify recipient is enabled" };
+  }
 
   const resendKey = process.env.RESEND_API_KEY;
   if (!resendKey) {

@@ -343,7 +343,7 @@ exactly where haste does its damage. The fix is procedural, not clever:
 - A deploy archives the working tree, not a commit. A dirty or conflicted tree
   deploys dirty. Confirm the tree is what you think before `--prod`.
 
-## A control that is displayed but never enforced: is_banned (Phase 2)
+## A control that reports an action it does not perform: is_banned (Phase 2)
 
 The admin Users page has a Ban/Unban button. It sets users.is_banned, shows a
 "banned" badge, and reads back correctly. It does nothing. No code enforces the

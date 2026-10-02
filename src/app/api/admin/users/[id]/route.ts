@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { setAuthDisabledFlag } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { getDb } from "@/lib/db";
 import { users, enrollments, subscriptions, courses, aiChatHistory, teacherProfiles, studentProfiles } from "@/lib/db/schema";
@@ -133,6 +134,21 @@ export async function PATCH(
     updates.updatedAt = new Date();
 
     await db.update(users).set(updates).where(eq(users.id, id));
+
+    // Mirror a ban change into the auth metadata so the middleware blocks an
+    // already-open session, not only the next login. The DB flag is the source
+    // of truth (the login check and email queries read it); this is the edge
+    // copy, so a failure to mirror is surfaced but does not fail the ban.
+    if (typeof body.isBanned === "boolean") {
+      const mirrored = await setAuthDisabledFlag(id, body.isBanned);
+      if (!mirrored) {
+        return NextResponse.json({
+          success: true,
+          warning:
+            "The account flag was set, but syncing it to the session layer failed — an already-open session may persist until it expires. Check the logs.",
+        });
+      }
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {
