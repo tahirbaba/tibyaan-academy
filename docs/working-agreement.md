@@ -21,9 +21,17 @@ real.
    substantial change, list the planned steps and wait for a go-ahead. Do not
    expand the job beyond what was asked.
 
-3. **Nothing reaches `main` or production without explicit approval.** Work on a
-   branch. Build a preview. Hand over the link. The owner approves each deploy
-   on its own — approval of one thing is never approval of the next.
+3. **`main` is production. Nothing reaches `main` without explicit approval.**
+   As of 3 October 2026 a push to `main` is the deploy button — the repository
+   is wired so that `main` *is* what runs in production for real students. This
+   is no longer a convention about tidiness; pushing to `main` ships. So: do the
+   work on a branch, build a preview, hand over the link, and get approval for
+   that specific change. Only then does it merge to `main` and go out. The owner
+   approves each deploy on its own — approval of one thing is never approval of
+   the next. The deploy procedure the owner set: after an approved change, push
+   to GitHub (`git push origin main`), then deploy with `vercel --prod` using the
+   Vercel token, and confirm the deployment reaches `Ready` before calling it
+   live. Do not lean on any auto-deploy integration to do it silently.
 
 4. **One concern per commit**, with a message that explains the *why*, not just
    the what.
