@@ -1614,5 +1614,20 @@
     "cancelContent": "Vous pouvez annuler votre abonnement à tout moment.\nSi vous annulez avant le début du prochain cycle de facturation, vous ne serez pas facturé.",
     "requestTitle": "Demander un remboursement",
     "requestContent": "E-mail : academytibyaan@gmail.com\nWhatsApp : +92 312 9114002\nNous répondrons dans les 48 heures."
+  },
+  "classLinks": {
+    "adminTitle": "Liens de classe",
+    "classTitle": "Lien de classe",
+    "todayIs": "Nous sommes le {day}",
+    "todaysLink": "Lien du jour — {day}",
+    "joinClass": "Rejoindre le cours",
+    "notIssuedYet": "Le lien du cours d'aujourd'hui n'a pas encore été publié",
+    "linkPlaceholder": "Collez le lien de réunion (tout fournisseur)",
+    "save": "Enregistrer",
+    "saving": "Enregistrement…",
+    "savedFor": "Enregistré pour {day}",
+    "saveFailed": "Échec de l'enregistrement. Réessayez.",
+    "yesterdayWas": "Hier ({day})",
+    "noTeachers": "Aucun enseignant pour l'instant."
   }
 }

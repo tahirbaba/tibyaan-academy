@@ -32,6 +32,7 @@ import {
   ClipboardList,
   FileCheck,
   Mail,
+  Link2,
 } from "lucide-react";
 import { NotificationBell } from "@/components/shared/notification-bell";
 
@@ -42,6 +43,7 @@ const navItems = [
   { key: "sidebarVideos", href: "/admin/videos", icon: Video },
   { key: "sidebarContentReview", href: "/admin/content-review", icon: FileCheck },
   { key: "sidebarClassRecordings", href: "/admin/class-recordings", icon: Video },
+  { key: "sidebarClassLinks", href: "/admin/class-links", icon: Link2 },
   { key: "sidebarMatches", href: "/admin/matches", icon: UserCheck },
   { key: "sidebarScheduleRequests", href: "/admin/schedule-requests", icon: CalendarClock },
   { key: "sidebarScheduleChanges", href: "/admin/schedule-change-requests", icon: RefreshCw },
@@ -77,6 +79,7 @@ export function AdminShell({
   userInitial: string;
 }) {
   const t = useTranslations("admin");
+  const tcl = useTranslations("classLinks");
   const locale = useLocale();
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
@@ -149,7 +152,13 @@ export function AdminShell({
                 } ${collapsed ? "justify-center" : ""}`}
               >
                 <Icon className="w-5 h-5 shrink-0" />
-                {!collapsed && <span>{t(item.key)}</span>}
+                {!collapsed && (
+                  <span>
+                    {item.href === "/admin/class-links"
+                      ? tcl("adminTitle")
+                      : t(item.key)}
+                  </span>
+                )}
               </Link>
             );
           })}

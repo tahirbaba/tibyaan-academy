@@ -10,6 +10,8 @@ import {
   numeric,
   jsonb,
   smallint,
+  date,
+  unique,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
@@ -1707,3 +1709,48 @@ export const emailEvents = pgTable("email_events", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
+
+// ========================
+// CLASS LINKS (Phase 15)
+// ========================
+// One meeting link per teacher per day, issued by an admin. The teacher and
+// all of that teacher's students see the same link for the day; any of the
+// three can join from it. There is no scheduler here — this is only the thing
+// that makes a class actually happen: everyone looking at the same URL.
+//
+// validOn is an Asia/Karachi calendar date (where the admin issuing it sits),
+// labelled "(PKT)" wherever it is shown, so a student in another timezone can
+// tell which day's link they are looking at without doing arithmetic.
+//
+// The (teacher_id, valid_on) uniqueness is enforced in the DATABASE, not only
+// in the form, so a teacher can never end up with two links for one day.
+export const classLinks = pgTable(
+  "class_links",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    teacherId: uuid("teacher_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    // Any provider's URL (Google Meet, Zoom, Jitsi, …). Not hardcoded to one.
+    meetingUrl: text("meeting_url").notNull(),
+    // The PKT calendar day this link is for.
+    validOn: date("valid_on").notNull(),
+    // The admin who issued it. SET NULL (not cascade): removing an admin account
+    // must not delete the links they issued.
+    createdBy: uuid("created_by").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => ({
+    teacherDayUnique: unique("class_links_teacher_valid_on_unique").on(
+      t.teacherId,
+      t.validOn
+    ),
+  })
+);

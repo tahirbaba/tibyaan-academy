@@ -40,6 +40,7 @@ const navItems = [
   { key: "sidebarTajweedChecker", href: "/student/tajweed-checker", icon: Mic },
   { key: "sidebarKidsActivities", href: "/student/activities", icon: Gamepad2 },
   { key: "sidebarSchedule", href: "/student/schedule", icon: Calendar },
+  { key: "classTitle", href: "/student/class-link", icon: Video },
   { key: "sidebarTrackProgress", href: "/student/track-progress", icon: ClipboardCheck },
   { key: "sidebarClassRecordings", href: "/student/class-recordings", icon: Video },
   { key: "sidebarTestsAssignments", href: "/student/tests-assignments", icon: FileText },
@@ -64,6 +65,7 @@ export function StudentShell({
   locale,
 }: StudentShellProps) {
   const t = useTranslations("dashboard");
+  const tcl = useTranslations("classLinks");
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -135,7 +137,13 @@ export function StudentShell({
                 } ${collapsed ? "justify-center" : ""}`}
               >
                 <Icon className="w-5 h-5 shrink-0" />
-                {!collapsed && <span>{t(item.key)}</span>}
+                {!collapsed && (
+                  <span>
+                    {item.href === "/student/class-link"
+                      ? tcl("classTitle")
+                      : t(item.key)}
+                  </span>
+                )}
               </Link>
             );
           })}

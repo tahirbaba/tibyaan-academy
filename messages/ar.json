@@ -1614,5 +1614,20 @@
     "cancelContent": "يمكنك إلغاء اشتراكك في أي وقت.\nإذا تم الإلغاء قبل بدء دورة الفوترة التالية، فلن يتم محاسبتك.",
     "requestTitle": "طلب الاسترداد",
     "requestContent": "البريد الإلكتروني: academytibyaan@gmail.com\nواتساب: +92 312 9114002\nسنرد خلال 48 ساعة."
+  },
+  "classLinks": {
+    "adminTitle": "روابط الصفوف",
+    "classTitle": "رابط الصف",
+    "todayIs": "اليوم {day}",
+    "todaysLink": "رابط اليوم — {day}",
+    "joinClass": "انضم إلى الصف",
+    "notIssuedYet": "لم يُصدر رابط صف اليوم بعد",
+    "linkPlaceholder": "الصق رابط الاجتماع (أي مزوّد)",
+    "save": "حفظ",
+    "saving": "جارٍ الحفظ…",
+    "savedFor": "تم الحفظ لـ {day}",
+    "saveFailed": "تعذّر الحفظ. حاول مرة أخرى.",
+    "yesterdayWas": "أمس ({day})",
+    "noTeachers": "لا يوجد معلمون بعد."
   }
 }

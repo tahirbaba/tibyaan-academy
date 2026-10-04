@@ -1614,5 +1614,20 @@
     "cancelContent": "Anda dapat membatalkan langganan kapan saja.\nJika dibatalkan sebelum siklus penagihan berikutnya dimulai, Anda tidak akan dikenai biaya.",
     "requestTitle": "Meminta Pengembalian Dana",
     "requestContent": "Email: academytibyaan@gmail.com\nWhatsApp: +92 312 9114002\nKami akan merespons dalam 48 jam."
+  },
+  "classLinks": {
+    "adminTitle": "Tautan kelas",
+    "classTitle": "Tautan kelas",
+    "todayIs": "Hari ini {day}",
+    "todaysLink": "Tautan hari ini — {day}",
+    "joinClass": "Gabung kelas",
+    "notIssuedYet": "Tautan kelas hari ini belum diterbitkan",
+    "linkPlaceholder": "Tempel tautan rapat (penyedia apa pun)",
+    "save": "Simpan",
+    "saving": "Menyimpan…",
+    "savedFor": "Disimpan untuk {day}",
+    "saveFailed": "Gagal menyimpan. Coba lagi.",
+    "yesterdayWas": "Kemarin ({day})",
+    "noTeachers": "Belum ada guru."
   }
 }
