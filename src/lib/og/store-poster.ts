@@ -3,14 +3,7 @@ import { getDb } from "@/lib/db";
 import { dailyDars } from "@/lib/db/schema";
 import { renderPoster } from "@/lib/og/poster";
 import { extractArabicBlock } from "@/lib/og/arabic-excerpt";
-import { uploadToStorage, getPublicUrl } from "@/lib/r2/client";
-
-/**
- * Public on purpose: this is the social preview image, so Twitter, WhatsApp
- * and Facebook have to fetch it with no credential, and it has to stay
- * downloadable from a plain URL by hand.
- */
-export const POSTER_BUCKET = "dars-posters";
+import { putObject, bucketFiles, filePublicUrl } from "@/lib/r2/s3-client";
 
 const CATEGORY_LABELS: Record<string, string> = {
   quran: "Quran",
@@ -65,18 +58,14 @@ export async function generateAndStorePoster(slug: string): Promise<PosterResult
     const bytes = Buffer.from(await response.arrayBuffer());
 
     // Same key every time for a given dars: re-approving replaces the poster
-    // rather than leaving orphaned copies behind.
-    const key = `${slug}.png`;
-    // Public (it is the social preview image) and a small size limit — a poster
-    // is ~100KB. The 500MB default would exceed the project's global file-size
-    // limit and the bucket auto-create would be rejected. 5MB is ample and well
-    // under any reasonable global cap.
-    await uploadToStorage(key, bytes, "image/png", POSTER_BUCKET, {
-      publicBucket: true,
-      fileSizeLimit: 5 * 1024 * 1024,
-    });
+    // rather than leaving orphaned copies behind. Stored under a posters/ prefix
+    // in the public tibyaan-files bucket — the social preview must be fetchable
+    // with no credential by Twitter, WhatsApp and Facebook, which tibyaan-files
+    // (public) allows. Existing posters keep their old URLs; nothing is migrated.
+    const key = `posters/${slug}.png`;
+    await putObject(bucketFiles(), key, bytes, "image/png");
 
-    const url = getPublicUrl(key, POSTER_BUCKET);
+    const url = filePublicUrl(key);
 
     await db.update(dailyDars).set({ posterUrl: url }).where(eq(dailyDars.slug, slug));
 
