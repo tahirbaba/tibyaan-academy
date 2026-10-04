@@ -1,19 +1,20 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import {
   Video,
-  Upload,
+  Plus,
   Clock,
   CheckCircle,
   XCircle,
   Eye,
   Inbox,
   Loader2,
-  Play,
+  AlertCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { YouTubeEmbed } from "@/components/shared/youtube-embed";
 import { VideoShareButtons } from "@/components/video/video-share-buttons";
 
 type VideoItem = {
@@ -36,6 +37,8 @@ const statusConfig: Record<string, { icon: typeof Clock; color: string; label: s
   rejected: { icon: XCircle, color: "text-red-500", label: "Rejected" },
 };
 
+const MAX_VIDEOS = 10;
+
 export function VideosClient({
   videos: initialVideos,
   teacherName,
@@ -45,72 +48,42 @@ export function VideosClient({
 }) {
   const t = useTranslations("teacher");
   const [videos, setVideos] = useState(initialVideos);
-  const [uploading, setUploading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [videoUrl, setVideoUrl] = useState("");
+  const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [playing, setPlaying] = useState<Record<string, boolean>>({});
-  const fileRef = useRef<HTMLInputElement>(null);
 
-  async function handleUpload() {
-    const file = fileRef.current?.files?.[0];
-    if (!file || !title.trim()) return;
+  const atLimit = videos.length >= MAX_VIDEOS;
 
-    setUploading(true);
-    setUploadProgress(0);
-
+  async function handleAdd() {
+    if (!title.trim() || !videoUrl.trim()) return;
+    setSubmitting(true);
+    setError(null);
     try {
-      setUploadProgress(5);
       const res = await fetch("/api/videos/upload", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title: title.trim(),
           description: description.trim() || undefined,
-          contentType: file.type || "video/mp4",
-          fileName: file.name,
+          videoUrl: videoUrl.trim(),
         }),
       });
-
-      if (res.status === 429) {
-        const data = await res.json().catch(() => ({}));
-        alert(data.error || "Daily limit reached. You can upload 1 video per day.");
-        setUploading(false);
-        setUploadProgress(0);
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(data.error || "Could not add the video.");
+        setSubmitting(false);
         return;
       }
-
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || "Upload failed");
-      }
-
-      const { signedUrl, videoId } = await res.json();
-      setUploadProgress(15);
-
-      // Supabase Storage signed URL upload — FormData with empty-string key matches SDK
-      const formData = new FormData();
-      formData.append("cacheControl", "3600");
-      formData.append("", file);
-
-      const uploadRes = await fetch(signedUrl, {
-        method: "PUT",
-        body: formData,
-      });
-
-      if (!uploadRes.ok) {
-        const errText = await uploadRes.text().catch(() => "");
-        throw new Error(`Storage upload failed (${uploadRes.status}): ${errText}`);
-      }
-      setUploadProgress(100);
-
       setVideos((prev) => [
         {
-          id: videoId,
+          id: data.videoId,
           title: title.trim(),
           description: description.trim() || null,
-          videoUrl: "",
+          // The embed parses any YouTube form; store what was entered.
+          videoUrl: videoUrl.trim(),
           thumbnailUrl: null,
           duration: null,
           status: "pending",
@@ -121,17 +94,14 @@ export function VideosClient({
         },
         ...prev,
       ]);
-
       setTitle("");
       setDescription("");
+      setVideoUrl("");
       setShowForm(false);
-      if (fileRef.current) fileRef.current.value = "";
-    } catch (err) {
-      console.error("Upload error:", err);
-      alert("Upload failed. Please try again.");
+    } catch {
+      setError("Could not add the video. Please try again.");
     } finally {
-      setUploading(false);
-      setUploadProgress(0);
+      setSubmitting(false);
     }
   }
 
@@ -145,16 +115,23 @@ export function VideosClient({
             {t("sidebarVideos")}
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Upload tilawat and intro videos for your profile
+            Add tilawat and intro videos as YouTube links ({videos.length}/{MAX_VIDEOS}).
+            An admin reviews each one before it shows on the home page.
           </p>
         </div>
-        <Button onClick={() => setShowForm(!showForm)}>
-          <Upload className="w-4 h-4 me-2" />
-          Upload Video
+        <Button onClick={() => setShowForm(!showForm)} disabled={atLimit}>
+          <Plus className="w-4 h-4 me-2" />
+          Add Video
         </Button>
       </div>
 
-      {/* Upload Form */}
+      {atLimit && !showForm && (
+        <p className="text-sm text-amber-600 dark:text-amber-400">
+          You have reached the maximum of {MAX_VIDEOS} videos. Remove one to add another.
+        </p>
+      )}
+
+      {/* Add-by-link form */}
       {showForm && (
         <div className="rounded-xl border bg-card p-6 space-y-4">
           <div>
@@ -168,6 +145,22 @@ export function VideosClient({
             />
           </div>
           <div>
+            <label className="block text-sm font-medium text-foreground mb-1">
+              YouTube link *
+            </label>
+            <input
+              type="url"
+              inputMode="url"
+              value={videoUrl}
+              onChange={(e) => setVideoUrl(e.target.value)}
+              className="w-full px-3 py-2 rounded-lg border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              placeholder="https://www.youtube.com/watch?v=…  (or a Short)"
+            />
+            <p className="mt-1 text-xs text-muted-foreground">
+              Keep it to about 10 minutes — the admin checks the length when approving.
+            </p>
+          </div>
+          <div>
             <label className="block text-sm font-medium text-foreground mb-1">Description</label>
             <textarea
               value={description}
@@ -177,105 +170,52 @@ export function VideosClient({
               placeholder="Optional description..."
             />
           </div>
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-1">Video File *</label>
-            <input
-              ref={fileRef}
-              type="file"
-              accept="video/mp4,video/webm,video/quicktime"
-              className="w-full text-sm text-muted-foreground file:me-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 dark:file:bg-emerald-900 dark:file:text-emerald-300"
-            />
-          </div>
 
-          {uploading && uploadProgress > 0 && (
-            <div className="space-y-1">
-              <div className="w-full bg-muted rounded-full h-2">
-                <div
-                  className="bg-emerald-500 h-2 rounded-full transition-all duration-300"
-                  style={{ width: `${uploadProgress}%` }}
-                />
-              </div>
-              <p className="text-xs text-muted-foreground text-center">{uploadProgress}%</p>
-            </div>
+          {error && (
+            <p className="text-sm text-destructive flex items-center gap-1">
+              <AlertCircle className="w-4 h-4 shrink-0" /> {error}
+            </p>
           )}
 
           <div className="flex gap-2">
-            <Button onClick={handleUpload} disabled={uploading || !title.trim()}>
-              {uploading ? (
+            <Button onClick={handleAdd} disabled={submitting || !title.trim() || !videoUrl.trim()}>
+              {submitting ? (
                 <>
                   <Loader2 className="w-4 h-4 me-2 animate-spin" />
-                  Uploading...
+                  Adding...
                 </>
               ) : (
-                "Upload"
+                "Add video"
               )}
             </Button>
-            <Button variant="outline" onClick={() => setShowForm(false)} disabled={uploading}>
+            <Button variant="outline" onClick={() => setShowForm(false)} disabled={submitting}>
               Cancel
             </Button>
           </div>
         </div>
       )}
 
-      {/* Videos List */}
+      {/* Videos list */}
       {videos.length === 0 ? (
         <div className="text-center py-16">
           <Inbox className="w-12 h-12 text-muted-foreground/40 mx-auto mb-3" />
-          <p className="text-muted-foreground">No videos yet. Upload your first video!</p>
+          <p className="text-muted-foreground">No videos yet. Add your first YouTube link!</p>
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {videos.map((video) => {
             const cfg = statusConfig[video.status] ?? statusConfig.pending;
             const StatusIcon = cfg.icon;
-            const isPlaying = playing[video.id];
-
             return (
               <div key={video.id} className="rounded-xl border bg-card overflow-hidden">
-                {/* Video area */}
-                <div className="aspect-video bg-muted relative flex items-center justify-center overflow-hidden">
-                  {isPlaying && video.videoUrl ? (
-                    <video
-                      src={video.videoUrl}
-                      className="w-full h-full object-contain bg-black"
-                      controls
-                      autoPlay
-                      playsInline
-                    />
-                  ) : (
-                    <>
-                      {video.thumbnailUrl ? (
-                        <img
-                          src={video.thumbnailUrl}
-                          alt={video.title}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <Video className="w-10 h-10 text-muted-foreground/30" />
-                      )}
-                      {/* Play button overlay — only for approved videos with a URL */}
-                      {video.status === "approved" && video.videoUrl && (
-                        <button
-                          onClick={() => setPlaying((p) => ({ ...p, [video.id]: true }))}
-                          className="absolute inset-0 flex items-center justify-center hover:bg-black/10 transition-colors group"
-                        >
-                          <div className="w-12 h-12 bg-white/90 dark:bg-black/70 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                            <Play className="w-5 h-5 text-emerald-600 ms-0.5" />
-                          </div>
-                        </button>
-                      )}
-                    </>
-                  )}
-
-                  {/* Status badge */}
-                  <div className="absolute top-2 end-2">
-                    <span
-                      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-background/90 backdrop-blur-sm ${cfg.color}`}
-                    >
-                      <StatusIcon className="w-3 h-3" />
-                      {cfg.label}
-                    </span>
-                  </div>
+                <div className="relative">
+                  <YouTubeEmbed url={video.videoUrl} title={video.title} />
+                  <span
+                    className={`absolute top-2 end-2 z-10 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-background/90 backdrop-blur-sm ${cfg.color}`}
+                  >
+                    <StatusIcon className="w-3 h-3" />
+                    {cfg.label}
+                  </span>
                 </div>
 
                 <div className="p-4">
@@ -297,7 +237,6 @@ export function VideosClient({
                           {video.viewCount}
                         </span>
                       )}
-                      {/* Share button — only for approved videos */}
                       {video.status === "approved" && (
                         <VideoShareButtons
                           videoId={video.id}
