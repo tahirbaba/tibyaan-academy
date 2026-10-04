@@ -1,4 +1,13 @@
 {
+  "guidingVideos": {
+    "heading": "Baru di Tibyaan? Lihat cara memulai",
+    "studentTitle": "Mulai belajar dalam tiga langkah",
+    "teacherTitle": "Mengajar bersama Tibyaan — cara memulai"
+  },
+  "teacherShare": {
+    "title": "Teacher share",
+    "body": "For every student you teach, you receive 75% of that student's monthly fee. The remaining 25% is Tibyaan Academy's platform share, which covers hosting, class links, recordings, student support and payment handling."
+  },
   "common": {
     "appName": "Tibyaan Academy",
     "tagline": "Madrasah Digital Modern untuk Al-Quran & Ilmu Islam",

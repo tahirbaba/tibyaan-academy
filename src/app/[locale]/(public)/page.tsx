@@ -5,6 +5,7 @@ import { FeaturesSection } from "@/components/homepage/features-section";
 import { HumanAiSection } from "@/components/homepage/human-ai-section";
 import { CoursesSection } from "@/components/homepage/courses-section";
 import { HowItWorksSection } from "@/components/homepage/how-it-works-section";
+import { GuidingVideosSection } from "@/components/homepage/guiding-videos-section";
 import { TestimonialsSection } from "@/components/homepage/testimonials-section";
 import { TrustSignalsSection } from "@/components/homepage/trust-signals-section";
 import { PricingTeaserSection } from "@/components/homepage/pricing-teaser-section";
@@ -78,6 +79,7 @@ export default function HomePage() {
         <CoursesSection />
         <TeacherVideosSection />
         <HowItWorksSection />
+        <GuidingVideosSection />
         <DailyDarsSection />
         <TestimonialsSection />
         <TrustSignalsSection />

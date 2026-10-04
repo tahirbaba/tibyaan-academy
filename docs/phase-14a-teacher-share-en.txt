@@ -1,0 +1,17 @@
+Phase 14a — the 25% teacher share — English copy (for approval)
+
+Not approved yet. This is the exact wording from the Phase 30 brief, placed
+behind translation keys. Nothing merges to main, and ar/fr/id are not
+translated, until you approve these words.
+
+Title:
+Teacher share
+
+Body:
+For every student you teach, you receive 75% of that student's monthly fee.
+The remaining 25% is Tibyaan Academy's platform share, which covers hosting,
+class links, recordings, student support and payment handling.
+
+Where it shows:
+- Teacher signup, before the form (when the "teacher" role is selected).
+- Teacher dashboard, on the revenue/earnings screen.

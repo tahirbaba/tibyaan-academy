@@ -1,4 +1,13 @@
 {
+  "guidingVideos": {
+    "heading": "Nouveau sur Tibyaan ? Découvrez comment commencer",
+    "studentTitle": "Commencez à apprendre en trois étapes",
+    "teacherTitle": "Enseigner avec Tibyaan — comment commencer"
+  },
+  "teacherShare": {
+    "title": "Teacher share",
+    "body": "For every student you teach, you receive 75% of that student's monthly fee. The remaining 25% is Tibyaan Academy's platform share, which covers hosting, class links, recordings, student support and payment handling."
+  },
   "common": {
     "appName": "Tibyaan Academy",
     "tagline": "La Madrassa Numérique Moderne pour le Coran et les Sciences Islamiques",
