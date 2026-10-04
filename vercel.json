@@ -15,10 +15,6 @@
       "schedule": "0 5 * * *"
     },
     {
-      "path": "/api/recordings/cleanup",
-      "schedule": "0 0 * * *"
-    },
-    {
       "path": "/api/parent-reports/weekly",
       "schedule": "0 8 * * 0"
     },
