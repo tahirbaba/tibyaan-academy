@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { SITE_URL } from "@/lib/site-config";
 import { getDashboardPath } from "@/lib/auth/get-dashboard-path";
@@ -57,6 +58,11 @@ export async function loginWithEmail(formData: FormData) {
     locale,
     dbRole || metadataRole
   );
+  // Discard the pre-login cached layout so the redirect renders with the new
+  // session. Without this the first press navigated with a stale (logged-out)
+  // tree and the guard bounced it back to login — the two-press bug. See
+  // docs/phase-12-environment.md (Task 4).
+  revalidatePath("/", "layout");
   redirect(dashboardPath);
 }
 

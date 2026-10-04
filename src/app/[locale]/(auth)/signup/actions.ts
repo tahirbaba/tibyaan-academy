@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { createClient as createAdminClient } from "@supabase/supabase-js";
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { notifyAdminNewSignup } from "@/lib/utils/notify-admin";
 
 async function uploadAvatar(userId: string, file: File): Promise<string | null> {
@@ -101,7 +102,11 @@ export async function signupWithEmail(formData: FormData) {
   // If email confirmation is required, user won't have a session yet
   // Check if we got a session (auto-confirm enabled)
   if (data.session) {
-    // User is logged in — go to onboarding
+    // User is logged in — go to onboarding. Discard the pre-signup cached
+    // layout first so the redirect carries the new session (the two-press bug;
+    // see docs/phase-12-environment.md Task 4). The no-session branch below
+    // needs no revalidation — the user is not logged in there.
+    revalidatePath("/", "layout");
     redirect(`/${locale}/onboarding`);
   } else {
     // Email confirmation required — redirect to login with a message
