@@ -78,6 +78,7 @@ const COUNTRY_CODES = [
 export default function SignupPage() {
   const t = useTranslations("auth");
   const tc = useTranslations("common");
+  const tShare = useTranslations("teacherShare");
   const params = useParams();
   const locale = params.locale as string;
   const [error, setError] = useState<string | null>(null);
@@ -285,6 +286,17 @@ export default function SignupPage() {
                 </SelectContent>
               </Select>
             </div>
+
+            {/* Teacher share (25%) — shown before a teacher commits. Wording is
+                behind the teacherShare keys and awaits owner approval. */}
+            {selectedRole === "teacher" && (
+              <div className="rounded-lg border border-accent/30 bg-accent/5 p-4 space-y-1">
+                <p className="text-sm font-semibold text-accent">
+                  {tShare("title")}
+                </p>
+                <p className="text-sm text-muted-foreground">{tShare("body")}</p>
+              </div>
+            )}
 
             {/* Parent WhatsApp with country code — students only */}
             {selectedRole === "student" && (

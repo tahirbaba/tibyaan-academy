@@ -14,6 +14,7 @@ interface Earning {
 
 export function RevenueClient({ earnings }: { earnings: Earning[] }) {
   const t = useTranslations("teacher");
+  const tShare = useTranslations("teacherShare");
   const totalMonthly = earnings.reduce((sum, s) => sum + s.monthlyAmount, 0);
   const planLabel = (p: string) => p === "human_ai" ? "Human + AI" : "AI Only";
 
@@ -39,6 +40,13 @@ export function RevenueClient({ earnings }: { earnings: Earning[] }) {
           <p className="text-3xl font-bold text-foreground">{earnings.length}</p>
           {earnings.length > 0 && <p className="text-xs text-muted-foreground mt-1">{t("perStudent")}: ${Math.round(totalMonthly / earnings.length)}/mo</p>}
         </motion.div>
+      </div>
+
+      {/* Teacher share (25%) — the standing policy, shown where a teacher
+          checks earnings. Wording behind teacherShare keys, awaiting approval. */}
+      <div className="rounded-xl border border-accent/30 bg-accent/5 p-4 space-y-1">
+        <p className="text-sm font-semibold text-accent">{tShare("title")}</p>
+        <p className="text-sm text-muted-foreground">{tShare("body")}</p>
       </div>
 
       {earnings.length === 0 ? (
