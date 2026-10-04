@@ -28,6 +28,14 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { signupWithEmail } from "./actions";
 import { loginWithGoogle } from "../login/actions";
+import { YouTubeEmbed, parseYouTubeUrl } from "@/components/shared/youtube-embed";
+
+// Guiding videos (Phase 14b), baked in at build. A role's card shows only if
+// its link is set; an unset link shows nothing, never a broken frame.
+const STUDENT_VIDEO = process.env.NEXT_PUBLIC_SIGNUP_GUIDING_VIDEO_LINK_STUDENT;
+const TEACHER_VIDEO = process.env.NEXT_PUBLIC_SIGNUP_GUIDING_VIDEO_LINK_TEACHER;
+const HAS_STUDENT_VIDEO = parseYouTubeUrl(STUDENT_VIDEO) !== null;
+const HAS_TEACHER_VIDEO = parseYouTubeUrl(TEACHER_VIDEO) !== null;
 
 const languages = [
   { value: "ur", label: "اردو" },
@@ -79,6 +87,7 @@ export default function SignupPage() {
   const t = useTranslations("auth");
   const tc = useTranslations("common");
   const tShare = useTranslations("teacherShare");
+  const tGuide = useTranslations("guidingVideos");
   const params = useParams();
   const locale = params.locale as string;
   const [error, setError] = useState<string | null>(null);
@@ -286,6 +295,27 @@ export default function SignupPage() {
                 </SelectContent>
               </Select>
             </div>
+
+            {/* Guiding video for the chosen role (Phase 14b). Shows only if that
+                role's link is set; otherwise nothing renders. */}
+            {((selectedRole === "student" && HAS_STUDENT_VIDEO) ||
+              (selectedRole === "teacher" && HAS_TEACHER_VIDEO)) && (
+              <div className="space-y-2">
+                <p className="text-sm font-semibold text-foreground">
+                  {selectedRole === "teacher"
+                    ? tGuide("teacherTitle")
+                    : tGuide("studentTitle")}
+                </p>
+                <YouTubeEmbed
+                  url={selectedRole === "teacher" ? TEACHER_VIDEO : STUDENT_VIDEO}
+                  title={
+                    selectedRole === "teacher"
+                      ? tGuide("teacherTitle")
+                      : tGuide("studentTitle")
+                  }
+                />
+              </div>
+            )}
 
             {/* Teacher share (25%) — shown before a teacher commits. Wording is
                 behind the teacherShare keys and awaits owner approval. */}
