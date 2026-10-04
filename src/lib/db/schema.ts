@@ -12,8 +12,9 @@ import {
   smallint,
   date,
   unique,
+  check,
 } from "drizzle-orm/pg-core";
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 
 // ========================
 // ENUMS
@@ -1751,6 +1752,14 @@ export const classLinks = pgTable(
     teacherDayUnique: unique("class_links_teacher_valid_on_unique").on(
       t.teacherId,
       t.validOn
+    ),
+    // An empty string is not a link. text NOT NULL accepts "", which would show
+    // a Join button that goes nowhere — "empty" is not "absent". Enforced in the
+    // database. (updated_at is kept current by a BEFORE UPDATE trigger in the
+    // migration, so it always reflects the real last-change time.)
+    meetingUrlNotEmpty: check(
+      "class_links_meeting_url_not_empty",
+      sql`length(trim(${t.meetingUrl})) > 0`
     ),
   })
 );
