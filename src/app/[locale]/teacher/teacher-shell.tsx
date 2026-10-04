@@ -30,6 +30,7 @@ const navItems = [
   { key: "sidebarDashboard", href: "/teacher/dashboard", icon: LayoutDashboard },
   { key: "sidebarStudents", href: "/teacher/students", icon: Users },
   { key: "sidebarSchedule", href: "/teacher/schedule", icon: Calendar },
+  { key: "classTitle", href: "/teacher/class-link", icon: Video },
   { key: "sidebarLessons", href: "/teacher/lessons", icon: BookOpen },
   { key: "sidebarTrackProgress", href: "/teacher/track-progress", icon: TrendingUp },
   { key: "sidebarTests", href: "/teacher/tests", icon: ClipboardCheck },
@@ -56,6 +57,7 @@ export function TeacherShell({
   locale: string;
 }) {
   const t = useTranslations("teacher");
+  const tcl = useTranslations("classLinks");
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -127,7 +129,13 @@ export function TeacherShell({
                 } ${collapsed ? "justify-center" : ""}`}
               >
                 <Icon className="w-5 h-5 shrink-0" />
-                {!collapsed && <span>{t(item.key)}</span>}
+                {!collapsed && (
+                  <span>
+                    {item.href === "/teacher/class-link"
+                      ? tcl("classTitle")
+                      : t(item.key)}
+                  </span>
+                )}
               </Link>
             );
           })}

@@ -1594,5 +1594,20 @@
     "cancelContent": "آپ کسی بھی وقت سبسکرپشن منسوخ کر سکتے ہیں۔\nاگلا بلنگ سائیکل شروع ہونے سے پہلے منسوخ کیا تو چارج نہیں ہوگا۔",
     "requestTitle": "واپسی کی درخواست",
     "requestContent": "Email: academytibyaan@gmail.com\nWhatsApp: +92 312 9114002\nہم 48 گھنٹوں میں جواب دیں گے۔"
+  },
+  "classLinks": {
+    "adminTitle": "کلاس لنکس",
+    "classTitle": "کلاس لنک",
+    "todayIs": "آج {day} ہے",
+    "todaysLink": "آج کا لنک — {day}",
+    "joinClass": "کلاس میں شامل ہوں",
+    "notIssuedYet": "آج کا کلاس لنک ابھی جاری نہیں ہوا",
+    "linkPlaceholder": "میٹنگ لنک پیسٹ کریں (کوئی بھی سروس)",
+    "save": "محفوظ کریں",
+    "saving": "محفوظ ہو رہا ہے…",
+    "savedFor": "{day} کے لیے محفوظ ہو گیا",
+    "saveFailed": "محفوظ نہیں ہو سکا۔ دوبارہ کوشش کریں۔",
+    "yesterdayWas": "کل ({day})",
+    "noTeachers": "ابھی کوئی استاد نہیں۔"
   }
 }

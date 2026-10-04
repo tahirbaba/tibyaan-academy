@@ -1594,5 +1594,20 @@
     "cancelContent": "You can cancel your subscription at any time.\nIf cancelled before the next billing cycle starts, you will not be charged.",
     "requestTitle": "Requesting a Refund",
     "requestContent": "Email: academytibyaan@gmail.com\nWhatsApp: +92 312 9114002\nWe will respond within 48 hours."
+  },
+  "classLinks": {
+    "adminTitle": "Class links",
+    "classTitle": "Class link",
+    "todayIs": "Today is {day}",
+    "todaysLink": "Today's link — {day}",
+    "joinClass": "Join class",
+    "notIssuedYet": "Today's class link has not been issued yet",
+    "linkPlaceholder": "Paste the meeting link (any provider)",
+    "save": "Save",
+    "saving": "Saving…",
+    "savedFor": "Saved for {day}",
+    "saveFailed": "Could not save. Please try again.",
+    "yesterdayWas": "Yesterday ({day})",
+    "noTeachers": "No teachers yet."
   }
 }
