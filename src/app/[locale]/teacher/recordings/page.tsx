@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { getTeacherRecordings } from "@/lib/db/teacher-queries";
+import { isRecordingPlayable } from "@/lib/recordings";
 import { RecordingsClient } from "./recordings-client";
 
 export default async function TeacherRecordingsPage({
@@ -19,7 +20,7 @@ export default async function TeacherRecordingsPage({
   let recordings: Array<{
     id: string;
     studentName: string;
-    recordingUrl: string;
+    available: boolean;
     duration: number | null;
     sessionDate: string;
     expiresAt: string;
@@ -30,7 +31,9 @@ export default async function TeacherRecordingsPage({
     recordings = raw.map((r) => ({
       id: r.recording.id,
       studentName: r.student.fullName,
-      recordingUrl: r.recording.recordingUrl,
+      // No raw key leaves here; playback goes through the play route. Available
+      // until a few hours before the 3-day deletion.
+      available: isRecordingPlayable(r.recording.expiresAt),
       duration: r.recording.duration,
       sessionDate: r.recording.sessionDate.toISOString(),
       expiresAt: r.recording.expiresAt.toISOString(),

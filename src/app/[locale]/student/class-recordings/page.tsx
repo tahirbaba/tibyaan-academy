@@ -14,11 +14,12 @@ type Recording = {
   id: string;
   source: "teacher_upload" | "admin_link";
   title: string;
-  recordingUrl: string;
+  recordingUrl: string | null;
   date: string;
   teacherName: string | null;
   durationMinutes: number | null;
   expiresAt: string | null;
+  available: boolean;
   notes: string | null;
 };
 
@@ -75,6 +76,12 @@ export default function StudentClassRecordingsPage() {
           {recordings.map((rec) => {
             const left = daysLeft(rec.expiresAt);
             const fromTeacher = rec.source === "teacher_upload";
+            // admin links go straight to their URL; private uploads go through
+            // the play route (a fresh presigned URL) and only while available.
+            const canWatch = fromTeacher ? rec.available : !!rec.recordingUrl;
+            const watchHref = fromTeacher
+              ? `/api/recordings/${rec.id}/play`
+              : rec.recordingUrl ?? "#";
             return (
               <div
                 key={`${rec.source}:${rec.id}`}
@@ -119,33 +126,43 @@ export default function StudentClassRecordingsPage() {
                   )}
 
                   {/* Only teacher uploads expire; admin links have no expiry. */}
-                  {left !== null && (
+                  {fromTeacher && (
                     <p
                       className={`text-xs flex items-center gap-1 ${
-                        left <= 3 ? "text-amber-600 dark:text-amber-400" : "text-muted-foreground"
+                        rec.available ? "text-muted-foreground" : "text-amber-600 dark:text-amber-400"
                       }`}
                     >
                       <Clock className="w-3 h-3 shrink-0" />
-                      {left > 0
-                        ? `Available for ${left} more day${left === 1 ? "" : "s"}`
-                        : "Expired"}
+                      {rec.available
+                        ? left && left > 0
+                          ? `Available for about ${left} more day${left === 1 ? "" : "s"}`
+                          : "Available for a little longer"
+                        : "No longer available"}
                     </p>
                   )}
 
-                  <a
-                    href={rec.recordingUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="mt-auto pt-2"
-                  >
-                    <Button
-                      size="sm"
-                      className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+                  {canWatch ? (
+                    <a
+                      href={watchHref}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="mt-auto pt-2"
                     >
-                      <ExternalLink className="w-3.5 h-3.5 me-1.5" />
-                      Watch Recording
-                    </Button>
-                  </a>
+                      <Button
+                        size="sm"
+                        className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5 me-1.5" />
+                        Watch Recording
+                      </Button>
+                    </a>
+                  ) : (
+                    <div className="mt-auto pt-2">
+                      <Button size="sm" variant="secondary" disabled className="w-full">
+                        No longer available
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </div>
             );

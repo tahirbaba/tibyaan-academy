@@ -4,6 +4,7 @@ import {
   HeadObjectCommand,
   GetObjectCommand,
 } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 /**
  * Cloudflare R2 over the S3-compatible API (Phase 13).
@@ -86,6 +87,40 @@ export async function objectSize(bucket: string, key: string): Promise<number | 
   } catch {
     return null;
   }
+}
+
+/**
+ * A short-lived presigned URL to UPLOAD one object directly from the browser.
+ * Used for class recordings so large video never passes through our server.
+ */
+export async function presignedPutUrl(
+  bucket: string,
+  key: string,
+  contentType: string,
+  expiresInSeconds: number
+): Promise<string> {
+  return getSignedUrl(
+    client(),
+    new PutObjectCommand({ Bucket: bucket, Key: key, ContentType: contentType }),
+    { expiresIn: expiresInSeconds }
+  );
+}
+
+/**
+ * A short-lived presigned URL to VIEW one private object. Class recordings live
+ * in a private bucket, so playback is a fresh presigned GET fetched at click
+ * time — never a public link — and the URL is valid only for minutes.
+ */
+export async function presignedGetUrl(
+  bucket: string,
+  key: string,
+  expiresInSeconds: number
+): Promise<string> {
+  return getSignedUrl(
+    client(),
+    new GetObjectCommand({ Bucket: bucket, Key: key }),
+    { expiresIn: expiresInSeconds }
+  );
 }
 
 /** Fetch an object's bytes (used by the migration to copy from the old store). */

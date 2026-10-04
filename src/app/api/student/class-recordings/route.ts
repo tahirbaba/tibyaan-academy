@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getDb } from "@/lib/db";
 import { users, adminClassRecordings, classRecordings } from "@/lib/db/schema";
 import { eq, and, desc } from "drizzle-orm";
+import { isRecordingPlayable } from "@/lib/recordings";
 
 /**
  * Every recording a student can watch, from both sources, newest first.
@@ -29,13 +30,16 @@ export interface StudentRecording {
   id: string;
   source: StudentRecordingSource;
   title: string;
-  recordingUrl: string;
+  /** A direct URL for admin links; null for private uploads (fetched on click). */
+  recordingUrl: string | null;
   /** ISO date — session date for uploads, class date for admin links. */
   date: string;
   teacherName: string | null;
   durationMinutes: number | null;
   /** Only teacher uploads expire. null means it stays available. */
   expiresAt: string | null;
+  /** Can it be watched now? Admin links: always. Uploads: within the window. */
+  available: boolean;
   notes: string | null;
 }
 
@@ -83,6 +87,7 @@ export async function GET() {
       teacherName: null,
       durationMinutes: null,
       expiresAt: null,
+      available: true,
       notes: r.notes,
     }));
 
@@ -91,12 +96,17 @@ export async function GET() {
       source: "teacher_upload",
       // These rows carry no title; name them after the teacher and the session.
       title: teacher.fullName ? `Class with ${teacher.fullName}` : "Class recording",
-      recordingUrl: r.recordingUrl,
+      // Private: no URL leaves here. The page fetches a short-lived presigned
+      // URL from /api/recordings/[id]/play on click.
+      recordingUrl: null,
       date: r.sessionDate.toISOString(),
       teacherName: teacher.fullName ?? null,
       // stored in seconds
       durationMinutes: r.duration ? Math.max(1, Math.round(r.duration / 60)) : null,
       expiresAt: r.expiresAt.toISOString(),
+      // Hidden a few hours before the 72h deletion, so the screen never offers a
+      // file the lifecycle is about to remove.
+      available: isRecordingPlayable(r.expiresAt),
       notes: null,
     }));
 
