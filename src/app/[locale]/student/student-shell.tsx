@@ -197,8 +197,11 @@ export function StudentShell({
               <Moon className="w-5 h-5 dark:hidden" />
             </Button>
 
-            {/* Logout */}
-            <form action={() => signOut(locale)}>
+            {/* Logout — same server-action form as admin and teacher. Was the
+                lone client-closure `() => signOut(locale)`, the fragile shape
+                sign-out has broken with before; aligned to the bound server
+                action so it posts directly and works without client JS too. */}
+            <form action={signOut.bind(null, locale)}>
               <Button type="submit" variant="ghost" size="sm">
                 <LogOut className="w-5 h-5" />
               </Button>
