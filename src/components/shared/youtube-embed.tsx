@@ -2,65 +2,11 @@
 
 import { useState } from "react";
 import { Play } from "lucide-react";
+import { parseYouTubeUrl, type ParsedYouTube } from "@/lib/youtube";
 
-/**
- * A YouTube URL, parsed.
- *
- * `isShort` matters for layout: a Short is filmed vertically (9:16) and an
- * embed forced into a 16:9 box shows it pillarboxed with black bars down both
- * sides. The caller uses this to pick the aspect ratio rather than guessing.
- */
-export type ParsedYouTube = { id: string; isShort: boolean };
-
-/**
- * Accepts the forms people actually paste:
- *   https://www.youtube.com/watch?v=ID
- *   https://youtu.be/ID
- *   https://www.youtube.com/shorts/ID     <- vertical
- *   https://www.youtube.com/embed/ID
- *   a bare 11-character video ID
- * Returns null for anything else, so a typo renders the empty state rather
- * than an iframe pointing at nothing.
- */
-export function parseYouTubeUrl(input: string | undefined | null): ParsedYouTube | null {
-  const raw = input?.trim();
-  if (!raw) return null;
-
-  const ID = /^[A-Za-z0-9_-]{11}$/;
-  if (ID.test(raw)) return { id: raw, isShort: false };
-
-  let url: URL;
-  try {
-    url = new URL(raw);
-  } catch {
-    return null;
-  }
-
-  const host = url.hostname.replace(/^www\./, "");
-  const parts = url.pathname.split("/").filter(Boolean);
-
-  if (host === "youtu.be") {
-    const id = parts[0];
-    return id && ID.test(id) ? { id, isShort: false } : null;
-  }
-
-  if (host !== "youtube.com" && host !== "m.youtube.com" && host !== "youtube-nocookie.com") {
-    return null;
-  }
-
-  if (parts[0] === "watch") {
-    const id = url.searchParams.get("v");
-    return id && ID.test(id) ? { id, isShort: false } : null;
-  }
-
-  if (parts[0] === "shorts" || parts[0] === "embed" || parts[0] === "v") {
-    const id = parts[1];
-    if (!id || !ID.test(id)) return null;
-    return { id, isShort: parts[0] === "shorts" };
-  }
-
-  return null;
-}
+// Re-exported so existing importers keep working after the parser moved to a
+// pure lib module (so server routes can validate a pasted link too).
+export { parseYouTubeUrl, type ParsedYouTube };
 
 type Props = {
   /** Any YouTube URL, or a bare video ID. Invalid input renders nothing. */
