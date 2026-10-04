@@ -140,9 +140,34 @@ function assertTranslations(): void {
     );
   }
 }
+/**
+ * Fail the production build when any R2 variable is missing or blank (Phase 13).
+ * Files, posters and recordings are served from R2; a build that ships without
+ * these would serve nothing and discover it only when a page shows a broken
+ * image. A blank value counts as missing. Same principle as assertSiteUrl.
+ */
+function assertR2Config(): void {
+  const required = [
+    "R2_ACCOUNT_ID",
+    "R2_ACCESS_KEY_ID",
+    "R2_SECRET_ACCESS_KEY",
+    "R2_BUCKET_FILES",
+    "R2_BUCKET_RECORDINGS",
+    "NEXT_PUBLIC_R2_PUBLIC_URL",
+  ];
+  const missing = required.filter((k) => !process.env[k]?.trim());
+  if (missing.length > 0) {
+    throw new Error(
+      `R2 storage is not fully configured — missing/blank: ${missing.join(", ")}. ` +
+        "Set all six in Vercel (Settings → Environment Variables); see Appendix A1."
+    );
+  }
+}
+
 export default function config(phase: string): NextConfig {
   if (phase === PHASE_PRODUCTION_BUILD) {
     assertSiteUrl();
+    assertR2Config();
     assertTranslations();
   }
   // In development the dev server calls this too, so a missing key is caught
