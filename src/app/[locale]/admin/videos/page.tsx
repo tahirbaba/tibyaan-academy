@@ -69,5 +69,17 @@ export default async function AdminVideosPage({
     console.error("Failed to load videos for admin:", err);
   }
 
-  return <AdminVideosClient videos={videos} />;
+  // Teachers for the add-by-link picker (admin adds a video on a teacher's behalf).
+  let teachers: { id: string; fullName: string }[] = [];
+  try {
+    teachers = await db
+      .select({ id: users.id, fullName: users.fullName })
+      .from(users)
+      .where(eq(users.role, "teacher"))
+      .orderBy(users.fullName);
+  } catch (err) {
+    console.error("Failed to load teachers for admin video form:", err);
+  }
+
+  return <AdminVideosClient videos={videos} teachers={teachers} />;
 }

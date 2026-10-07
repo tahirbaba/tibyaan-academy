@@ -41,6 +41,8 @@ export async function POST(request: NextRequest) {
     surahNumber?: number;
     ayahFrom?: number;
     ayahTo?: number;
+    /** Admins only: the teacher this video belongs to. */
+    teacherId?: string;
   };
   try {
     body = await request.json();
@@ -59,20 +61,40 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // Max 10 per teacher, any status — in the database count, not just the form.
-  if (dbUser.role === "teacher") {
-    const [{ count }] = await db
-      .select({ count: sql<number>`count(*)::int` })
-      .from(teacherVideos)
-      .where(eq(teacherVideos.teacherId, authUser.id));
-    if ((count ?? 0) >= MAX_VIDEOS_PER_TEACHER) {
+  // An admin adds on a teacher's behalf and must name that teacher; a teacher
+  // adds for themselves. The per-teacher cap applies to whoever the video is
+  // for, counted in the database — not only in the form.
+  let teacherId = authUser.id;
+  if (dbUser.role === "admin") {
+    const target = (body.teacherId ?? "").trim();
+    if (!target) {
       return NextResponse.json(
-        {
-          error: `You can have at most ${MAX_VIDEOS_PER_TEACHER} videos. Remove one before adding another.`,
-        },
-        { status: 429 }
+        { error: "Select the teacher this video belongs to." },
+        { status: 400 }
       );
     }
+    const [t] = await db
+      .select({ role: users.role })
+      .from(users)
+      .where(eq(users.id, target))
+      .limit(1);
+    if (!t || t.role !== "teacher") {
+      return NextResponse.json({ error: "Select a valid teacher." }, { status: 400 });
+    }
+    teacherId = target;
+  }
+
+  const [{ count }] = await db
+    .select({ count: sql<number>`count(*)::int` })
+    .from(teacherVideos)
+    .where(eq(teacherVideos.teacherId, teacherId));
+  if ((count ?? 0) >= MAX_VIDEOS_PER_TEACHER) {
+    return NextResponse.json(
+      {
+        error: `This teacher already has ${MAX_VIDEOS_PER_TEACHER} videos. Remove one before adding another.`,
+      },
+      { status: 429 }
+    );
   }
 
   const normalizedUrl = `https://www.youtube.com/watch?v=${parsed.id}`;
@@ -81,7 +103,7 @@ export async function POST(request: NextRequest) {
   const [video] = await db
     .insert(teacherVideos)
     .values({
-      teacherId: authUser.id,
+      teacherId,
       title,
       description: body.description?.trim() || null,
       surahName: body.surahName?.trim() || null,
