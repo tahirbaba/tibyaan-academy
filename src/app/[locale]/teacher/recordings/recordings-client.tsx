@@ -5,7 +5,9 @@ import { Disc, Inbox, Clock, User, Download } from "lucide-react";
 type RecordingItem = {
   id: string;
   studentName: string;
-  recordingUrl: string;
+  /** Private recordings play through /api/recordings/[id]/play; this says if the
+   *  window is still open (hidden a few hours before the 3-day deletion). */
+  available: boolean;
   duration: number | null;
   sessionDate: string;
   expiresAt: string;
@@ -32,7 +34,7 @@ export function RecordingsClient({ recordings }: { recordings: RecordingItem[] }
           Class Recordings
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Recordings are automatically deleted after 7 days
+          Recordings are automatically deleted 3 days after the class
         </p>
       </div>
 
@@ -83,15 +85,21 @@ export function RecordingsClient({ recordings }: { recordings: RecordingItem[] }
                     {days}d left
                   </span>
 
-                  <a
-                    href={rec.recordingUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300 text-xs font-medium hover:bg-emerald-100 dark:hover:bg-emerald-800 transition-colors"
-                  >
-                    <Download className="w-3 h-3" />
-                    View
-                  </a>
+                  {rec.available ? (
+                    <a
+                      href={`/api/recordings/${rec.id}/play`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300 text-xs font-medium hover:bg-emerald-100 dark:hover:bg-emerald-800 transition-colors"
+                    >
+                      <Download className="w-3 h-3" />
+                      View
+                    </a>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-muted text-muted-foreground text-xs font-medium">
+                      No longer available
+                    </span>
+                  )}
                 </div>
               </div>
             );

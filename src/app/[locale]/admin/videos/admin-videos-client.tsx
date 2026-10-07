@@ -10,9 +10,11 @@ import {
   Inbox,
   Loader2,
   User,
-  Play,
+  Plus,
+  AlertCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { YouTubeEmbed } from "@/components/shared/youtube-embed";
 import { VideoShareButtons } from "@/components/video/video-share-buttons";
 
 type VideoItem = {
@@ -31,12 +33,77 @@ type VideoItem = {
 
 type Tab = "all" | "pending" | "approved" | "rejected";
 
-export function AdminVideosClient({ videos: initialVideos }: { videos: VideoItem[] }) {
+export function AdminVideosClient({
+  videos: initialVideos,
+  teachers,
+}: {
+  videos: VideoItem[];
+  teachers: { id: string; fullName: string }[];
+}) {
   const [videos, setVideos] = useState(initialVideos);
   const [tab, setTab] = useState<Tab>("pending");
   const [processing, setProcessing] = useState<string | null>(null);
   const [notesInput, setNotesInput] = useState<Record<string, string>>({});
-  const [playing, setPlaying] = useState<Record<string, boolean>>({});
+
+  // Admin add-by-link form — same table and same pending→approved flow as a
+  // teacher's own submission, just created here on a chosen teacher's behalf.
+  const [showAdd, setShowAdd] = useState(false);
+  const [addTeacher, setAddTeacher] = useState("");
+  const [addTitle, setAddTitle] = useState("");
+  const [addUrl, setAddUrl] = useState("");
+  const [addDesc, setAddDesc] = useState("");
+  const [adding, setAdding] = useState(false);
+  const [addError, setAddError] = useState<string | null>(null);
+
+  async function handleAdd() {
+    if (!addTeacher || !addTitle.trim() || !addUrl.trim()) return;
+    setAdding(true);
+    setAddError(null);
+    try {
+      const res = await fetch("/api/videos/upload", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          teacherId: addTeacher,
+          title: addTitle.trim(),
+          description: addDesc.trim() || undefined,
+          videoUrl: addUrl.trim(),
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setAddError(data.error || "Could not add the video.");
+        setAdding(false);
+        return;
+      }
+      const teacherName = teachers.find((t) => t.id === addTeacher)?.fullName ?? "";
+      setVideos((prev) => [
+        {
+          id: data.videoId,
+          title: addTitle.trim(),
+          description: addDesc.trim() || null,
+          videoUrl: addUrl.trim(),
+          status: "pending",
+          adminNotes: null,
+          isPublic: false,
+          viewCount: 0,
+          createdAt: new Date().toISOString(),
+          teacherName,
+          teacherEmail: "",
+        },
+        ...prev,
+      ]);
+      setShowAdd(false);
+      setAddTeacher("");
+      setAddTitle("");
+      setAddUrl("");
+      setAddDesc("");
+    } catch {
+      setAddError("Could not add the video. Please try again.");
+    } finally {
+      setAdding(false);
+    }
+  }
 
   const filtered = tab === "all" ? videos : videos.filter((v) => v.status === tab);
 
@@ -84,15 +151,98 @@ export function AdminVideosClient({ videos: initialVideos }: { videos: VideoItem
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-          <Video className="w-6 h-6 text-red-600" />
-          Video Management
-        </h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Review and approve teacher-uploaded videos
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+            <Video className="w-6 h-6 text-red-600" />
+            Video Management
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Review teacher videos, or add one by pasting a YouTube link
+          </p>
+        </div>
+        <Button onClick={() => setShowAdd(!showAdd)}>
+          <Plus className="w-4 h-4 me-2" />
+          Add by link
+        </Button>
       </div>
+
+      {showAdd && (
+        <div className="rounded-xl border bg-card p-6 space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-1">Teacher *</label>
+            <select
+              value={addTeacher}
+              onChange={(e) => setAddTeacher(e.target.value)}
+              className="w-full px-3 py-2 rounded-lg border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            >
+              <option value="">Select a teacher…</option>
+              {teachers.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.fullName}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-1">Title *</label>
+            <input
+              type="text"
+              value={addTitle}
+              onChange={(e) => setAddTitle(e.target.value)}
+              className="w-full px-3 py-2 rounded-lg border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              placeholder="e.g. Surah Al-Baqarah Tilawat"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-1">YouTube link *</label>
+            <input
+              type="url"
+              inputMode="url"
+              value={addUrl}
+              onChange={(e) => setAddUrl(e.target.value)}
+              className="w-full px-3 py-2 rounded-lg border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              placeholder="https://www.youtube.com/watch?v=…"
+            />
+            <p className="mt-1 text-xs text-muted-foreground">
+              Check the length yourself — keep it to about 10 minutes.
+            </p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-1">Description</label>
+            <textarea
+              value={addDesc}
+              onChange={(e) => setAddDesc(e.target.value)}
+              rows={2}
+              className="w-full px-3 py-2 rounded-lg border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              placeholder="Optional description..."
+            />
+          </div>
+          {addError && (
+            <p className="text-sm text-destructive flex items-center gap-1">
+              <AlertCircle className="w-4 h-4 shrink-0" /> {addError}
+            </p>
+          )}
+          <div className="flex gap-2">
+            <Button
+              onClick={handleAdd}
+              disabled={adding || !addTeacher || !addTitle.trim() || !addUrl.trim()}
+            >
+              {adding ? (
+                <>
+                  <Loader2 className="w-4 h-4 me-2 animate-spin" />
+                  Adding...
+                </>
+              ) : (
+                "Add video"
+              )}
+            </Button>
+            <Button variant="outline" onClick={() => setShowAdd(false)} disabled={adding}>
+              Cancel
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* Tabs */}
       <div className="flex gap-2 flex-wrap">
@@ -121,35 +271,12 @@ export function AdminVideosClient({ videos: initialVideos }: { videos: VideoItem
       ) : (
         <div className="space-y-4">
           {filtered.map((video) => {
-            const isPlaying = playing[video.id];
             return (
               <div key={video.id} className="rounded-xl border bg-card p-5">
                 <div className="flex flex-col lg:flex-row gap-4">
-                  {/* Video player */}
-                  <div className="w-full lg:w-64 aspect-video bg-muted rounded-lg flex items-center justify-center shrink-0 overflow-hidden">
-                    {isPlaying && video.videoUrl ? (
-                      <video
-                        src={video.videoUrl}
-                        className="w-full h-full object-contain bg-black"
-                        controls
-                        autoPlay
-                        playsInline
-                      />
-                    ) : video.videoUrl ? (
-                      <div className="relative w-full h-full flex items-center justify-center">
-                        <Video className="w-10 h-10 text-muted-foreground/30" />
-                        <button
-                          onClick={() => setPlaying((p) => ({ ...p, [video.id]: true }))}
-                          className="absolute inset-0 flex items-center justify-center hover:bg-black/5 transition-colors group"
-                        >
-                          <div className="w-12 h-12 bg-white/90 dark:bg-black/70 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                            <Play className="w-5 h-5 text-emerald-600 ms-0.5" />
-                          </div>
-                        </button>
-                      </div>
-                    ) : (
-                      <Video className="w-10 h-10 text-muted-foreground/30" />
-                    )}
+                  {/* Video player — YouTube embed for review */}
+                  <div className="w-full lg:w-64 shrink-0">
+                    <YouTubeEmbed url={video.videoUrl} title={video.title} />
                   </div>
 
                   {/* Info */}

@@ -3,10 +3,12 @@ import { createClient } from "@/lib/supabase/server";
 import { getDb } from "@/lib/db";
 import { users, classRecordings, teacherStudentMatches } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
-import { getRecordingKey, getPresignedUploadUrl, getPublicUrl } from "@/lib/r2/client";
+import { bucketRecordings, presignedPutUrl } from "@/lib/r2/s3-client";
+import {
+  RECORDING_STORAGE_HOURS,
+  RECORDING_UPLOAD_URL_TTL_SECONDS,
+} from "@/lib/recordings";
 import { randomUUID } from "crypto";
-
-const RECORDINGS_BUCKET = "recordings";
 
 /**
  * POST /api/recordings/upload
@@ -53,12 +55,21 @@ export async function POST(request: NextRequest) {
   }
 
   const recordingId = randomUUID();
-  const key = getRecordingKey(matchId, recordingId);
+  // Key only — recordings are PRIVATE on R2. There is no public URL; playback is
+  // a short-lived presigned GET fetched at view time. recording_url holds the key.
+  const key = `${matchId}/${recordingId}.mp4`;
 
-  const uploadUrl = await getPresignedUploadUrl(key, contentType, 3600, RECORDINGS_BUCKET);
+  const uploadUrl = await presignedPutUrl(
+    bucketRecordings(),
+    key,
+    contentType,
+    RECORDING_UPLOAD_URL_TTL_SECONDS
+  );
 
   const now = new Date();
-  const expiresAt = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000); // 7 days
+  // 3 days, matching the Cloudflare lifecycle on tibyaan-recordings (was 7, which
+  // the screen then wrongly promised). The object is deleted ~72h after upload.
+  const expiresAt = new Date(now.getTime() + RECORDING_STORAGE_HOURS * 60 * 60 * 1000);
 
   const [recording] = await db
     .insert(classRecordings)
@@ -67,7 +78,7 @@ export async function POST(request: NextRequest) {
       matchId,
       teacherId: match[0].teacherId,
       studentId: match[0].studentId,
-      recordingUrl: getPublicUrl(key, RECORDINGS_BUCKET),
+      recordingUrl: key,
       duration: duration ?? null,
       sessionDate: now,
       expiresAt,
