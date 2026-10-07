@@ -42,16 +42,27 @@ const s3 = new S3Client({
 let failed = false;
 
 async function listBuckets() {
-  const out = await s3.send(new ListBucketsCommand({}));
-  const names = (out.Buckets ?? []).map((b) => b.Name);
-  console.log("Buckets R2 reports for this token:");
-  names.forEach((n) => console.log("   - " + n));
-  for (const want of [FILES, RECORDINGS]) {
-    if (names.includes(want)) console.log(`   OK: "${want}" exists`);
-    else {
-      console.error(`   FAIL: "${want}" is NOT in the list above — check the name for a typo.`);
-      failed = true;
+  // Best-effort only. A bucket-scoped "Object Read & Write" token (the correct,
+  // least-privilege kind) cannot list all buckets — that is an account-level
+  // permission — so AccessDenied here is EXPECTED and not a failure. The real
+  // proof is the per-bucket round-trip below.
+  try {
+    const out = await s3.send(new ListBucketsCommand({}));
+    const names = (out.Buckets ?? []).map((b) => b.Name);
+    console.log("Buckets R2 reports for this token:");
+    names.forEach((n) => console.log("   - " + n));
+    for (const want of [FILES, RECORDINGS]) {
+      console.log(
+        names.includes(want)
+          ? `   OK: "${want}" is listed`
+          : `   note: "${want}" not listed (token may be bucket-scoped — the round-trip decides)`
+      );
     }
+  } catch (e) {
+    console.log(
+      `ListBuckets not permitted (${e.name}) — expected for a bucket-scoped token. ` +
+        `Proving each bucket by a write/read/delete round-trip instead.`
+    );
   }
 }
 
