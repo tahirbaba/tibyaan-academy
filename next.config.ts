@@ -130,6 +130,7 @@ function assertTranslations(): void {
   if (translationsChecked) return;
   translationsChecked = true;
 
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { execFileSync } = require("node:child_process");
   try {
     execFileSync(process.execPath, ["scripts/check-i18n.mjs"], { stdio: "inherit" });
