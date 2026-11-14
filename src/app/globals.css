@@ -7,7 +7,10 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
+  /* Was `var(--font-sans)` — a variable defined as itself, i.e. undefined, so
+     the Geist font the root layout loads was never applied and the whole site
+     rendered in the browser's default serif. */
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: var(--font-geist-mono);
   --font-heading: var(--font-sans);
   --color-sidebar-ring: var(--sidebar-ring);
@@ -318,4 +321,13 @@
   .marquee-row {
     overflow-x: auto;
   }
+}
+
+/* The display serif defaults to old-style figures, which make prices look
+   uneven ("$55" with descending digits). Prices and stats use lining figures. */
+.font-display {
+  font-variant-numeric: lining-nums;
+}
+.font-display.tabular-nums {
+  font-variant-numeric: lining-nums tabular-nums;
 }
