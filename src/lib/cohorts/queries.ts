@@ -52,15 +52,26 @@ const cohortColumns = {
   isPublished: cohorts.isPublished,
 } as const;
 
+/**
+ * The outer cohort row, written out in full on purpose.
+ *
+ * Interpolating `${cohorts.id}` here is a trap: when a query selects from
+ * `cohorts` alone, Drizzle renders the column as a bare "id", and inside the
+ * subquery a bare "id" means cohort_enrollments.id. The comparison then never
+ * matches and every cohort reports 0 seats taken — a full class would have
+ * looked empty to its teacher. Caught by the local end-to-end run.
+ */
+const OUTER_COHORT_ID = sql.raw('"cohorts"."id"');
+
 /** Seats taken, computed in the same statement as the cohort row. */
 const seatsTaken = sql<number>`(
   SELECT count(*)::int FROM cohort_enrollments e
-  WHERE e.cohort_id = ${cohorts.id} AND ${HOLDS_SEAT}
+  WHERE e.cohort_id = ${OUTER_COHORT_ID} AND ${HOLDS_SEAT}
 )`;
 
 const waitlistCount = sql<number>`(
   SELECT count(*)::int FROM cohort_enrollments e
-  WHERE e.cohort_id = ${cohorts.id} AND e.status = 'waitlisted'
+  WHERE e.cohort_id = ${OUTER_COHORT_ID} AND e.status = 'waitlisted'
 )`;
 
 export type CohortRow = Awaited<ReturnType<typeof listPublishedCohorts>>[number];
