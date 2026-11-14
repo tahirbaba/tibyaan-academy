@@ -2,7 +2,10 @@
 
 import Image from "next/image";
 import { formatStat } from "@/lib/site-stats";
-import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
+import { Button } from "@/components/ui/button";
+import { SectionHeading } from "./primitives";
 import { Star } from "lucide-react";
 import InitialsAvatar from "@/components/shared/initials-avatar";
 
@@ -587,7 +590,7 @@ const reviews = [
 
 function ReviewCard({ review }: { review: (typeof reviews)[0] }) {
   return (
-    <div className="w-[300px] shrink-0 p-5 rounded-xl border bg-card shadow-sm flex flex-col gap-3">
+    <div className="flex w-[300px] shrink-0 flex-col gap-3 rounded-2xl border border-border bg-card p-5 shadow-sm">
       <div className="flex gap-0.5">
         {Array.from({ length: review.rating }, (_, j) => (
           <Star key={j} className="w-3.5 h-3.5 fill-accent text-accent" />
@@ -620,54 +623,64 @@ function ReviewCard({ review }: { review: (typeof reviews)[0] }) {
 const row1 = reviews.slice(0, 24);
 const row2 = reviews.slice(24);
 
-export function TestimonialsSection() {
+/**
+ * One marquee row. The cards are written out twice so the loop is seamless;
+ * the second copy is hidden from assistive technology so nobody hears each
+ * review read out twice. The scroll is a CSS animation (it used to be a
+ * JavaScript-driven one that ran for the whole life of the page), it pauses
+ * on hover and focus, and under prefers-reduced-motion the row stops moving
+ * and becomes a normal swipeable strip.
+ */
+function ReviewRow({
+  items,
+  direction,
+}: {
+  items: typeof reviews;
+  direction: "left" | "right";
+}) {
   return (
-    <section className="py-20 bg-muted/30 overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.h2
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="text-3xl md:text-4xl font-bold text-center text-primary"
-        >
-          What Parents &amp; Students Say
-        </motion.h2>
-        <motion.p
-          initial={{ opacity: 0, y: 10 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          className="mt-3 text-center text-muted-foreground"
-        >
-          Real stories from our global community of {formatStat("students")} students
-        </motion.p>
+    <div className="marquee-row overflow-hidden">
+      <div
+        className={`marquee-track flex w-max gap-5 ${
+          direction === "left" ? "marquee-left" : "marquee-right"
+        }`}
+      >
+        {items.map((review) => (
+          <ReviewCard key={`a-${review.id}`} review={review} />
+        ))}
+        <div className="flex gap-5" aria-hidden>
+          {items.map((review) => (
+            <ReviewCard key={`b-${review.id}`} review={review} />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function TestimonialsSection() {
+  const t = useTranslations("testimonials");
+
+  return (
+    <section className="overflow-hidden bg-background py-20 md:py-28">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <SectionHeading
+          title="What Parents & Students Say"
+          subtitle={`Real stories from our global community of ${formatStat("students")} students`}
+        />
       </div>
 
-      {/* Row 1 — scroll left */}
-      <div className="mt-10 overflow-hidden">
-        <motion.div
-          className="flex gap-4 w-max"
-          animate={{ x: ["0%", "-50%"] }}
-          transition={{ duration: 60, ease: "linear", repeat: Infinity }}
-        >
-          {[...row1, ...row1].map((review, i) => (
-            <ReviewCard key={`r1-${review.id}-${i}`} review={review} />
-          ))}
-        </motion.div>
+      <div className="mt-12 space-y-5">
+        <ReviewRow items={row1} direction="left" />
+        <ReviewRow items={row2} direction="right" />
       </div>
 
-      {/* Row 2 — scroll right */}
-      <div className="mt-4 overflow-hidden">
-        <motion.div
-          className="flex gap-4 w-max"
-          animate={{ x: ["-50%", "0%"] }}
-          transition={{ duration: 60, ease: "linear", repeat: Infinity }}
-        >
-          {[...row2, ...row2].map((review, i) => (
-            <ReviewCard key={`r2-${review.id}-${i}`} review={review} />
-          ))}
-        </motion.div>
+      <div className="mt-10 text-center">
+        <Link href="/reviews">
+          <Button variant="outline" size="lg" className="rounded-full border-primary/30 px-8">
+            {t("readAllReviews")}
+          </Button>
+        </Link>
       </div>
     </section>
   );

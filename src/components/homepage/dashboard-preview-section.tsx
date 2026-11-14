@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { motion, AnimatePresence } from "framer-motion";
+import { SectionHeading } from "./primitives";
 import {
   Calendar,
   BookMarked,
@@ -56,20 +57,12 @@ export function DashboardPreviewSection() {
   const items = itemsByTab[activeTab];
 
   return (
-    <section className="py-20 bg-muted/30">
+    <section className="bg-muted/40 py-20 md:py-28">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.h2
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="text-3xl md:text-4xl font-bold text-primary"
-        >
-          {t("title")}
-        </motion.h2>
+        <SectionHeading title={t("title")} />
 
         {/* Tabs */}
-        <div className="mt-8 flex gap-2 flex-wrap">
+        <div className="mt-10 flex flex-wrap justify-center gap-2">
           {tabs.map((tab) => (
             <button
               key={tab}
@@ -93,14 +86,14 @@ export function DashboardPreviewSection() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.3 }}
-            className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4"
+            className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2"
           >
             {items.map((item) => {
               const Icon = item.icon;
               return (
                 <div
                   key={item.key}
-                  className="flex items-center gap-4 p-4 rounded-xl bg-card border border-border/60 hover:border-primary/30 hover:shadow-sm transition-all"
+                  className="premium-card flex items-center gap-4 p-5"
                 >
                   <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
                     <Icon className="w-5 h-5 text-primary" />

@@ -16,6 +16,10 @@ import { DailyDarsSection } from "@/components/homepage/daily-dars-section";
 import { DashboardPreviewSection } from "@/components/homepage/dashboard-preview-section";
 import { EnrollmentFormSection } from "@/components/homepage/enrollment-form-section";
 import { Footer } from "@/components/shared/footer";
+import { TeachersSection } from "@/components/homepage/teachers-section";
+import { GroupClassesSection } from "@/components/homepage/group-classes-section";
+import { HomeMotion } from "@/components/homepage/primitives";
+import { getPricing } from "@/lib/pricing-server";
 
 import { localeMetadataAlternates, absoluteUrl } from "@/lib/site-config";
 
@@ -67,26 +71,35 @@ export async function generateMetadata({
   };
 }
 
-export default function HomePage() {
+export default async function HomePage() {
+  // One read of the pricing config for the whole page; every price shown
+  // below comes from it. If it cannot be read the page fails loudly
+  // (getPricing alerts) instead of showing prices nobody set.
+  const pricing = await getPricing();
+
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
       <main className="flex-1">
-        <HeroSection />
-        <FeaturesSection />
-        <HumanAiSection />
-        <CoursesSection />
-        <TeacherVideosSection />
-        <HowItWorksSection />
-        <DailyDarsSection />
-        <TestimonialsSection />
-        <TrustSignalsSection />
-        <DashboardPreviewSection />
-        <PricingTeaserSection />
-        <EnrollmentFormSection />
-        <TeacherCtaSection />
-        <SocialLinksSection />
-        <CtaSection />
+        <HomeMotion>
+          <HeroSection />
+          <FeaturesSection />
+          <HumanAiSection />
+          <CoursesSection pricing={pricing} />
+          <GroupClassesSection />
+          <TeachersSection />
+          <TeacherVideosSection />
+          <HowItWorksSection />
+          <DailyDarsSection />
+          <TestimonialsSection />
+          <TrustSignalsSection />
+          <DashboardPreviewSection />
+          <PricingTeaserSection pricing={pricing} />
+          <EnrollmentFormSection />
+          <TeacherCtaSection pricing={pricing} />
+          <SocialLinksSection />
+          <CtaSection />
+        </HomeMotion>
       </main>
       <Footer />
     </div>

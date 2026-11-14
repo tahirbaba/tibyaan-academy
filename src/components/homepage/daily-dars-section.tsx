@@ -6,6 +6,7 @@ import { Link } from "@/i18n/navigation";
 import { motion } from "framer-motion";
 import { BookOpen, ChevronRight, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { SectionHeading } from "./primitives";
 
 interface DarsItem {
   id: string;
@@ -63,26 +64,10 @@ export function DailyDarsSection() {
   }
 
   return (
-    <section className="py-16 md:py-24 bg-muted/30">
+    <section className="bg-background py-20 md:py-28">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="mb-10"
-        >
-          <div className="inline-flex items-center gap-2 bg-primary/10 text-primary rounded-full px-4 py-1.5 text-sm font-medium mb-3">
-            <BookOpen className="w-4 h-4" />
-            {t("title")}
-          </div>
-          <h2 className="text-3xl md:text-4xl font-bold text-primary">
-            {t("title")}
-          </h2>
-          <p className="mt-2 text-lg text-muted-foreground max-w-2xl">
-            {t("subtitle")}
-          </p>
-        </motion.div>
+        <SectionHeading title={t("title")} subtitle={t("subtitle")} />
+        <div className="h-12" aria-hidden />
 
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

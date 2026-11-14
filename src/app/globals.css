@@ -152,3 +152,170 @@
   from { transform: translateX(-50%); }
   to { transform: translateX(0); }
 }
+
+/* ==========================================================================
+   Premium homepage design system (Nov 2026)
+   --------------------------------------------------------------------------
+   Everything here is CSS-only: no images, no network requests, nothing that
+   can shift layout. Motion is transform/opacity only and is switched off by
+   prefers-reduced-motion at the bottom of this block.
+   ========================================================================== */
+
+@theme inline {
+  --font-display: var(--font-playfair), ui-serif, Georgia, "Times New Roman", serif;
+}
+
+/* Arabic-script locales: the Latin display serif has no Arabic glyphs, so
+   headings fall back to the reader's Arabic/Urdu system font — and need the
+   taller line box those scripts require. */
+:lang(ur) .font-display,
+:lang(ar) .font-display {
+  font-family: inherit;
+  line-height: 1.6;
+  letter-spacing: 0;
+}
+
+/* Eight-point star (khatam) lattice — the classic Islamic geometric tiling. */
+.pattern-stars {
+  position: relative;
+  isolation: isolate;
+}
+.pattern-stars::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.09;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 96 96'%3E%3Cg fill='none' stroke='%23C9A84C' stroke-width='1'%3E%3Cpath d='M48 12 58.5 37.5 84 48 58.5 58.5 48 84 37.5 58.5 12 48 37.5 37.5z'/%3E%3Cpath d='M22.5 22.5 48 33 73.5 22.5 63 48 73.5 73.5 48 63 22.5 73.5 33 48z'/%3E%3Cpath d='M0 0 12 48 0 96M96 0 84 48 96 96M0 0 48 12 96 0M0 96 48 84 96 96'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 96px 96px;
+  mask-image: radial-gradient(ellipse at 50% 40%, #000 30%, transparent 85%);
+}
+/* Same lattice in green, for light surfaces. */
+.pattern-stars-light::before {
+  opacity: 0.05;
+  filter: hue-rotate(95deg) saturate(0.7) brightness(0.5);
+}
+.dark .pattern-stars-light::before {
+  opacity: 0.07;
+  filter: none;
+}
+
+/* Gold hairline with a small star in the middle, under section headings. */
+.ornament {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--color-islamic-gold);
+}
+.ornament::before,
+.ornament::after {
+  content: "";
+  height: 1px;
+  width: 3.5rem;
+  background: linear-gradient(to right, transparent, currentColor);
+}
+.ornament::after {
+  background: linear-gradient(to left, transparent, currentColor);
+}
+[dir="rtl"] .ornament::before {
+  background: linear-gradient(to left, transparent, currentColor);
+}
+[dir="rtl"] .ornament::after {
+  background: linear-gradient(to right, transparent, currentColor);
+}
+
+/* Card surface used across the homepage. */
+.premium-card {
+  border-radius: 1.25rem;
+  border: 1px solid var(--border);
+  background: var(--card);
+  box-shadow: 0 1px 2px rgb(15 41 34 / 0.04), 0 8px 24px -12px rgb(15 41 34 / 0.12);
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.35s;
+}
+.premium-card:hover {
+  transform: translateY(-4px);
+  border-color: color-mix(in oklab, var(--color-islamic-gold) 55%, transparent);
+  box-shadow: 0 2px 4px rgb(15 41 34 / 0.05), 0 24px 48px -20px rgb(15 41 34 / 0.28);
+}
+.dark .premium-card {
+  box-shadow: 0 1px 0 rgb(255 255 255 / 0.04) inset, 0 12px 32px -16px rgb(0 0 0 / 0.6);
+}
+
+/* Hero entrance. Transform only — the heading is the page's LCP element, and
+   an opacity-0 start would hide it from the first paint. */
+@keyframes hero-rise {
+  from { transform: translateY(14px); }
+  to { transform: translateY(0); }
+}
+.hero-rise {
+  animation: hero-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* The decorative hero star: three nested khatam stars turning slowly at
+   different speeds inside a tilted plane, which reads as depth. */
+@keyframes spin-slow {
+  to { transform: rotate(360deg); }
+}
+@keyframes ornament-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.hero-ornament {
+  animation: ornament-fade 1.2s ease-out both;
+  perspective: 900px;
+}
+.hero-ornament-plane {
+  transform: rotateX(52deg) rotateZ(0deg);
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.hero-ornament-ring {
+  transform-origin: 50% 50%;
+  transform-box: fill-box;
+  animation: spin-slow 80s linear infinite;
+}
+.hero-ornament-ring.reverse {
+  animation-duration: 55s;
+  animation-direction: reverse;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-rise,
+  .hero-ornament,
+  .hero-ornament-ring {
+    animation: none;
+  }
+  .premium-card,
+  .hero-ornament-plane {
+    transition: none;
+  }
+  .premium-card:hover {
+    transform: none;
+  }
+}
+
+/* Testimonial marquee — CSS-driven, pauses on hover/focus. */
+.marquee-track.marquee-left {
+  animation: marquee-left 90s linear infinite;
+}
+.marquee-track.marquee-right {
+  animation: marquee-right 90s linear infinite;
+}
+.marquee-row:hover .marquee-track,
+.marquee-row:focus-within .marquee-track {
+  animation-play-state: paused;
+}
+[dir="rtl"] .marquee-row {
+  direction: ltr; /* the track is a physical strip; card text keeps its own direction */
+}
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track.marquee-left,
+  .marquee-track.marquee-right {
+    animation: none;
+  }
+  .marquee-row {
+    overflow-x: auto;
+  }
+}

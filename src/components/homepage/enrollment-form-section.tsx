@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { motion } from "framer-motion";
+import { SectionHeading } from "./primitives";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2 } from "lucide-react";
 import { trackEnrollmentSubmit } from "@/lib/analytics";
@@ -19,6 +20,7 @@ export function EnrollmentFormSection() {
   const locale = useLocale();
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [failed, setFailed] = useState(false);
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -32,17 +34,22 @@ export function EnrollmentFormSection() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setFailed(false);
     try {
-      await fetch("/api/enrollment-requests", {
+      const res = await fetch("/api/enrollment-requests", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...form, locale }),
       });
+      if (!res.ok) throw new Error(`enrollment request ${res.status}`);
       trackEnrollmentSubmit(form.country, form.course);
       setSubmitted(true);
     } catch {
-      // fail silently, still show success to not frustrate user
-      setSubmitted(true);
+      // This used to show the success screen even when the request failed, so
+      // a family who filled in the form believed they had enquired and the
+      // academy never received it. A failed enquiry now says so, and the form
+      // keeps what was typed so it can be sent again.
+      setFailed(true);
     } finally {
       setLoading(false);
     }
@@ -67,19 +74,9 @@ export function EnrollmentFormSection() {
   }
 
   return (
-    <section className="py-20 bg-background">
+    <section className="bg-muted/40 py-20 md:py-28">
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-        >
-          <h2 className="text-3xl md:text-4xl font-bold text-primary">
-            {t("title")}
-          </h2>
-          <p className="mt-2 text-muted-foreground">{t("subtitle")}</p>
-        </motion.div>
+        <SectionHeading title={t("title")} subtitle={t("subtitle")} />
 
         <motion.form
           initial={{ opacity: 0, y: 20 }}
@@ -87,7 +84,7 @@ export function EnrollmentFormSection() {
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.15 }}
           onSubmit={handleSubmit}
-          className="mt-8 space-y-4"
+          className="premium-card mt-10 space-y-4 p-6 hover:!translate-y-0 md:p-8"
         >
           {/* Name */}
           <div>
@@ -212,6 +209,11 @@ export function EnrollmentFormSection() {
           >
             {loading ? "..." : t("submit")}
           </Button>
+          {failed && (
+            <p role="alert" className="text-center text-sm font-medium text-red-600">
+              {t("submitFailed")}
+            </p>
+          )}
         </motion.form>
       </div>
     </section>

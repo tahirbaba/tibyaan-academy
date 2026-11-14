@@ -47,32 +47,32 @@ export function TrustSignalsSection() {
   const t = useTranslations("stats");
 
   return (
-    <section className="py-16 bg-primary text-primary-foreground">
+    <section className="pattern-stars bg-gradient-to-br from-[#0F2922] via-[#1B4332] to-[#143528] py-20 text-white">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="grid grid-cols-2 md:grid-cols-4 gap-8"
+          className="grid grid-cols-2 gap-10 md:grid-cols-4"
         >
           {signals.map((signal) => {
             const Icon = signal.icon;
             return (
               <div key={signal.key} className="text-center">
-                <Icon className="w-8 h-8 mx-auto mb-3 opacity-80" />
-                <div className="text-3xl md:text-4xl font-bold">
+                <Icon className="mx-auto mb-3 h-8 w-8 text-[#C9A84C]" aria-hidden />
+                <div className="font-display text-4xl font-semibold text-[#E3CE8A] tabular-nums md:text-5xl">
                   <AnimatedCounter target={signal.value} />
                   {signal.suffix}
                 </div>
-                <div className="text-sm mt-1 opacity-80">{t(signal.key)}</div>
-                <div className="text-xs mt-1 opacity-60">{t(`${signal.key}Sub`)}</div>
+                <div className="mt-2 text-sm font-medium text-white/85">{t(signal.key)}</div>
+                <div className="mt-1 text-xs text-white/60">{t(`${signal.key}Sub`)}</div>
               </div>
             );
           })}
         </motion.div>
 
-        <p className="mt-10 text-center text-xs opacity-40">
+        <p className="mt-12 text-center text-xs text-white/55">
           {t("footnote")}
         </p>
       </div>
