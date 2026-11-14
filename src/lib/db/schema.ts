@@ -10,6 +10,9 @@ import {
   numeric,
   jsonb,
   smallint,
+  date,
+  index,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
@@ -1707,3 +1710,111 @@ export const emailEvents = pgTable("email_events", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
+
+// ========================
+// COHORTS — paid, recurring live group classes
+// ========================
+// New tables rather than new columns on dars_circles: a dars circle is a free
+// one-off session, and adding columns to it would change what every existing
+// dars-circle query asks the database for (docs/schema-and-migrations.md).
+// Nothing that existed before these tables reads them.
+//
+// Migration: docs/migration-cohorts.sql — run with the deploy, after a backup.
+//
+// The weekly schedule is stored in UTC: `weekdays_utc` holds UTC weekdays
+// (0 = Sunday … 6 = Saturday) and `start_time_utc` is "HH:MM" in UTC. Pages
+// convert each session to the visitor's own time zone when they render it.
+//
+// Seats remaining is NOT a column. It is always computed from
+// cohort_enrollments, so it cannot drift from the roster the way
+// dars_circles.current_students can.
+export const cohortEnrollmentStatusEnum = pgEnum("cohort_enrollment_status", [
+  "pending", // checkout started; seat held until seat_held_until
+  "trial", // one free trial class; seat held until that class ends
+  "active", // subscription paid
+  "past_due", // a renewal payment failed; Stripe is retrying
+  "cancelled", // subscription ended, or the student left
+  "waitlisted", // cohort was full
+]);
+
+export const cohorts = pgTable("cohorts", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  slug: varchar("slug", { length: 255 }).notNull().unique(),
+  // RESTRICT: deleting a teacher must not silently delete a cohort people pay for.
+  teacherId: uuid("teacher_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "restrict" }),
+  titleEn: varchar("title_en", { length: 500 }).notNull(),
+  titleUr: varchar("title_ur", { length: 500 }),
+  titleAr: varchar("title_ar", { length: 500 }),
+  titleFr: varchar("title_fr", { length: 500 }),
+  titleId: varchar("title_id", { length: 500 }),
+  descriptionEn: text("description_en"),
+  descriptionUr: text("description_ur"),
+  descriptionAr: text("description_ar"),
+  descriptionFr: text("description_fr"),
+  descriptionId: text("description_id"),
+  weekdaysUtc: smallint("weekdays_utc").array().notNull(),
+  startTimeUtc: varchar("start_time_utc", { length: 5 }).notNull(),
+  sessionMinutes: integer("session_minutes").notNull().default(60),
+  startDate: date("start_date", { mode: "string" }).notNull(),
+  durationWeeks: integer("duration_weeks").notNull(),
+  monthlyFee: numeric("monthly_fee", { precision: 10, scale: 2 }).notNull(),
+  currency: varchar("currency", { length: 3 }).notNull().default("USD"),
+  maxSeats: integer("max_seats").notNull().default(30),
+  enrollmentOpen: boolean("enrollment_open").notNull().default(true),
+  trialEnabled: boolean("trial_enabled").notNull().default(true),
+  isPublished: boolean("is_published").notNull().default(false),
+  meetingLink: text("meeting_link"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+export const cohortEnrollments = pgTable(
+  "cohort_enrollments",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    cohortId: uuid("cohort_id")
+      .notNull()
+      .references(() => cohorts.id, { onDelete: "restrict" }),
+    studentId: uuid("student_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    status: cohortEnrollmentStatusEnum("status").notNull(),
+    /** For `pending` and `trial`: the seat is held only until this moment. */
+    seatHeldUntil: timestamp("seat_held_until", { withTimezone: true }),
+    /** Start of the free trial class. Set once and never cleared: one trial per cohort. */
+    trialClassAt: timestamp("trial_class_at", { withTimezone: true }),
+    stripeCustomerId: varchar("stripe_customer_id", { length: 255 }),
+    stripeSubscriptionId: varchar("stripe_subscription_id", { length: 255 }),
+    stripeCheckoutSessionId: varchar("stripe_checkout_session_id", {
+      length: 255,
+    }),
+    /** The fee this student signed up at. A later fee change does not alter it. */
+    monthlyFee: numeric("monthly_fee", { precision: 10, scale: 2 }),
+    currency: varchar("currency", { length: 3 }),
+    currentPeriodEnd: timestamp("current_period_end", { withTimezone: true }),
+    cancelAtPeriodEnd: boolean("cancel_at_period_end").notNull().default(false),
+    waitlistedAt: timestamp("waitlisted_at", { withTimezone: true }),
+    activatedAt: timestamp("activated_at", { withTimezone: true }),
+    cancelledAt: timestamp("cancelled_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    uniqueIndex("cohort_enrollments_cohort_student_uq").on(
+      table.cohortId,
+      table.studentId
+    ),
+    index("cohort_enrollments_student_idx").on(table.studentId),
+    index("cohort_enrollments_subscription_idx").on(table.stripeSubscriptionId),
+  ]
+);
