@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getStudentEnrollments, getStudentStats, getUpcomingClasses } from "@/lib/db/queries";
 import { DashboardClient } from "./dashboard-client";
 import { redirect } from "next/navigation";
+import { StudentGroupClassesWidget } from "@/components/cohorts/dashboard-widgets";
 
 export default async function DashboardPage({
   params,
@@ -60,13 +61,16 @@ export default async function DashboardPage({
   } : null;
 
   return (
-    <DashboardClient
-      userId={user.id}
-      userName={userName}
-      enrolledCourses={enrolledCourses}
-      stats={stats}
-      nextClass={nextClass}
-      locale={locale}
-    />
+    <>
+      <DashboardClient
+        userId={user.id}
+        userName={userName}
+        enrolledCourses={enrolledCourses}
+        stats={stats}
+        nextClass={nextClass}
+        locale={locale}
+      />
+      <StudentGroupClassesWidget studentId={user.id} locale={locale} />
+    </>
   );
 }

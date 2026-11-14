@@ -43,6 +43,7 @@ const navItems = [
   { key: "sidebarTrackProgress", href: "/student/track-progress", icon: ClipboardCheck },
   { key: "sidebarClassRecordings", href: "/student/class-recordings", icon: Video },
   { key: "sidebarTestsAssignments", href: "/student/tests-assignments", icon: FileText },
+  { key: "sidebarGroupClasses", href: "/student/group-classes", icon: Users2 },
   { key: "sidebarDarsCircles", href: "/student/dars-circles", icon: Users2 },
   { key: "sidebarComplaints", href: "/student/complaints", icon: AlertCircle },
   { key: "sidebarPayments", href: "/student/payments", icon: CreditCard },

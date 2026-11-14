@@ -14,7 +14,8 @@ import {
   Bot,
   Star,
   Bell,
-  Video,  UserCheck,
+  Video,
+  UserCheck,
   CalendarClock,
   Activity,
   Sun,
@@ -32,6 +33,7 @@ import {
   ClipboardList,
   FileCheck,
   Mail,
+  DollarSign,
 } from "lucide-react";
 import { NotificationBell } from "@/components/shared/notification-bell";
 
@@ -47,6 +49,8 @@ const navItems = [
   { key: "sidebarScheduleChanges", href: "/admin/schedule-change-requests", icon: RefreshCw },
   { key: "sidebarComplaints", href: "/admin/complaints", icon: AlertCircle },
   { key: "sidebarDarsCircles", href: "/admin/dars-circles", icon: Users2 },
+  { key: "sidebarCohorts", href: "/admin/cohorts", icon: Users2 },
+  { key: "sidebarPricing", href: "/admin/pricing", icon: DollarSign },
   { key: "sidebarCertificates", href: "/admin/certificates", icon: Award },
   { key: "sidebarAgents", href: "/admin/agents", icon: Activity },
   { key: "sidebarAIMonitor", href: "/admin/ai-monitor", icon: Bot },

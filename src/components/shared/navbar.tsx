@@ -17,6 +17,7 @@ const languages = [
 
 const navLinks = [
   { href: "/courses" as const, key: "courses" as const },
+  { href: "/group-classes" as const, key: "groupClasses" as const },
   { href: "/about" as const, key: "about" as const },
   { href: "/blog" as const, key: "blog" as const },
   { href: "/pricing" as const, key: "pricing" as const },

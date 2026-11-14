@@ -65,6 +65,11 @@ export function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/group-classes" className="opacity-70 hover:opacity-100 transition-opacity">
+                  {tc("groupClasses")}
+                </Link>
+              </li>
+              <li>
                 <Link href="/about" className="opacity-70 hover:opacity-100 transition-opacity">
                   {t("about")}
                 </Link>

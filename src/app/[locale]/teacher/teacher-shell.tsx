@@ -20,7 +20,8 @@ import {
   Menu,
   X,
   LogOut,
-  ChevronLeft,  TrendingUp,
+  ChevronLeft,
+  TrendingUp,
   FileText,
   Bell,
 } from "lucide-react";
@@ -30,6 +31,7 @@ const navItems = [
   { key: "sidebarDashboard", href: "/teacher/dashboard", icon: LayoutDashboard },
   { key: "sidebarStudents", href: "/teacher/students", icon: Users },
   { key: "sidebarSchedule", href: "/teacher/schedule", icon: Calendar },
+  { key: "sidebarGroupClasses", href: "/teacher/group-classes", icon: Users },
   { key: "sidebarLessons", href: "/teacher/lessons", icon: BookOpen },
   { key: "sidebarTrackProgress", href: "/teacher/track-progress", icon: TrendingUp },
   { key: "sidebarTests", href: "/teacher/tests", icon: ClipboardCheck },
