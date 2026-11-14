@@ -3,6 +3,8 @@ import { sendFailureAlert } from "@/lib/alerts";
 import { redirect } from "next/navigation";
 import { getTeacherRevenue } from "@/lib/db/teacher-queries";
 import { RevenueClient } from "./revenue-client";
+import { getPricing } from "@/lib/pricing-server";
+import { teacherShare } from "@/lib/pricing";
 
 export default async function TeacherRevenuePage({
   params,
@@ -18,18 +20,32 @@ export default async function TeacherRevenuePage({
     studentName: string;
     courseName: string;
     planType: string;
+    /** What the student actually pays (after any family discount). */
+    studentPays: number;
+    /** The teacher's share of that amount. */
     monthlyAmount: number;
   }> = [];
+  let sharePercent = 0;
 
   try {
+    // The share % comes from the pricing config, inside the same try: if it
+    // cannot be read this page fails loudly rather than showing a guessed split.
+    const pricing = await getPricing();
+    sharePercent = pricing.teacherSharePercent;
     const raw = await getTeacherRevenue(user.id);
     const localeKey = `name${locale.charAt(0).toUpperCase() + locale.slice(1)}` as keyof typeof raw[0]["course"];
-    earnings = raw.map((r) => ({
-      studentName: r.student.fullName,
-      courseName: (r.course[localeKey] as string) || r.course.nameEn,
-      planType: r.subscription.planType,
-      monthlyAmount: parseFloat(r.subscription.amountUsd ?? "0"),
-    }));
+    earnings = raw.map((r) => {
+      // amount_usd is the amount Stripe actually charged, so the share is
+      // taken from the discounted fee, never from the list price.
+      const studentPays = parseFloat(r.subscription.amountUsd ?? "0");
+      return {
+        studentName: r.student.fullName,
+        courseName: (r.course[localeKey] as string) || r.course.nameEn,
+        planType: r.subscription.planType,
+        studentPays,
+        monthlyAmount: teacherShare(pricing, studentPays),
+      };
+    });
   } catch (error) {
     // Alert and rethrow — never fall through to earnings = [].
     //
@@ -46,5 +62,5 @@ export default async function TeacherRevenuePage({
     throw error;
   }
 
-  return <RevenueClient earnings={earnings} />;
+  return <RevenueClient earnings={earnings} sharePercent={sharePercent} />;
 }

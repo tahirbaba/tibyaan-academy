@@ -27,13 +27,16 @@ import {
 type CourseKey = "nazra" | "hifz" | "arabic" | "aalim";
 type FilterKey = "all" | CourseKey;
 
-import { PRICING } from "@/lib/pricing";
+import {
+  aiOnlyMonthly,
+  formatPrice,
+  oneOnOneFrom,
+  type PricingConfig,
+} from "@/lib/pricing";
 
 const courses: {
   key: CourseKey;
   icon: typeof BookOpen;
-  plan1Price: string;
-  plan2Price: string;
   color: string;
   iconColor: string;
   slug: string;
@@ -43,8 +46,6 @@ const courses: {
   {
     key: "nazra",
     icon: BookOpen,
-    plan1Price: `$${PRICING.nazra.human_ai}`,
-    plan2Price: `$${PRICING.nazra.ai_only}`,
     color: "from-emerald-500/10 to-emerald-500/5 border-emerald-200 dark:border-emerald-800",
     iconColor: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300",
     slug: "nazra-quran",
@@ -54,8 +55,6 @@ const courses: {
   {
     key: "hifz",
     icon: Sparkles,
-    plan1Price: `$${PRICING.hifz.human_ai}`,
-    plan2Price: `$${PRICING.hifz.ai_only}`,
     color: "from-amber-500/10 to-amber-500/5 border-amber-200 dark:border-amber-800",
     iconColor: "bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300",
     slug: "hifz-quran",
@@ -65,8 +64,6 @@ const courses: {
   {
     key: "arabic",
     icon: Languages,
-    plan1Price: `$${PRICING.arabic.human_ai}`,
-    plan2Price: `$${PRICING.arabic.ai_only}`,
     color: "from-blue-500/10 to-blue-500/5 border-blue-200 dark:border-blue-800",
     iconColor: "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300",
     slug: "arabic-language",
@@ -76,8 +73,6 @@ const courses: {
   {
     key: "aalim",
     icon: GraduationCap,
-    plan1Price: `$${PRICING.aalim.human_ai}`,
-    plan2Price: `$${PRICING.aalim.ai_only}`,
     color: "from-purple-500/10 to-purple-500/5 border-purple-200 dark:border-purple-800",
     iconColor: "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300",
     slug: "aalim-course",
@@ -109,7 +104,11 @@ const comparisonFeatures: {
   { key: "certificates", label: "Certificates", icon: Award, plan1: true, plan2: false },
 ];
 
-export default function CoursesPageClient() {
+export default function CoursesPageClient({
+  pricing,
+}: {
+  pricing: PricingConfig;
+}) {
   const t = useTranslations("coursesPage");
   const tc = useTranslations("coursesSection");
   const [activeFilter, setActiveFilter] = useState<FilterKey>("all");
@@ -224,7 +223,10 @@ export default function CoursesPageClient() {
                           {t("plan1Label")}
                         </p>
                         <p className="text-2xl font-bold text-primary mt-1">
-                          {course.plan1Price}
+                          <span className="text-xs font-normal text-muted-foreground me-1">
+                            {tc("from")}
+                          </span>
+                          {formatPrice(oneOnOneFrom(pricing, course.key))}
                         </p>
                         <p className="text-xs text-muted-foreground">
                           {t("perMonth")}
@@ -235,7 +237,7 @@ export default function CoursesPageClient() {
                           {t("plan2Label")}
                         </p>
                         <p className="text-2xl font-bold text-accent mt-1">
-                          {course.plan2Price}
+                          {formatPrice(aiOnlyMonthly(pricing, course.key))}
                         </p>
                         <p className="text-xs text-muted-foreground">
                           {t("perMonth")}

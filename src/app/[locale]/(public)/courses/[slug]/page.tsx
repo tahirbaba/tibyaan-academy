@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import CourseDetailClient from "@/components/courses/course-detail-client";
 
 import { SITE_URL as BASE_URL, localeMetadataAlternates } from "@/lib/site-config";
-import { PRICING } from "@/lib/pricing";
+import { COURSE_SLUG_TO_KEY, aiOnlyMonthly } from "@/lib/pricing";
+import { getPricing } from "@/lib/pricing-server";
 
 const courseInfo: Record<
   string,
@@ -14,7 +15,6 @@ const courseInfo: Record<
     nameId: string;
     descEn: string;
     descUr: string;
-    price: string;
   }
 > = {
   "nazra-quran": {
@@ -24,10 +24,9 @@ const courseInfo: Record<
     nameFr: "Nazra Coran — Apprendre à lire le Coran",
     nameId: "Nazra Quran — Belajar Membaca Quran",
     descEn:
-      "Learn to read Quran with proper Tajweed from certified teachers + AI Ustaz. 3-6 months program. From $25/month.",
+      "Learn to read Quran with proper Tajweed from certified teachers + AI Ustaz. 3-6 months program. From ${price}/month.",
     descUr:
-      "تجوید کے ساتھ قرآن پاک پڑھنا سیکھیں۔ مستند اساتذہ + AI استاذ۔ 3-6 ماہ۔ $25 ماہانہ سے۔",
-    price: String(PRICING.nazra.ai_only),
+      "تجوید کے ساتھ قرآن پاک پڑھنا سیکھیں۔ مستند اساتذہ + AI استاذ۔ 3-6 ماہ۔ ${price} ماہانہ سے۔",
   },
   "hifz-quran": {
     nameEn: "Hifz Quran — Memorize the Holy Quran",
@@ -36,10 +35,9 @@ const courseInfo: Record<
     nameFr: "Hifz Coran — Mémoriser le Saint Coran",
     nameId: "Hifz Quran — Hafal Al-Quran",
     descEn:
-      "Complete Hifz program with daily Sabaq, Sabqi & Manzil tracking. AI-powered revision. From $37/month.",
+      "Complete Hifz program with daily Sabaq, Sabqi & Manzil tracking. AI-powered revision. From ${price}/month.",
     descUr:
-      "مکمل حفظ پروگرام — روزانہ سبق، سبقی اور منزل ٹریکنگ۔ AI سے ریویژن۔ $37 ماہانہ سے۔",
-    price: String(PRICING.hifz.ai_only),
+      "مکمل حفظ پروگرام — روزانہ سبق، سبقی اور منزل ٹریکنگ۔ AI سے ریویژن۔ ${price} ماہانہ سے۔",
   },
   "arabic-language": {
     nameEn: "Arabic Language — Learn Arabic for Quran",
@@ -48,10 +46,9 @@ const courseInfo: Record<
     nameFr: "Langue Arabe — Apprendre l'arabe pour le Coran",
     nameId: "Bahasa Arab — Belajar Bahasa Arab untuk Quran",
     descEn:
-      "Learn Arabic grammar, vocabulary & conversation with Quran focus. 6-12 months. From $35/month.",
+      "Learn Arabic grammar, vocabulary & conversation with Quran focus. 6-12 months. From ${price}/month.",
     descUr:
-      "عربی گرامر، الفاظ اور مکالمہ سیکھیں — قرآنی عربی پر فوکس۔ 6-12 ماہ۔ $35 ماہانہ سے۔",
-    price: String(PRICING.arabic.ai_only),
+      "عربی گرامر، الفاظ اور مکالمہ سیکھیں — قرآنی عربی پر فوکس۔ 6-12 ماہ۔ ${price} ماہانہ سے۔",
   },
   "aalim-course": {
     nameEn: "Aalim Course — Dars-e-Nizami Online",
@@ -60,10 +57,9 @@ const courseInfo: Record<
     nameFr: "Cours Aalim — Dars-e-Nizami en ligne",
     nameId: "Kursus Aalim — Dars-e-Nizami Online",
     descEn:
-      "Complete Dars-e-Nizami / Aalim program online — Fiqh, Hadith, Tafseer & more. 2-8 years. From $40/month.",
+      "Complete Dars-e-Nizami / Aalim program online — Fiqh, Hadith, Tafseer & more. 2-8 years. From ${price}/month.",
     descUr:
-      "مکمل درس نظامی / عالم کورس — فقہ، حدیث، تفسیر اور مزید۔ 2-8 سال۔ $40 ماہانہ سے۔",
-    price: String(PRICING.aalim.ai_only),
+      "مکمل درس نظامی / عالم کورس — فقہ، حدیث، تفسیر اور مزید۔ 2-8 سال۔ ${price} ماہانہ سے۔",
   },
 };
 
@@ -104,7 +100,9 @@ export async function generateMetadata({
   }
 
   const title = getCourseTitle(info, locale);
-  const description = getCourseDesc(info, locale);
+  const pricing = await getPricing();
+  const price = String(aiOnlyMonthly(pricing, COURSE_SLUG_TO_KEY[slug]));
+  const description = getCourseDesc(info, locale).replace("{price}", price);
 
   return {
     title,
@@ -126,13 +124,17 @@ export default async function CourseDetailPage({
 }) {
   const { slug } = await params;
   const info = courseInfo[slug];
+  const pricing = await getPricing();
+  const price = info
+    ? String(aiOnlyMonthly(pricing, COURSE_SLUG_TO_KEY[slug]))
+    : "";
 
   const courseJsonLd = info
     ? {
         "@context": "https://schema.org",
         "@type": "Course",
         name: info.nameEn,
-        description: info.descEn,
+        description: info.descEn.replace("{price}", price),
         provider: {
           "@type": "Organization",
           name: "Tibyaan Academy",
@@ -141,7 +143,7 @@ export default async function CourseDetailPage({
         offers: {
           "@type": "Offer",
           priceCurrency: "USD",
-          price: info.price,
+          price,
           availability: "https://schema.org/InStock",
         },
         educationalLevel: "Beginner to Advanced",
@@ -157,7 +159,7 @@ export default async function CourseDetailPage({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(courseJsonLd) }}
         />
       )}
-      <CourseDetailClient />
+      <CourseDetailClient pricing={pricing} />
     </>
   );
 }

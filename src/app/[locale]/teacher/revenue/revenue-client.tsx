@@ -4,17 +4,29 @@ import { useTranslations } from "next-intl";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
 import { DollarSign, Users, Inbox } from "lucide-react";
+import { formatPrice, roundMoney } from "@/lib/pricing";
 
 interface Earning {
   studentName: string;
   courseName: string;
   planType: string;
+  /** What the student actually pays. */
+  studentPays: number;
+  /** The teacher's share of it. */
   monthlyAmount: number;
 }
 
-export function RevenueClient({ earnings }: { earnings: Earning[] }) {
+export function RevenueClient({
+  earnings,
+  sharePercent,
+}: {
+  earnings: Earning[];
+  sharePercent: number;
+}) {
   const t = useTranslations("teacher");
-  const totalMonthly = earnings.reduce((sum, s) => sum + s.monthlyAmount, 0);
+  const totalMonthly = roundMoney(
+    earnings.reduce((sum, s) => sum + s.monthlyAmount, 0)
+  );
   const planLabel = (p: string) => p === "human_ai" ? "Human + AI" : "AI Only";
 
   return (
@@ -32,12 +44,13 @@ export function RevenueClient({ earnings }: { earnings: Earning[] }) {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.1 }} className="rounded-xl border bg-gradient-to-br from-emerald-50 to-emerald-100/50 dark:from-emerald-950 dark:to-emerald-900/50 p-5">
           <div className="flex items-center gap-2 text-emerald-600 mb-2"><DollarSign className="w-5 h-5" /><span className="text-sm font-medium">{t("monthlyEarnings")}</span></div>
-          <p className="text-3xl font-bold text-foreground">${totalMonthly.toLocaleString()}</p>
+          <p className="text-3xl font-bold text-foreground">{formatPrice(totalMonthly)}</p>
+          <p className="text-xs text-muted-foreground mt-1">{t("shareNote", { percent: sharePercent })}</p>
         </motion.div>
         <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.15 }} className="rounded-xl border bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-950 dark:to-blue-900/50 p-5">
           <div className="flex items-center gap-2 text-blue-600 mb-2"><Users className="w-5 h-5" /><span className="text-sm font-medium">{t("activeStudents")}</span></div>
           <p className="text-3xl font-bold text-foreground">{earnings.length}</p>
-          {earnings.length > 0 && <p className="text-xs text-muted-foreground mt-1">{t("perStudent")}: ${Math.round(totalMonthly / earnings.length)}/mo</p>}
+          {earnings.length > 0 && <p className="text-xs text-muted-foreground mt-1">{t("perStudent")}: {formatPrice(totalMonthly / earnings.length)}/mo</p>}
         </motion.div>
       </div>
 
@@ -56,7 +69,8 @@ export function RevenueClient({ earnings }: { earnings: Earning[] }) {
                   <th className="text-start p-3 text-xs font-medium text-muted-foreground uppercase">{t("studentName")}</th>
                   <th className="text-start p-3 text-xs font-medium text-muted-foreground uppercase">{t("course")}</th>
                   <th className="text-start p-3 text-xs font-medium text-muted-foreground uppercase">{t("plan")}</th>
-                  <th className="text-end p-3 text-xs font-medium text-muted-foreground uppercase">{t("monthlyAmount")}</th>
+                  <th className="text-end p-3 text-xs font-medium text-muted-foreground uppercase">{t("studentPays")}</th>
+                  <th className="text-end p-3 text-xs font-medium text-muted-foreground uppercase">{t("yourShare", { percent: sharePercent })}</th>
                 </tr>
               </thead>
               <tbody>
@@ -72,14 +86,15 @@ export function RevenueClient({ earnings }: { earnings: Earning[] }) {
                     </td>
                     <td className="p-3 text-sm text-muted-foreground">{e.courseName}</td>
                     <td className="p-3"><Badge variant="outline" className="text-xs">{planLabel(e.planType)}</Badge></td>
-                    <td className="p-3 text-end"><span className="text-sm font-bold text-emerald-600">${e.monthlyAmount}</span><span className="text-xs text-muted-foreground">/mo</span></td>
+                    <td className="p-3 text-end text-sm text-muted-foreground tabular-nums">{formatPrice(e.studentPays)}/mo</td>
+                    <td className="p-3 text-end"><span className="text-sm font-bold text-emerald-600 tabular-nums">{formatPrice(e.monthlyAmount)}</span><span className="text-xs text-muted-foreground">/mo</span></td>
                   </tr>
                 ))}
               </tbody>
               <tfoot>
                 <tr className="bg-muted/50">
-                  <td colSpan={3} className="p-3 text-sm font-semibold text-foreground">{t("totalEarnings")}</td>
-                  <td className="p-3 text-end text-sm font-bold text-emerald-600">${totalMonthly}/mo</td>
+                  <td colSpan={4} className="p-3 text-sm font-semibold text-foreground">{t("totalEarnings")}</td>
+                  <td className="p-3 text-end text-sm font-bold text-emerald-600 tabular-nums">{formatPrice(totalMonthly)}/mo</td>
                 </tr>
               </tfoot>
             </table>

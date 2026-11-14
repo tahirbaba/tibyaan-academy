@@ -4,7 +4,11 @@ import { useState } from "react";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { PRICING } from "@/lib/pricing";
+import {
+  aiOnlyMonthly,
+  formatPrice,
+  type PricingConfig,
+} from "@/lib/pricing";
 import { Navbar } from "@/components/shared/navbar";
 import { Footer } from "@/components/shared/footer";
 import { Button } from "@/components/ui/button";
@@ -43,8 +47,6 @@ const courseData: Record<
     color: string;
     iconColor: string;
     heroGradient: string;
-    plan1Price: string;
-    plan2Price: string;
     duration: string;
   }
 > = {
@@ -54,8 +56,6 @@ const courseData: Record<
     color: "emerald",
     iconColor: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300",
     heroGradient: "from-emerald-600/10 via-background to-emerald-600/5",
-    plan1Price: `$${PRICING.nazra.human_ai}`,
-    plan2Price: `$${PRICING.nazra.ai_only}`,
     duration: "3-6 months",
   },
   "hifz-quran": {
@@ -64,8 +64,6 @@ const courseData: Record<
     color: "amber",
     iconColor: "bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300",
     heroGradient: "from-amber-600/10 via-background to-amber-600/5",
-    plan1Price: `$${PRICING.hifz.human_ai}`,
-    plan2Price: `$${PRICING.hifz.ai_only}`,
     duration: "2-4 years",
   },
   "arabic-language": {
@@ -74,8 +72,6 @@ const courseData: Record<
     color: "blue",
     iconColor: "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300",
     heroGradient: "from-blue-600/10 via-background to-blue-600/5",
-    plan1Price: `$${PRICING.arabic.human_ai}`,
-    plan2Price: `$${PRICING.arabic.ai_only}`,
     duration: "6-12 months",
   },
   "aalim-course": {
@@ -84,8 +80,6 @@ const courseData: Record<
     color: "purple",
     iconColor: "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300",
     heroGradient: "from-purple-600/10 via-background to-purple-600/5",
-    plan1Price: `$${PRICING.aalim.human_ai}`,
-    plan2Price: `$${PRICING.aalim.ai_only}`,
     duration: "2-8 years",
   },
 };
@@ -144,12 +138,17 @@ const courseReviews: Record<string, { name: string; country: string; text: strin
   ],
 };
 
-export default function CourseDetailClient() {
+export default function CourseDetailClient({
+  pricing,
+}: {
+  pricing: PricingConfig;
+}) {
   const params = useParams();
   const slug = params.slug as string;
   const t = useTranslations("courseDetail");
   const tc = useTranslations("coursesSection");
   const tp = useTranslations("coursesPage");
+  const tpr = useTranslations("pricingPage");
 
   const course = courseData[slug];
   const [showAllSyllabus, setShowAllSyllabus] = useState(false);
@@ -485,14 +484,40 @@ export default function CourseDetailClient() {
                   {tp("plan1Label")}
                 </Badge>
                 <div className="mt-2">
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-4xl font-bold text-primary">
-                      {course.plan1Price}
-                    </span>
-                    <span className="text-sm text-muted-foreground">
-                      {tp("perMonth")}
-                    </span>
-                  </div>
+                  {k === "hifz" ? (
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-4xl font-bold text-primary">
+                        {formatPrice(pricing.oneOnOne.hifz)}
+                      </span>
+                      <span className="text-sm text-muted-foreground">
+                        {tp("perMonth")}
+                      </span>
+                    </div>
+                  ) : (
+                    <ul className="divide-y divide-border rounded-xl border border-border">
+                      {(
+                        [
+                          ["tier3Days", pricing.oneOnOne.threeDays],
+                          ["tier5Days", pricing.oneOnOne.fiveDays],
+                        ] as const
+                      ).map(([label, amount]) => (
+                        <li
+                          key={label}
+                          className="flex items-baseline justify-between gap-3 px-4 py-2.5"
+                        >
+                          <span className="text-sm text-foreground">{tpr(label)}</span>
+                          <span>
+                            <span className="text-2xl font-bold text-primary tabular-nums">
+                              {formatPrice(amount)}
+                            </span>
+                            <span className="text-xs text-muted-foreground ms-1">
+                              {tp("perMonth")}
+                            </span>
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                   <ul className="mt-6 space-y-3">
                     <li className="flex items-center gap-2 text-sm">
                       <Check className="w-4 h-4 text-green-600" />
@@ -536,7 +561,7 @@ export default function CourseDetailClient() {
                 <div className="mt-2">
                   <div className="flex items-baseline gap-1">
                     <span className="text-4xl font-bold text-accent">
-                      {course.plan2Price}
+                      {formatPrice(aiOnlyMonthly(pricing, k))}
                     </span>
                     <span className="text-sm text-muted-foreground">
                       {tp("perMonth")}

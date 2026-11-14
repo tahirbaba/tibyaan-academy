@@ -26,8 +26,15 @@ import {
   Users,
   Sparkles,
 } from "lucide-react";
-import { COURSE_FEES, formatFee } from "@/lib/data/fees-config";
-import { PRICING } from "@/lib/pricing";
+import {
+  COURSE_KEYS,
+  aiOnlyMonthly,
+  formatPrice,
+  lowestOneOnOnePrice,
+  lowestPrice,
+  yearlyPrice,
+  type PricingConfig,
+} from "@/lib/pricing";
 
 const plan1Features = [
   { key: "liveClasses", icon: Video, included: true },
@@ -46,42 +53,24 @@ const plan2Features = [
   { key: "certificates", icon: Award, included: false },
 ];
 
-const coursePricing = [
-  {
-    key: "nazra",
-    monthly1: `$${PRICING.nazra.human_ai}`,
-    monthly2: `$${PRICING.nazra.ai_only}`,
-    yearly1: `$${PRICING.nazra.human_ai_yearly}`,
-    yearly2: `$${PRICING.nazra.ai_only_yearly}`,
-  },
-  {
-    key: "hifz",
-    monthly1: `$${PRICING.hifz.human_ai}`,
-    monthly2: `$${PRICING.hifz.ai_only}`,
-    yearly1: `$${PRICING.hifz.human_ai_yearly}`,
-    yearly2: `$${PRICING.hifz.ai_only_yearly}`,
-  },
-  {
-    key: "arabic",
-    monthly1: `$${PRICING.arabic.human_ai}`,
-    monthly2: `$${PRICING.arabic.ai_only}`,
-    yearly1: `$${PRICING.arabic.human_ai_yearly}`,
-    yearly2: `$${PRICING.arabic.ai_only_yearly}`,
-  },
-  {
-    key: "aalim",
-    monthly1: `$${PRICING.aalim.human_ai}`,
-    monthly2: `$${PRICING.aalim.ai_only}`,
-    yearly1: `$${PRICING.aalim.human_ai_yearly}`,
-    yearly2: `$${PRICING.aalim.ai_only_yearly}`,
-  },
-];
-
-export default function PricingPageClient() {
+export default function PricingPageClient({
+  pricing,
+}: {
+  pricing: PricingConfig;
+}) {
   const t = useTranslations("pricingPage");
   const tc = useTranslations("coursesSection");
   const tp = useTranslations("coursesPage");
   const [isYearly, setIsYearly] = useState(false);
+
+  // Every figure on this page is derived from the one pricing config.
+  const show = (monthly: number) =>
+    formatPrice(isYearly ? yearlyPrice(pricing, monthly) : monthly);
+  const tiers = [
+    { key: "tier3Days", amount: pricing.oneOnOne.threeDays },
+    { key: "tier5Days", amount: pricing.oneOnOne.fiveDays },
+    { key: "tierHifz", amount: pricing.oneOnOne.hifz },
+  ] as const;
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -172,13 +161,27 @@ export default function PricingPageClient() {
                   {t("plan1Desc")}
                 </p>
                 <div className="mt-6 flex items-baseline gap-1">
+                  <span className="text-sm text-muted-foreground">{t("from")}</span>
                   <span className="text-4xl font-bold text-primary">
-                    {isYearly ? `$${PRICING.nazra.human_ai_yearly}` : `$${PRICING.nazra.human_ai}`}
+                    {show(lowestOneOnOnePrice(pricing))}
                   </span>
                   <span className="text-sm text-muted-foreground">
                     {isYearly ? t("perYear") : t("perMonth")}
                   </span>
                 </div>
+                <ul className="mt-4 divide-y divide-border rounded-xl border border-border bg-muted/30">
+                  {tiers.map((tier) => (
+                    <li
+                      key={tier.key}
+                      className="flex items-center justify-between gap-3 px-4 py-2.5 text-sm"
+                    >
+                      <span className="text-foreground">{t(tier.key)}</span>
+                      <span className="font-semibold text-primary tabular-nums">
+                        {show(tier.amount)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
                 {isYearly && (
                   <p className="text-xs text-accent mt-1">
                     {t("yearlyDiscount")}
@@ -228,8 +231,9 @@ export default function PricingPageClient() {
                   {t("plan2Desc")}
                 </p>
                 <div className="mt-6 flex items-baseline gap-1">
+                  <span className="text-sm text-muted-foreground">{t("from")}</span>
                   <span className="text-4xl font-bold text-accent">
-                    {isYearly ? `$${PRICING.nazra.ai_only_yearly}` : `$${PRICING.nazra.ai_only}`}
+                    {show(lowestPrice(pricing))}
                   </span>
                   <span className="text-sm text-muted-foreground">
                     {isYearly ? t("perYear") : t("perMonth")}
@@ -281,9 +285,9 @@ export default function PricingPageClient() {
 
             {/* Money-back guarantee */}
             <p className="mt-6 text-center text-sm text-muted-foreground">
-              <a href="/refund-policy" className="text-primary hover:underline font-medium">
+              <Link href="/refund-policy" className="text-primary hover:underline font-medium">
                 {t("moneyBack")}
-              </a>
+              </Link>
             </p>
           </div>
         </section>
@@ -316,7 +320,10 @@ export default function PricingPageClient() {
                         {t("course")}
                       </th>
                       <th className="px-6 py-4 text-center text-sm font-semibold text-primary">
-                        {t("plan1Monthly")}
+                        {t("col3Days")}
+                      </th>
+                      <th className="px-6 py-4 text-center text-sm font-semibold text-primary">
+                        {t("col5Days")}
                       </th>
                       <th className="px-6 py-4 text-center text-sm font-semibold text-accent">
                         {t("plan2Monthly")}
@@ -324,28 +331,32 @@ export default function PricingPageClient() {
                     </tr>
                   </thead>
                   <tbody>
-                    {coursePricing.map((cp, i) => (
-                      <tr
-                        key={cp.key}
-                        className={i % 2 === 0 ? "" : "bg-muted/20"}
-                      >
+                    {COURSE_KEYS.map((course, i) => (
+                      <tr key={course} className={i % 2 === 0 ? "" : "bg-muted/20"}>
                         <td className="px-6 py-4 text-sm font-medium text-foreground">
-                          {tc(`${cp.key}Title`)}
+                          {tc(`${course}Title`)}
                         </td>
                         <td className="px-6 py-4 text-center">
-                          <span className="font-bold text-primary">
-                            {isYearly ? cp.yearly1 : cp.monthly1}
-                          </span>
-                          <span className="text-xs text-muted-foreground">
-                            {isYearly ? t("perYear") : t("perMonth")}
+                          {course === "hifz" ? (
+                            <span className="text-muted-foreground">—</span>
+                          ) : (
+                            <span className="font-bold text-primary tabular-nums">
+                              {show(pricing.oneOnOne.threeDays)}
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 text-center">
+                          <span className="font-bold text-primary tabular-nums">
+                            {show(
+                              course === "hifz"
+                                ? pricing.oneOnOne.hifz
+                                : pricing.oneOnOne.fiveDays
+                            )}
                           </span>
                         </td>
                         <td className="px-6 py-4 text-center">
-                          <span className="font-bold text-accent">
-                            {isYearly ? cp.yearly2 : cp.monthly2}
-                          </span>
-                          <span className="text-xs text-muted-foreground">
-                            {isYearly ? t("perYear") : t("perMonth")}
+                          <span className="font-bold text-accent tabular-nums">
+                            {show(aiOnlyMonthly(pricing, course))}
                           </span>
                         </td>
                       </tr>
@@ -354,6 +365,9 @@ export default function PricingPageClient() {
                 </table>
               </div>
             </motion.div>
+            <p className="mt-3 text-center text-xs text-muted-foreground">
+              {isYearly ? t("tableNoteYearly") : t("tableNoteMonthly")}
+            </p>
           </div>
         </section>
 
@@ -377,11 +391,11 @@ export default function PricingPageClient() {
               <div className="mt-6 flex flex-col sm:flex-row gap-4 justify-center">
                 <div className="flex items-center gap-2 bg-card border rounded-xl px-5 py-3">
                   <Sparkles className="w-4 h-4 text-accent" />
-                  <span className="text-sm font-medium">{t("family2")}</span>
+                  <span className="text-sm font-medium">{t("family2", { percent: pricing.familyDiscount.secondChildPercent })}</span>
                 </div>
                 <div className="flex items-center gap-2 bg-card border rounded-xl px-5 py-3">
                   <Sparkles className="w-4 h-4 text-accent" />
-                  <span className="text-sm font-medium">{t("family3")}</span>
+                  <span className="text-sm font-medium">{t("family3", { percent: pricing.familyDiscount.thirdChildOnwardPercent })}</span>
                 </div>
               </div>
             </motion.div>

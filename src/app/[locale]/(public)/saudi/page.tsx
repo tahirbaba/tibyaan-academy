@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getPricing } from "@/lib/pricing-server";
 import { CountryPageTemplate } from "@/components/country/country-page-template";
 import { SAUDI_PAGE } from "@/lib/data/country-pages";
 import { localeMetadataAlternates, absoluteUrl } from "@/lib/site-config";
@@ -24,5 +25,6 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 
 export default async function SaudiLandingPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
-  return <CountryPageTemplate locale={locale} data={SAUDI_PAGE} />;
+  const pricing = await getPricing();
+  return <CountryPageTemplate locale={locale} data={SAUDI_PAGE} pricing={pricing} />;
 }

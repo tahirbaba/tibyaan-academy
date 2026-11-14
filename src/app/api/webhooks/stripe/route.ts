@@ -4,7 +4,25 @@ import { db } from "@/lib/db";
 import { subscriptions, enrollments } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import type Stripe from "stripe";
+import { sendFailureAlert } from "@/lib/alerts";
+import {
+  activateCohortEnrollment,
+  cancelCohortEnrollment,
+  markCohortPastDue,
+  syncCohortSubscription,
+} from "@/lib/cohorts/stripe-events";
 
+/**
+ * Stripe webhook.
+ *
+ * Two kinds of subscription pass through here, told apart by `metadata.kind`,
+ * which our own checkout code sets on both the session and the subscription:
+ *   "cohort" — a group class seat   -> cohort_enrollments
+ *   anything else — a course plan   -> enrollments + subscriptions (as before)
+ *
+ * Any failure returns 500 so Stripe retries, and sends an alert: a swallowed
+ * webhook error is a student who paid and whose access never switched on.
+ */
 export async function POST(request: NextRequest) {
   const body = await request.text();
   const signature = request.headers.get("stripe-signature");
@@ -30,29 +48,52 @@ export async function POST(request: NextRequest) {
     switch (event.type) {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
-        const {
-          studentId,
-          enrollmentId,
-          courseType,
-          planType,
-        } = session.metadata || {};
+
+        if (session.metadata?.kind === "cohort") {
+          const changed = await activateCohortEnrollment(session);
+          if (changed === 0) {
+            // Paid, but no enrollment row matched. Do not acknowledge quietly.
+            throw new Error(
+              `Cohort checkout ${session.id} was paid but matched no enrollment ` +
+                `(enrollmentId=${session.metadata?.enrollmentId}).`
+            );
+          }
+          console.log(`Cohort enrollment ${session.metadata.enrollmentId} activated`);
+          break;
+        }
+
+        const { studentId, enrollmentId, courseId, planType } =
+          session.metadata || {};
 
         if (!studentId || !enrollmentId) break;
 
         // Activate enrollment
-        await db
+        const activated = await db
           .update(enrollments)
           .set({
             status: "active",
             stripeSubscriptionId: session.subscription as string,
             subscriptionStartDate: new Date(),
           })
-          .where(eq(enrollments.id, enrollmentId));
+          .where(eq(enrollments.id, enrollmentId))
+          .returning({ courseId: enrollments.courseId });
 
-        // Create subscription record
+        // The subscription row needs the COURSE id. This used to be written as
+        // `courseId: enrollmentId`, which the foreign key to `courses` rejects,
+        // so the insert failed after the enrollment had already been activated.
+        const resolvedCourseId = courseId || activated[0]?.courseId;
+        if (!resolvedCourseId) {
+          throw new Error(
+            `Checkout ${session.id}: enrollment ${enrollmentId} not found, cannot record the subscription.`
+          );
+        }
+
+        // Create subscription record. amount_total is what the student was
+        // actually charged (after any family discount) — the teacher's share
+        // is calculated from this figure.
         await db.insert(subscriptions).values({
           studentId,
-          courseId: enrollmentId, // Will be resolved to actual courseId in production
+          courseId: resolvedCourseId,
           stripeCustomerId: session.customer as string,
           stripeSubscriptionId: session.subscription as string,
           planType: planType === "plan1" ? "human_ai" : "pure_ai",
@@ -70,6 +111,12 @@ export async function POST(request: NextRequest) {
       case "customer.subscription.updated": {
         const subscription = event.data.object as Stripe.Subscription;
         const subId = subscription.id;
+
+        if (subscription.metadata?.kind === "cohort") {
+          const changed = await syncCohortSubscription(subscription);
+          console.log(`Cohort subscription ${subId} synced (${changed} row)`);
+          break;
+        }
 
         const newStatus = subscription.cancel_at_period_end
           ? "cancelled"
@@ -106,6 +153,14 @@ export async function POST(request: NextRequest) {
         const subscription = event.data.object as Stripe.Subscription;
         const subId = subscription.id;
 
+        if (subscription.metadata?.kind === "cohort") {
+          const { changed, notified } = await cancelCohortEnrollment(subscription);
+          console.log(
+            `Cohort subscription ${subId} ended — ${changed} seat released, ${notified} waitlisted student notified`
+          );
+          break;
+        }
+
         // Mark subscription as cancelled
         await db
           .update(subscriptions)
@@ -125,11 +180,18 @@ export async function POST(request: NextRequest) {
       case "invoice.payment_failed": {
         const invoice = event.data.object as Stripe.Invoice;
         // In Stripe v20, subscription is under parent.subscription_details
-        const parentSub = invoice.parent?.subscription_details?.subscription;
+        const details = invoice.parent?.subscription_details;
+        const parentSub = details?.subscription;
         const subId =
           typeof parentSub === "string" ? parentSub : parentSub?.id;
 
         if (subId) {
+          if (details?.metadata?.kind === "cohort") {
+            await markCohortPastDue(subId);
+            console.log(`Payment failed for cohort subscription ${subId}`);
+            break;
+          }
+
           await db
             .update(subscriptions)
             .set({ status: "past_due" })
@@ -145,6 +207,12 @@ export async function POST(request: NextRequest) {
     }
   } catch (error) {
     console.error("Webhook handler error:", error);
+    await sendFailureAlert({
+      source: "/api/webhooks/stripe",
+      summary: `Stripe event ${event.type} could not be processed — a payment may not be reflected in the student's access.`,
+      error,
+      context: { eventId: event.id, eventType: event.type },
+    });
     return Response.json(
       { error: "Webhook handler failed" },
       { status: 500 }
