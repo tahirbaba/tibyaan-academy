@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getPricing } from "@/lib/pricing-server";
-import { lowestPrice } from "@/lib/pricing";
+import { feeSentence } from "@/lib/pricing";
 import PricingPageClient from "@/components/pricing/pricing-page-client";
 
 import { SITE_URL as BASE_URL, localeMetadataAlternates } from "@/lib/site-config";
@@ -9,27 +9,27 @@ const pricingMeta: Record<string, { title: string; description: string }> = {
   ur: {
     title: "قیمتیں — سستے آن لائن قرآن کورسز",
     description:
-      "تبیان اکیڈمی کی قیمتیں دیکھیں — ${lowest} ماہانہ سے شروع۔ لائیو ٹیچر + AI پلان۔ فیملی ڈسکاؤنٹ۔ 5 دن فری ٹرائل۔",
+      "تبیان اکیڈمی کی قیمتیں دیکھیں۔ لائیو ٹیچر + AI پلان۔ فیملی ڈسکاؤنٹ۔ 5 دن فری ٹرائل۔",
   },
   ar: {
     title: "الأسعار — دورات قرآنية بأسعار معقولة",
     description:
-      "تصفح أسعار أكاديمية تبيان — تبدأ من {lowest} دولار شهرياً. معلم مباشر + خطة ذكاء اصطناعي. خصم عائلي. تجربة مجانية 5 أيام.",
+      "تصفح أسعار أكاديمية تبيان. معلم مباشر + خطة ذكاء اصطناعي. خصم عائلي. تجربة مجانية 5 أيام.",
   },
   en: {
     title: "Pricing — Affordable Online Quran Courses",
     description:
-      "View Tibyaan Academy pricing — plans from ${lowest}/month. Live Teacher + AI plans. Family discount. 5-day free trial.",
+      "View Tibyaan Academy pricing. Live Teacher + AI plans. Family discount. 5-day free trial.",
   },
   fr: {
     title: "Tarifs — Cours de Coran en Ligne Abordables",
     description:
-      "Découvrez les tarifs de Tibyaan Academy — à partir de {lowest}$/mois. Enseignant en direct + plans IA. Réduction familiale. Essai gratuit 5 jours.",
+      "Découvrez les tarifs de Tibyaan Academy. Enseignant en direct + plans IA. Réduction familiale. Essai gratuit 5 jours.",
   },
   id: {
     title: "Harga — Kursus Quran Online Terjangkau",
     description:
-      "Lihat harga Tibyaan Academy — mulai dari ${lowest}/bulan. Guru langsung + paket AI. Diskon keluarga. Uji coba gratis 5 hari.",
+      "Lihat harga Tibyaan Academy. Guru langsung + paket AI. Diskon keluarga. Uji coba gratis 5 hari.",
   },
 };
 
@@ -43,7 +43,7 @@ export async function generateMetadata({
   const pricing = await getPricing();
   const meta = {
     title: base.title,
-    description: base.description.replace("{lowest}", String(lowestPrice(pricing))),
+    description: `${base.description} ${feeSentence(locale, pricing)}`,
   };
 
   return {

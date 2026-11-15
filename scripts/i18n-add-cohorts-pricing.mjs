@@ -49,7 +49,9 @@ const add = {
     family3rd: ["3rd child onward: {percent}% off", "تیسرا بچہ اور اس کے بعد: {percent}% رعایت", "الطفل الثالث وما بعده: خصم {percent}%", "À partir du 3e enfant : {percent} % de réduction", "Anak ke-3 dan seterusnya: diskon {percent}%"],
   },
   pricingPage: {
-    from: ["From", "صرف", "ابتداءً من", "À partir de", "Mulai"],
+    from: ["From", "کم از کم", "ابتداءً من", "À partir de", "Mulai"],
+    liveTeacherLabel: ["With a live teacher", "لائیو استاد کے ساتھ", "مع معلم مباشر", "Avec enseignant en direct", "Dengan guru langsung"],
+    aiOnlyLabel: ["AI Ustaz only", "صرف AI استاذ", "الأستاذ الذكي فقط", "AI Ustaz seul", "Hanya AI Ustaz"],
     tier3Days: ["1-on-1 · 3 days a week", "ون آن ون · ہفتے میں 3 دن", "فردي · 3 أيام في الأسبوع", "Individuel · 3 jours par semaine", "Privat · 3 hari seminggu"],
     tier5Days: ["1-on-1 · 5 days a week", "ون آن ون · ہفتے میں 5 دن", "فردي · 5 أيام في الأسبوع", "Individuel · 5 jours par semaine", "Privat · 5 hari seminggu"],
     tierHifz: ["Hifz · 5 days a week", "حفظ · ہفتے میں 5 دن", "الحفظ · 5 أيام في الأسبوع", "Hifz · 5 jours par semaine", "Hifz · 5 hari seminggu"],

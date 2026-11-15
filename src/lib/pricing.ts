@@ -157,22 +157,52 @@ export const COURSE_SLUG_TO_KEY: Record<string, CourseKey> = {
 };
 
 /**
- * "From $25/month" in the visitor's language. The one place this sentence is
- * written — it used to be typed out ~60 times across the country pages.
+ * The live-teacher fee to quote for a course, and whether it is a "from"
+ * price. Hifz has one fee; the other courses start at the cheaper of the
+ * 3-day and 5-day fees.
  */
-export function fromPriceLabel(locale: string, amount: number): string {
-  const n = roundMoney(amount);
+export function liveTeacherPrice(
+  config: PricingConfig,
+  course: CourseKey
+): { amount: number; isFrom: boolean } {
+  if (course === "hifz") return { amount: config.oneOnOne.hifz, isFrom: false };
+  return {
+    amount: oneOnOneFrom(config, course),
+    isFrom: config.oneOnOne.threeDays !== config.oneOnOne.fiveDays,
+  };
+}
+
+/**
+ * The fee sentence used in page descriptions (search results, link previews)
+ * and the FAQ, in the visitor's language. It always names BOTH fees with their
+ * labels — never a bare "from $25" — so the description a parent reads on
+ * Google says the same thing as the page they land on.
+ *
+ * Pass a course for that course's fees; omit it for the site-wide starting
+ * fees.
+ */
+export function feeSentence(
+  locale: string,
+  config: PricingConfig,
+  course?: CourseKey
+): string {
+  const live = course
+    ? liveTeacherPrice(config, course)
+    : { amount: lowestOneOnOnePrice(config), isFrom: true };
+  const ai = roundMoney(course ? aiOnlyMonthly(config, course) : lowestPrice(config));
+  const aiIsFrom = !course;
+  const l = roundMoney(live.amount);
   switch (locale) {
     case "ur":
-      return `صرف $${n} ماہانہ سے`;
+      return `لائیو استاد کے ساتھ $${l} ماہانہ${live.isFrom ? " سے" : ""}، صرف AI استاذ $${ai} ماہانہ${aiIsFrom ? " سے" : ""}۔`;
     case "ar":
-      return `من ${n} دولار/شهر`;
+      return `مع معلم مباشر ${live.isFrom ? "ابتداءً من " : ""}${l} دولاراً شهرياً، والأستاذ الذكي فقط ${aiIsFrom ? "ابتداءً من " : ""}${ai} دولاراً شهرياً.`;
     case "fr":
-      return `À partir de ${n}$/mois`;
+      return `Avec enseignant en direct ${live.isFrom ? "à partir de " : ""}${l} $/mois, AI Ustaz seul ${aiIsFrom ? "à partir de " : ""}${ai} $/mois.`;
     case "id":
-      return `Mulai dari $${n}/bulan`;
+      return `Dengan guru langsung ${live.isFrom ? "mulai " : ""}$${l}/bulan, hanya AI Ustaz ${aiIsFrom ? "mulai " : ""}$${ai}/bulan.`;
     default:
-      return `From $${n}/month`;
+      return `With a live teacher ${live.isFrom ? "from " : ""}$${l}/month, AI Ustaz only ${aiIsFrom ? "from " : ""}$${ai}/month.`;
   }
 }
 

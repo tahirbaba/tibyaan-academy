@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getPricing } from "@/lib/pricing-server";
-import { lowestPrice } from "@/lib/pricing";
+import { feeSentence } from "@/lib/pricing";
 import CoursesPageClient from "@/components/courses/courses-page-client";
 
 import { SITE_URL as BASE_URL, localeMetadataAlternates } from "@/lib/site-config";
@@ -9,27 +9,27 @@ const coursesMeta: Record<string, { title: string; description: string }> = {
   ur: {
     title: "کورسز — قرآن، حفظ، عربی اور عالم کورس",
     description:
-      "تبیان اکیڈمی کے تمام کورسز دیکھیں — ناظرہ قرآن، حفظ، عربی زبان اور دارس نظامی۔ ${lowest} ماہانہ سے شروع۔",
+      "تبیان اکیڈمی کے تمام کورسز دیکھیں — ناظرہ قرآن، حفظ، عربی زبان اور دارس نظامی۔",
   },
   ar: {
     title: "الدورات — القرآن والحفظ والعربية ودورة العالم",
     description:
-      "تصفح جميع دورات أكاديمية تبيان — الناظرة والحفظ والعربية والعالم. تبدأ من {lowest} دولار شهرياً.",
+      "تصفح جميع دورات أكاديمية تبيان — الناظرة والحفظ والعربية والعالم.",
   },
   en: {
     title: "Courses — Quran, Hifz, Arabic & Aalim Course",
     description:
-      "Browse all Tibyaan Academy courses — Nazra Quran, Hifz, Arabic Language & Dars-e-Nizami. Plans from ${lowest}/month.",
+      "Browse all Tibyaan Academy courses — Nazra Quran, Hifz, Arabic Language & Dars-e-Nizami.",
   },
   fr: {
     title: "Cours — Coran, Hifz, Arabe et Cours Aalim",
     description:
-      "Découvrez tous les cours de Tibyaan Academy — Nazra Coran, Hifz, Langue Arabe & Dars-e-Nizami. À partir de {lowest}$/mois.",
+      "Découvrez tous les cours de Tibyaan Academy — Nazra Coran, Hifz, Langue Arabe & Dars-e-Nizami.",
   },
   id: {
     title: "Kursus — Quran, Hifz, Bahasa Arab & Kursus Aalim",
     description:
-      "Jelajahi semua kursus Tibyaan Academy — Nazra Quran, Hifz, Bahasa Arab & Dars-e-Nizami. Mulai dari ${lowest}/bulan.",
+      "Jelajahi semua kursus Tibyaan Academy — Nazra Quran, Hifz, Bahasa Arab & Dars-e-Nizami.",
   },
 };
 
@@ -43,7 +43,7 @@ export async function generateMetadata({
   const pricing = await getPricing();
   const meta = {
     title: base.title,
-    description: base.description.replace("{lowest}", String(lowestPrice(pricing))),
+    description: `${base.description} ${feeSentence(locale, pricing)}`,
   };
 
   return {

@@ -709,7 +709,9 @@
     "col3Days": "Live teacher · 3 days/week",
     "col5Days": "Live teacher · 5 days/week",
     "tableNoteMonthly": "Prices in US dollars, per month. Hifz with a live teacher is taught five days a week.",
-    "tableNoteYearly": "Prices in US dollars, per year. Hifz with a live teacher is taught five days a week."
+    "tableNoteYearly": "Prices in US dollars, per year. Hifz with a live teacher is taught five days a week.",
+    "liveTeacherLabel": "With a live teacher",
+    "aiOnlyLabel": "AI Ustaz only"
   },
   "dashboard": {
     "title": "Dashboard",

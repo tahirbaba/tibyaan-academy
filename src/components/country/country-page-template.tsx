@@ -4,12 +4,8 @@ import { Link } from "@/i18n/navigation";
 import { Navbar } from "@/components/shared/navbar";
 import { Footer } from "@/components/shared/footer";
 import { CheckCircle } from "lucide-react";
-import {
-  COURSE_SLUG_TO_KEY,
-  aiOnlyMonthly,
-  fromPriceLabel,
-  type PricingConfig,
-} from "@/lib/pricing";
+import { COURSE_SLUG_TO_KEY, type PricingConfig } from "@/lib/pricing";
+import { CoursePrice } from "@/components/pricing/course-price";
 
 type Locale = "ur" | "ar" | "en" | "fr" | "id";
 
@@ -125,10 +121,11 @@ export function CountryPageTemplate({ locale, data, pricing }: Props) {
                 >
                   <h3 className="text-lg font-semibold text-foreground mb-2">{course.title}</h3>
                   <p className="text-sm text-muted-foreground mb-3">{course.desc}</p>
-                  <span className="text-emerald-600 font-medium text-sm">{fromPriceLabel(
-                      lang,
-                      aiOnlyMonthly(pricing, COURSE_SLUG_TO_KEY[course.slug])
-                    )}</span>
+                  <CoursePrice
+                    pricing={pricing}
+                    course={COURSE_SLUG_TO_KEY[course.slug]}
+                    className="border-t pt-3"
+                  />
                 </Link>
               ))}
             </div>

@@ -5,7 +5,8 @@ import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { BookOpen, Sparkles, Languages, GraduationCap } from "lucide-react";
-import { aiOnlyMonthly, formatPrice, type PricingConfig } from "@/lib/pricing";
+import type { PricingConfig } from "@/lib/pricing";
+import { CoursePrice } from "@/components/pricing/course-price";
 import { Reveal, SectionHeading } from "./primitives";
 
 const courses = [
@@ -48,13 +49,11 @@ export function CoursesSection({ pricing }: { pricing: PricingConfig }) {
                       </Badge>
                     </div>
 
-                    <div className="mt-5 flex items-baseline gap-1.5 border-t border-border pt-4">
-                      <span className="text-xs text-muted-foreground">{t("from")}</span>
-                      <span className="font-display text-2xl font-semibold text-primary tabular-nums">
-                        {formatPrice(aiOnlyMonthly(pricing, course.key))}
-                      </span>
-                      <span className="text-xs text-muted-foreground">/mo</span>
-                    </div>
+                    <CoursePrice
+                      pricing={pricing}
+                      course={course.key}
+                      className="mt-5 border-t border-border pt-4"
+                    />
 
                     <Link href={`/courses/${course.slug}`} className="mt-4 block">
                       <Button

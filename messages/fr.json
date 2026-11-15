@@ -709,7 +709,9 @@
     "col3Days": "Enseignant en direct · 3 j/sem.",
     "col5Days": "Enseignant en direct · 5 j/sem.",
     "tableNoteMonthly": "Prix en dollars américains, par mois. Le Hifz avec enseignant en direct a lieu cinq jours par semaine.",
-    "tableNoteYearly": "Prix en dollars américains, par an. Le Hifz avec enseignant en direct a lieu cinq jours par semaine."
+    "tableNoteYearly": "Prix en dollars américains, par an. Le Hifz avec enseignant en direct a lieu cinq jours par semaine.",
+    "liveTeacherLabel": "Avec enseignant en direct",
+    "aiOnlyLabel": "AI Ustaz seul"
   },
   "dashboard": {
     "title": "Tableau de bord",

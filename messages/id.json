@@ -709,7 +709,9 @@
     "col3Days": "Guru langsung · 3 hari/minggu",
     "col5Days": "Guru langsung · 5 hari/minggu",
     "tableNoteMonthly": "Harga dalam dolar AS, per bulan. Hifz dengan guru langsung diajarkan lima hari seminggu.",
-    "tableNoteYearly": "Harga dalam dolar AS, per tahun. Hifz dengan guru langsung diajarkan lima hari seminggu."
+    "tableNoteYearly": "Harga dalam dolar AS, per tahun. Hifz dengan guru langsung diajarkan lima hari seminggu.",
+    "liveTeacherLabel": "Dengan guru langsung",
+    "aiOnlyLabel": "Hanya AI Ustaz"
   },
   "dashboard": {
     "title": "Dashboard",

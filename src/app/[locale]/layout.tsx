@@ -13,17 +13,16 @@ import { WhatsAppClickTracker } from "@/components/shared/whatsapp-click-tracker
 
 import { localeMetadataAlternates, absoluteUrl } from "@/lib/site-config";
 import { getPricingOrNull } from "@/lib/pricing-server";
-import { lowestPrice } from "@/lib/pricing";
+import { feeSentence } from "@/lib/pricing";
 
 const localeMetadata: Record<
   string,
-  { title: string; description: string; priceSentence?: string }
+  { title: string; description: string }
 > = {
   ur: {
     title: "تبیان اکیڈمی — آن لائن قرآن و اسلامی تعلیم",
     description:
       "قرآن، حفظ، عربی اور اسلامی علوم آن لائن سیکھیں — لائیو اساتذہ + AI استاذ کے ساتھ۔",
-    priceSentence: " ماہانہ صرف ${lowest} سے۔",
   },
   ar: {
     title: "أكاديمية تبيان — تعليم القرآن والعلوم الإسلامية",
@@ -34,7 +33,6 @@ const localeMetadata: Record<
     title: "Tibyaan Academy — Online Quran & Islamic Education",
     description:
       "Learn Quran, Hifz, Arabic & Islamic Sciences online with live teachers + AI Ustaz.",
-    priceSentence: " Plans from ${lowest}/month.",
   },
   fr: {
     title: "Tibyaan Academy — Éducation Coranique et Islamique en Ligne",
@@ -45,7 +43,6 @@ const localeMetadata: Record<
     title: "Tibyaan Academy — Pendidikan Quran & Islam Online",
     description:
       "Belajar Quran, Hifz, Bahasa Arab & Ilmu Islam online dengan guru langsung + AI Ustaz.",
-    priceSentence: " Mulai dari ${lowest}/bulan.",
   },
 };
 
@@ -72,11 +69,9 @@ export async function generateMetadata({
   const pricing = await getPricingOrNull();
   const meta = {
     title: base.title,
-    description:
-      base.description +
-      (pricing && base.priceSentence
-        ? base.priceSentence.replace("{lowest}", String(lowestPrice(pricing)))
-        : ""),
+    description: pricing
+      ? `${base.description} ${feeSentence(locale, pricing)}`
+      : base.description,
   };
 
   return {

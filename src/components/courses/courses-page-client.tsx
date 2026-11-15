@@ -27,12 +27,8 @@ import {
 type CourseKey = "nazra" | "hifz" | "arabic" | "aalim";
 type FilterKey = "all" | CourseKey;
 
-import {
-  aiOnlyMonthly,
-  formatPrice,
-  oneOnOneFrom,
-  type PricingConfig,
-} from "@/lib/pricing";
+import type { PricingConfig } from "@/lib/pricing";
+import { CoursePrice } from "@/components/pricing/course-price";
 
 const courses: {
   key: CourseKey;
@@ -216,34 +212,12 @@ export default function CoursesPageClient({
                       ))}
                     </ul>
 
-                    {/* Pricing */}
-                    <div className="mt-6 grid grid-cols-2 gap-3">
-                      <div className="bg-card/60 border rounded-xl p-4 text-center">
-                        <p className="text-xs font-medium text-muted-foreground">
-                          {t("plan1Label")}
-                        </p>
-                        <p className="text-2xl font-bold text-primary mt-1">
-                          <span className="text-xs font-normal text-muted-foreground me-1">
-                            {tc("from")}
-                          </span>
-                          {formatPrice(oneOnOneFrom(pricing, course.key))}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {t("perMonth")}
-                        </p>
-                      </div>
-                      <div className="bg-card/60 border rounded-xl p-4 text-center">
-                        <p className="text-xs font-medium text-muted-foreground">
-                          {t("plan2Label")}
-                        </p>
-                        <p className="text-2xl font-bold text-accent mt-1">
-                          {formatPrice(aiOnlyMonthly(pricing, course.key))}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {t("perMonth")}
-                        </p>
-                      </div>
-                    </div>
+                    {/* Pricing — the same block every course card uses */}
+                    <CoursePrice
+                      pricing={pricing}
+                      course={course.key}
+                      className="mt-6 rounded-xl border bg-card/60 p-4"
+                    />
 
                     {/* Flexible scheduling line */}
                     <p className="mt-4 text-xs text-primary font-medium">
