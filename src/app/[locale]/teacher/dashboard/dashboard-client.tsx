@@ -47,7 +47,7 @@ export function TeacherDashboardClient({
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="rounded-2xl bg-gradient-to-r from-emerald-600 to-emerald-500 p-6 md:p-8 text-white"
+        className="pattern-stars overflow-hidden rounded-2xl border border-[#C9A84C]/25 bg-gradient-to-br from-[#0F2922] via-[#1B4332] to-[#143528] p-6 text-white shadow-lg md:p-8"
       >
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>

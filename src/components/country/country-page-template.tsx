@@ -63,23 +63,23 @@ export function CountryPageTemplate({ locale, data, pricing }: Props) {
       <Navbar />
       <main className="flex-1" dir={isRTL ? "rtl" : "ltr"}>
         {/* Hero */}
-        <section className="bg-gradient-to-b from-emerald-50 to-white dark:from-emerald-950/20 dark:to-background py-20 px-4">
+        <section className="pattern-stars relative overflow-hidden bg-gradient-to-br from-[#0F2922] via-[#1B4332] to-[#143528] px-4 py-20 text-white md:py-28">
           <div className="max-w-4xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 px-4 py-1.5 rounded-full text-sm font-medium mb-6">
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#C9A84C]/40 bg-[#C9A84C]/10 px-4 py-1.5 text-sm font-medium text-[#E3CE8A]">
               {data.flag} {t.badge}
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-6">{t.hero_heading}</h1>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">{t.hero_desc}</p>
+            <h1 className="hero-rise mb-6 font-display text-4xl font-semibold leading-tight text-white md:text-5xl">{t.hero_heading}</h1>
+            <p className="mx-auto mb-9 max-w-2xl text-lg leading-relaxed text-white/75">{t.hero_desc}</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 href="/signup"
-                className="inline-flex items-center justify-center px-8 py-3 rounded-xl bg-emerald-600 text-white font-semibold hover:bg-emerald-700 transition-colors"
+                className="inline-flex items-center justify-center rounded-full bg-[#C9A84C] px-9 py-3.5 font-semibold text-[#0F2922] shadow-lg shadow-black/25 transition-transform hover:-translate-y-0.5 hover:bg-[#D4BD6E]"
               >
                 {t.cta_trial}
               </Link>
               <Link
                 href="/courses"
-                className="inline-flex items-center justify-center px-8 py-3 rounded-xl border border-emerald-600 text-emerald-700 dark:text-emerald-300 font-semibold hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition-colors"
+                className="inline-flex items-center justify-center rounded-full border border-white/40 px-9 py-3.5 font-semibold text-white transition-colors hover:bg-white hover:text-[#1B4332]"
               >
                 {t.cta_courses}
               </Link>
@@ -88,18 +88,19 @@ export function CountryPageTemplate({ locale, data, pricing }: Props) {
         </section>
 
         {/* Timezone info */}
-        <div className="bg-emerald-50 dark:bg-emerald-950/20 py-3 px-4 text-center text-sm text-emerald-700 dark:text-emerald-300">
+        <div className="border-b border-border bg-accent/10 px-4 py-3 text-center text-sm font-medium text-[#6B5516] dark:text-accent">
           🕐 {t.timezone_msg}
         </div>
 
         {/* Why Choose */}
-        <section className="py-16 px-4 bg-white dark:bg-background">
+        <section className="pattern-stars pattern-stars-light bg-background px-4 py-20 md:py-24">
           <div className="max-w-4xl mx-auto">
-            <h2 className="text-3xl font-bold text-center text-foreground mb-10">{t.why_heading}</h2>
+            <h2 className="mb-3 text-center font-display text-3xl font-semibold text-primary dark:text-foreground md:text-4xl">{t.why_heading}</h2>
+            <div className="ornament mb-10 justify-center" aria-hidden><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0l3.5 8.5L24 12l-8.5 3.5L12 24l-3.5-8.5L0 12l8.5-3.5z" /></svg></div>
             <div className="grid md:grid-cols-2 gap-4">
               {t.features.map((feature, i) => (
-                <div key={i} className="flex items-start gap-3 p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/20">
-                  <CheckCircle className="w-5 h-5 text-emerald-600 mt-0.5 shrink-0" />
+                <div key={i} className="premium-card flex items-start gap-3 p-5">
+                  <CheckCircle className="mt-0.5 h-5 w-5 shrink-0 text-accent" aria-hidden />
                   <span className="text-foreground">{feature}</span>
                 </div>
               ))}
@@ -108,18 +109,18 @@ export function CountryPageTemplate({ locale, data, pricing }: Props) {
         </section>
 
         {/* Courses */}
-        <section className="py-16 px-4 bg-muted/30">
+        <section className="bg-muted/40 px-4 py-20 md:py-24">
           <div className="max-w-4xl mx-auto">
-            <h2 className="text-3xl font-bold text-center text-foreground mb-4">{t.courses_heading}</h2>
+            <h2 className="mb-4 text-center font-display text-3xl font-semibold text-primary dark:text-foreground md:text-4xl">{t.courses_heading}</h2>
             <p className="text-center text-muted-foreground mb-10">{t.courses_desc}</p>
             <div className="grid md:grid-cols-2 gap-6">
               {t.courses.map((course) => (
                 <Link
                   key={course.slug}
                   href={`/courses/${course.slug}`}
-                  className="block p-6 rounded-xl border bg-white dark:bg-card hover:border-emerald-400 transition-colors"
+                  className="premium-card block p-6"
                 >
-                  <h3 className="text-lg font-semibold text-foreground mb-2">{course.title}</h3>
+                  <h3 className="mb-2 font-display text-xl font-semibold text-foreground">{course.title}</h3>
                   <p className="text-sm text-muted-foreground mb-3">{course.desc}</p>
                   <CoursePrice
                     pricing={pricing}
@@ -133,13 +134,13 @@ export function CountryPageTemplate({ locale, data, pricing }: Props) {
         </section>
 
         {/* Stats */}
-        <section className="py-16 px-4 bg-white dark:bg-background">
+        <section className="bg-background px-4 py-20 md:py-24">
           <div className="max-w-3xl mx-auto">
-            <h2 className="text-3xl font-bold text-center text-foreground mb-8">{t.testimonials_heading}</h2>
+            <h2 className="mb-8 text-center font-display text-3xl font-semibold text-primary dark:text-foreground md:text-4xl">{t.testimonials_heading}</h2>
             <div className="grid grid-cols-3 gap-4">
               {t.stats.map(({ value, label }) => (
-                <div key={label} className="text-center p-6 rounded-xl bg-emerald-50 dark:bg-emerald-950/20">
-                  <div className="text-3xl font-bold text-emerald-600 mb-1">{value}</div>
+                <div key={label} className="premium-card p-6 text-center">
+                  <div className="mb-1 font-display text-3xl font-semibold text-primary">{value}</div>
                   <div className="text-sm text-muted-foreground">{label}</div>
                 </div>
               ))}
@@ -149,9 +150,9 @@ export function CountryPageTemplate({ locale, data, pricing }: Props) {
             {data.testimonials && data.testimonials.length > 0 && (
               <div className="mt-12 grid md:grid-cols-2 gap-6">
                 {data.testimonials.slice(0, 4).map((r, i) => (
-                  <div key={i} className="p-6 rounded-xl border bg-card">
+                  <div key={i} className="premium-card p-6">
                     <div className="flex items-center gap-3 mb-3">
-                      <div className="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-900 flex items-center justify-center text-emerald-700 dark:text-emerald-300 font-bold text-sm">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
                         {r.name.charAt(0)}
                       </div>
                       <div>
@@ -173,13 +174,13 @@ export function CountryPageTemplate({ locale, data, pricing }: Props) {
         </section>
 
         {/* Final CTA */}
-        <section className="py-16 px-4 bg-emerald-600 text-white">
+        <section className="pattern-stars bg-gradient-to-br from-[#0F2922] via-[#1B4332] to-[#143528] px-4 py-20 text-white">
           <div className="max-w-2xl mx-auto text-center">
-            <h2 className="text-3xl font-bold mb-4">{t.cta_final_heading}</h2>
-            <p className="text-emerald-100 mb-8">{t.cta_final_desc}</p>
+            <h2 className="mb-4 font-display text-3xl font-semibold md:text-4xl">{t.cta_final_heading}</h2>
+            <p className="mb-8 text-white/75">{t.cta_final_desc}</p>
             <Link
               href="/signup"
-              className="inline-flex items-center justify-center px-8 py-3 rounded-xl bg-white text-emerald-700 font-semibold hover:bg-emerald-50 transition-colors"
+              className="inline-flex items-center justify-center rounded-full bg-[#C9A84C] px-9 py-3.5 font-semibold text-[#0F2922] shadow-lg transition-transform hover:-translate-y-0.5 hover:bg-[#D4BD6E]"
             >
               {t.cta_final_btn}
             </Link>

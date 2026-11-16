@@ -331,3 +331,29 @@
 .font-display.tabular-nums {
   font-variant-numeric: lining-nums tabular-nums;
 }
+
+/* Public pages: every page title and section heading uses the display serif,
+   so the About, Courses, Pricing, FAQ and country pages read as one site with
+   the homepage. Public pages are the ones laid out as
+   `.flex.flex-col.min-h-screen > main`; the dashboards use a different shell
+   (`.flex.h-screen`) and deliberately keep the plain sans for dense screens. */
+.flex.flex-col.min-h-screen > main h1,
+.flex.flex-col.min-h-screen > main h2 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-variant-numeric: lining-nums;
+  letter-spacing: -0.01em;
+}
+:lang(ur) .flex.flex-col.min-h-screen > main h1,
+:lang(ur) .flex.flex-col.min-h-screen > main h2,
+:lang(ar) .flex.flex-col.min-h-screen > main h1,
+:lang(ar) .flex.flex-col.min-h-screen > main h2 {
+  font-family: inherit;
+  letter-spacing: 0;
+}
+
+/* Dashboards: a calmer canvas behind the cards, and tabular figures so
+   columns of numbers line up. */
+.flex.h-screen main {
+  font-variant-numeric: tabular-nums;
+}
