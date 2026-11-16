@@ -337,7 +337,7 @@ export const USA_PAGE: CountryPageData = {
       badge: "Serving Muslim Families Across the USA",
       hero_heading: "Learn Quran Online in the USA",
       hero_desc:
-        "Join thousands of Muslim families across New York, Chicago, Houston, Los Angeles, and the rest of the USA learning Quran with Tibyaan Academy. Expert teachers, flexible US time zone scheduling, and AI-powered learning.",
+        "Join hundreds of Muslim families across New York, Chicago, Houston, Los Angeles, and the rest of the USA learning Quran with Tibyaan Academy. Expert teachers, flexible US time zone scheduling, and AI-powered learning.",
       cta_trial: "Start 5-Day Free Trial",
       cta_courses: "View Courses",
       why_heading: "Why USA Muslims Choose Tibyaan Academy",
@@ -373,7 +373,7 @@ export const USA_PAGE: CountryPageData = {
     ur: {
       badge: "امریکہ میں مسلم خاندانوں کی خدمت میں",
       hero_heading: "امریکہ میں آن لائن قرآن سیکھیں",
-      hero_desc: "نیویارک، شکاگو، ہیوسٹن اور پورے امریکہ میں ہزاروں مسلم خاندانوں کے ساتھ شامل ہوں جو تبیان اکیڈمی سے قرآن سیکھ رہے ہیں۔",
+      hero_desc: "نیویارک، شکاگو، ہیوسٹن اور پورے امریکہ میں سینکڑوں مسلم خاندانوں کے ساتھ شامل ہوں جو تبیان اکیڈمی سے قرآن سیکھ رہے ہیں۔",
       cta_trial: "5 دن مفت ٹرائل شروع کریں",
       cta_courses: "کورسز دیکھیں",
       why_heading: "امریکہ کے مسلمان تبیان اکیڈمی کیوں چنتے ہیں",
@@ -407,7 +407,7 @@ export const USA_PAGE: CountryPageData = {
     ar: {
       badge: "نخدم العائلات المسلمة في الولايات المتحدة",
       hero_heading: "تعلم القرآن عبر الإنترنت في الولايات المتحدة",
-      hero_desc: "انضم إلى آلاف العائلات المسلمة في نيويورك وشيكاغو وهيوستن وسائر أنحاء الولايات المتحدة.",
+      hero_desc: "انضم إلى مئات العائلات المسلمة في نيويورك وشيكاغو وهيوستن وسائر أنحاء الولايات المتحدة.",
       cta_trial: "ابدأ تجربة مجانية لمدة 5 أيام",
       cta_courses: "استعرض الدورات",
       why_heading: "لماذا يختار مسلمو الولايات المتحدة أكاديمية تبيان",
@@ -441,7 +441,7 @@ export const USA_PAGE: CountryPageData = {
     fr: {
       badge: "Au service des familles musulmanes aux États-Unis",
       hero_heading: "Apprendre le Coran en ligne aux États-Unis",
-      hero_desc: "Rejoignez des milliers de familles musulmanes à New York, Chicago, Houston et partout aux États-Unis.",
+      hero_desc: "Rejoignez des centaines de familles musulmanes à New York, Chicago, Houston et partout aux États-Unis.",
       cta_trial: "Commencer l'essai gratuit de 5 jours",
       cta_courses: "Voir les cours",
       why_heading: "Pourquoi les musulmans des États-Unis choisissent Tibyaan Academy",
@@ -475,7 +475,7 @@ export const USA_PAGE: CountryPageData = {
     id: {
       badge: "Melayani Keluarga Muslim di Amerika Serikat",
       hero_heading: "Belajar Quran Online di Amerika Serikat",
-      hero_desc: "Bergabunglah dengan ribuan keluarga Muslim di New York, Chicago, Houston, dan seluruh Amerika Serikat.",
+      hero_desc: "Bergabunglah dengan ratusan keluarga Muslim di New York, Chicago, Houston, dan seluruh Amerika Serikat.",
       cta_trial: "Mulai Uji Coba Gratis 5 Hari",
       cta_courses: "Lihat Kursus",
       why_heading: "Mengapa Muslim Amerika Memilih Tibyaan Academy",

@@ -75,21 +75,12 @@ export const metadata: Metadata = {
     url: BASE_URL,
     locale: "en_US",
     alternateLocale: ["ur_PK", "ar_SA", "fr_FR", "id_ID"],
-    images: [
-      {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "Tibyaan Academy — Online Quran Education",
-      },
-    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Tibyaan Academy — Online Quran & Islamic Education",
     description:
       "Learn Quran, Hifz, Arabic & Islamic Sciences online with live teachers + AI Ustaz.",
-    images: ["/og-image.png"],
     creator: "@TibyaanAcademy",
   },
   verification: {

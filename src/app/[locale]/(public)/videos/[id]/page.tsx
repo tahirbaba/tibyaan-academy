@@ -7,7 +7,7 @@ import { Link } from "@/i18n/navigation";
 import { VideoShareButtons } from "@/components/video/video-share-buttons";
 import { ArrowLeft, User, Eye, Calendar, BookOpen } from "lucide-react";
 
-import { SITE_URL as BASE_URL } from "@/lib/site-config";
+import { SITE_URL as BASE_URL, openGraphBase } from "@/lib/site-config";
 
 interface Props {
   params: Promise<{ locale: string; id: string }>;
@@ -92,6 +92,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: `${video.title} — Tibyaan Academy`,
     description,
     openGraph: {
+      ...openGraphBase(locale),
       title: video.title,
       description,
       url: pageUrl,

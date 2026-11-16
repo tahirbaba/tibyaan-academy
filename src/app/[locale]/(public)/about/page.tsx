@@ -10,7 +10,7 @@ import {
   Video, Bot, Shield, Check, Clock, Layers, Percent
 } from "lucide-react";
 import { Link } from "@/i18n/navigation";
-import { localeMetadataAlternates, absoluteUrl } from "@/lib/site-config";
+import { localeMetadataAlternates, absoluteUrl, openGraphBase } from "@/lib/site-config";
 
 const aboutMeta: Record<string, { title: string; description: string }> = {
   ur: { title: "ہمارے بارے میں — تبیان اکیڈمی", description: "تبیان اکیڈمی ایک جدید ڈیجیٹل مدرسہ ہے جو آن لائن قرآن، حفظ، عربی اور اسلامی تعلیم فراہم کرتا ہے۔" },
@@ -27,7 +27,8 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     title: meta.title,
     description: meta.description,
     alternates: localeMetadataAlternates(locale, "/about"),
-    openGraph: { title: meta.title, description: meta.description, url: absoluteUrl(locale, "/about") },
+    openGraph: {
+      ...openGraphBase(locale), title: meta.title, description: meta.description, url: absoluteUrl(locale, "/about") },
   };
 }
 
@@ -289,11 +290,11 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
                "Begin Your Islamic Journey Today"}
             </h2>
             <p className="mt-4 text-white/80 text-lg max-w-xl mx-auto">
-              {locale === "ur" ? "ہزاروں طلبا کے ساتھ شامل ہوں جو قرآن اور اسلامی علوم آن لائن سیکھ رہے ہیں۔ آپ کے پہلے 5 دن بالکل مفت ہیں۔" :
-               locale === "ar" ? "انضم لآلاف الطلاب الذين يتعلمون القرآن والعلوم الإسلامية عبر الإنترنت. أول 5 أيام مجانية تماماً." :
-               locale === "fr" ? "Rejoignez des milliers d'étudiants qui apprennent le Coran en ligne. Vos 5 premiers jours sont entièrement gratuits." :
-               locale === "id" ? "Bergabunglah dengan ribuan siswa yang belajar Quran secara online. 5 hari pertama Anda sepenuhnya gratis." :
-               "Join thousands of students learning Quran and Islamic sciences online. Your first 5 days are completely free."}
+              {locale === "ur" ? "سینکڑوں طلبا کے ساتھ شامل ہوں جو قرآن اور اسلامی علوم آن لائن سیکھ رہے ہیں۔ آپ کے پہلے 5 دن بالکل مفت ہیں۔" :
+               locale === "ar" ? "انضم لمئات الطلاب الذين يتعلمون القرآن والعلوم الإسلامية عبر الإنترنت. أول 5 أيام مجانية تماماً." :
+               locale === "fr" ? "Rejoignez des centaines d'étudiants qui apprennent le Coran en ligne. Vos 5 premiers jours sont entièrement gratuits." :
+               locale === "id" ? "Bergabunglah dengan ratusan siswa yang belajar Quran secara online. 5 hari pertama Anda sepenuhnya gratis." :
+               "Join hundreds of students learning Quran and Islamic sciences online. Your first 5 days are completely free."}
             </p>
             <div className="mt-8 flex flex-wrap gap-4 justify-center">
               <Link href="/signup" className="bg-white text-[#1B4332] hover:bg-white/90 font-bold px-10 py-4 rounded-xl transition-colors text-lg">

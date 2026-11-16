@@ -28,8 +28,7 @@ import {
   SITE_NAME,
   SITE_URL,
   absoluteUrl,
-  localeMetadataAlternates,
-} from "@/lib/site-config";
+  localeMetadataAlternates, openGraphBase } from "@/lib/site-config";
 import { CalendarDays, Clock, Timer, UserRound, Users } from "lucide-react";
 
 type Params = Promise<{ locale: string; slug: string }>;
@@ -68,6 +67,7 @@ export async function generateMetadata({
     description,
     alternates: localeMetadataAlternates(locale, `/group-classes/${slug}`),
     openGraph: {
+      ...openGraphBase(locale),
       title,
       description,
       url: absoluteUrl(locale, `/group-classes/${slug}`),

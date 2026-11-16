@@ -196,14 +196,31 @@ export function feeSentence(
     case "ur":
       return `لائیو استاد کے ساتھ $${l} ماہانہ${live.isFrom ? " سے" : ""}، صرف AI استاذ $${ai} ماہانہ${aiIsFrom ? " سے" : ""}۔`;
     case "ar":
-      return `مع معلم مباشر ${live.isFrom ? "ابتداءً من " : ""}${l} دولاراً شهرياً، والأستاذ الذكي فقط ${aiIsFrom ? "ابتداءً من " : ""}${ai} دولاراً شهرياً.`;
+      return `مع معلم مباشر ${live.isFrom ? "من " : ""}${l}$ شهرياً، والأستاذ الذكي فقط ${aiIsFrom ? "من " : ""}${ai}$ شهرياً.`;
     case "fr":
-      return `Avec enseignant en direct ${live.isFrom ? "à partir de " : ""}${l} $/mois, AI Ustaz seul ${aiIsFrom ? "à partir de " : ""}${ai} $/mois.`;
+      return `Avec enseignant en direct ${live.isFrom ? "dès " : ""}${l} $/mois, AI Ustaz seul ${aiIsFrom ? "dès " : ""}${ai} $/mois.`;
     case "id":
       return `Dengan guru langsung ${live.isFrom ? "mulai " : ""}$${l}/bulan, hanya AI Ustaz ${aiIsFrom ? "mulai " : ""}$${ai}/bulan.`;
     default:
       return `With a live teacher ${live.isFrom ? "from " : ""}$${l}/month, AI Ustaz only ${aiIsFrom ? "from " : ""}$${ai}/month.`;
   }
+}
+
+/**
+ * Add the fee sentence to a page description when the result still fits in a
+ * search result (about 165 characters). A description that would be cut off
+ * mid-price is worse than one without the price, so a long description is
+ * returned unchanged.
+ */
+export function appendFeeSentence(
+  description: string,
+  locale: string,
+  config: PricingConfig,
+  course?: CourseKey,
+  maxLength = 165
+): string {
+  const combined = `${description} ${feeSentence(locale, config, course)}`;
+  return combined.length <= maxLength ? combined : description;
 }
 
 /**

@@ -8,7 +8,7 @@ import { Link } from "@/i18n/navigation";
 import { BookOpen } from "lucide-react";
 import { STATIC_BLOG_POSTS } from "@/lib/data/blog-seed";
 
-import { SITE_URL as BASE_URL, localeMetadataAlternates } from "@/lib/site-config";
+import { SITE_URL as BASE_URL, localeMetadataAlternates, openGraphBase } from "@/lib/site-config";
 import { contentToPlainText, truncateText } from "@/lib/markdown";
 import { publishedBlogPosts, publishedDars } from "@/lib/content/publication";
 
@@ -55,6 +55,7 @@ export async function generateMetadata({
     description: meta.description,
     alternates: localeMetadataAlternates(locale, "/blog"),
     openGraph: {
+      ...openGraphBase(locale),
       title: meta.title,
       description: meta.description,
       url: `${BASE_URL}/${locale}/blog`,

@@ -3,7 +3,7 @@ import { getPricing } from "@/lib/pricing-server";
 import { feeSentence } from "@/lib/pricing";
 import PricingPageClient from "@/components/pricing/pricing-page-client";
 
-import { SITE_URL as BASE_URL, localeMetadataAlternates } from "@/lib/site-config";
+import { SITE_URL as BASE_URL, localeMetadataAlternates, openGraphBase } from "@/lib/site-config";
 
 const pricingMeta: Record<string, { title: string; description: string }> = {
   ur: {
@@ -51,6 +51,7 @@ export async function generateMetadata({
     description: meta.description,
     alternates: localeMetadataAlternates(locale, "/pricing"),
     openGraph: {
+      ...openGraphBase(locale),
       title: meta.title,
       description: meta.description,
       url: `${BASE_URL}/${locale}/pricing`,

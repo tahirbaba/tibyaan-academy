@@ -11,7 +11,7 @@ import { FloatingWhatsApp } from "@/components/shared/floating-whatsapp";
 import { ExitIntentPopup } from "@/components/shared/exit-intent-popup";
 import { WhatsAppClickTracker } from "@/components/shared/whatsapp-click-tracker";
 
-import { localeMetadataAlternates, absoluteUrl } from "@/lib/site-config";
+import { localeMetadataAlternates, absoluteUrl, openGraphBase } from "@/lib/site-config";
 import { getPricingOrNull } from "@/lib/pricing-server";
 import { feeSentence } from "@/lib/pricing";
 
@@ -79,6 +79,7 @@ export async function generateMetadata({
     description: meta.description,
     alternates: localeMetadataAlternates(locale),
     openGraph: {
+      ...openGraphBase(locale),
       title: meta.title,
       description: meta.description,
       url: absoluteUrl(locale),

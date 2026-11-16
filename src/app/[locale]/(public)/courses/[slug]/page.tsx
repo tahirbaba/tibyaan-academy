@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import CourseDetailClient from "@/components/courses/course-detail-client";
 
-import { SITE_URL as BASE_URL, localeMetadataAlternates } from "@/lib/site-config";
+import { SITE_URL as BASE_URL, localeMetadataAlternates, openGraphBase } from "@/lib/site-config";
 import {
   COURSE_SLUG_TO_KEY,
   aiOnlyMonthly,
@@ -118,6 +118,7 @@ export async function generateMetadata({
     description,
     alternates: localeMetadataAlternates(locale, `/courses/${slug}`),
     openGraph: {
+      ...openGraphBase(locale),
       title,
       description,
       url: `${BASE_URL}/${locale}/courses/${slug}`,

@@ -4,7 +4,7 @@ import { darsCircles, users } from "@/lib/db/schema";
 import { eq, gte } from "drizzle-orm";
 import { getLocale, getTranslations } from "next-intl/server";
 import { Calendar, Users, BookOpen } from "lucide-react";
-import { localeMetadataAlternates, absoluteUrl } from "@/lib/site-config";
+import { localeMetadataAlternates, absoluteUrl, openGraphBase } from "@/lib/site-config";
 
 const circlesMeta: Record<string, { title: string; description: string }> = {
   ur: { title: "درس سرکل — لائیو گروپ کلاسز", description: "تبیان اکیڈمی کے لائیو درس سرکل میں شامل ہوں — گروپ اسلامی کلاسز۔" },
@@ -25,7 +25,8 @@ export async function generateMetadata({
     title: meta.title,
     description: meta.description,
     alternates: localeMetadataAlternates(locale, "/dars-circles"),
-    openGraph: { title: meta.title, description: meta.description, url: absoluteUrl(locale, "/dars-circles") },
+    openGraph: {
+      ...openGraphBase(locale), title: meta.title, description: meta.description, url: absoluteUrl(locale, "/dars-circles") },
   };
 }
 

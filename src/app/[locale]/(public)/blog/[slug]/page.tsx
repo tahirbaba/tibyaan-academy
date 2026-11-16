@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import { STATIC_BLOG_POSTS } from "@/lib/data/blog-seed";
 
-import { SITE_URL as BASE_URL, localeMetadataAlternates } from "@/lib/site-config";
+import { SITE_URL as BASE_URL, localeMetadataAlternates, openGraphBase } from "@/lib/site-config";
 import { publishedBlogPosts } from "@/lib/content/publication";
 
 type LocaleKey = "en" | "ur" | "ar" | "fr" | "id";
@@ -140,6 +140,7 @@ export async function generateMetadata({
     description,
     alternates: localeMetadataAlternates(locale, `/blog/${slug}`),
     openGraph: {
+      ...openGraphBase(locale),
       title,
       description,
       url: `${BASE_URL}/${locale}/blog/${slug}`,

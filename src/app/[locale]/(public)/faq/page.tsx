@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import { Navbar } from "@/components/shared/navbar";
 import { Footer } from "@/components/shared/footer";
 import { Link } from "@/i18n/navigation";
-import { SITE_URL, localeMetadataAlternates, absoluteUrl } from "@/lib/site-config";
+import { SITE_URL, localeMetadataAlternates, absoluteUrl, openGraphBase } from "@/lib/site-config";
 
 const metaByLocale: Record<string, { title: string; description: string }> = {
   en: { title: "FAQ — Frequently Asked Questions | Tibyaan Academy", description: "Get answers to common questions about enrollment, pricing, teachers, schedule, free trial, and more at Tibyaan Academy." },
@@ -91,7 +91,8 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     title: meta.title,
     description: meta.description,
     alternates: localeMetadataAlternates(locale, "/faq"),
-    openGraph: { title: meta.title, description: meta.description, url: absoluteUrl(locale, "/faq") },
+    openGraph: {
+      ...openGraphBase(locale), title: meta.title, description: meta.description, url: absoluteUrl(locale, "/faq") },
   };
 }
 

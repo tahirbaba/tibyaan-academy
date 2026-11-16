@@ -4,7 +4,7 @@ import { users, teacherProfiles, teacherVideos } from "@/lib/db/schema";
 import { eq, and, sql, desc } from "drizzle-orm";
 import { Link } from "@/i18n/navigation";
 import { Users, Star, BookOpen, Play } from "lucide-react";
-import { localeMetadataAlternates, absoluteUrl } from "@/lib/site-config";
+import { localeMetadataAlternates, absoluteUrl, openGraphBase } from "@/lib/site-config";
 
 const teachersMeta: Record<string, { title: string; description: string }> = {
   ur: { title: "ہمارے اساتذہ — مستند قرآن ٹیچرز", description: "تبیان اکیڈمی کے مستند اساتذہ سے ملیں — قرآن، حفظ، عربی اور اسلامی علوم۔" },
@@ -25,7 +25,8 @@ export async function generateMetadata({
     title: meta.title,
     description: meta.description,
     alternates: localeMetadataAlternates(locale, "/teachers"),
-    openGraph: { title: meta.title, description: meta.description, url: absoluteUrl(locale, "/teachers") },
+    openGraph: {
+      ...openGraphBase(locale), title: meta.title, description: meta.description, url: absoluteUrl(locale, "/teachers") },
   };
 }
 

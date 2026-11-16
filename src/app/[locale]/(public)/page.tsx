@@ -21,7 +21,7 @@ import { GroupClassesSection } from "@/components/homepage/group-classes-section
 import { HomeMotion } from "@/components/homepage/primitives";
 import { getPricing } from "@/lib/pricing-server";
 
-import { localeMetadataAlternates, absoluteUrl } from "@/lib/site-config";
+import { localeMetadataAlternates, absoluteUrl, openGraphBase } from "@/lib/site-config";
 
 const homeMeta: Record<string, { title: string; description: string }> = {
   ur: {
@@ -64,6 +64,7 @@ export async function generateMetadata({
     description: meta.description,
     alternates: localeMetadataAlternates(locale),
     openGraph: {
+      ...openGraphBase(locale),
       title: meta.title,
       description: meta.description,
       url: absoluteUrl(locale),

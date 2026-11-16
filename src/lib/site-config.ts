@@ -93,6 +93,43 @@ export function absoluteUrl(locale: string, path = ""): string {
   return `${SITE_URL}/${locale}${path}`;
 }
 
+const OG_LOCALE: Record<string, string> = {
+  ur: "ur_PK",
+  ar: "ar_SA",
+  en: "en_US",
+  fr: "fr_FR",
+  id: "id_ID",
+};
+
+/**
+ * The Open Graph fields every page shares: the share image, the site name,
+ * the type and the locale.
+ *
+ * In Next.js a page that sets `openGraph` REPLACES the layout's whole
+ * `openGraph` object — it is not merged. Every page here sets its own title
+ * and URL, so every page silently dropped the image and the site name, and a
+ * link shared on WhatsApp or Facebook showed no picture. Spread this FIRST in
+ * a page's `openGraph` so the page's own fields (and a page's own image, e.g.
+ * a dars poster) still win:
+ *
+ *   openGraph: { ...openGraphBase(locale), title, description, url }
+ */
+export function openGraphBase(locale: string) {
+  return {
+    type: "website" as const,
+    siteName: SITE_NAME,
+    locale: OG_LOCALE[locale] ?? "en_US",
+    images: [
+      {
+        url: `${SITE_URL}/${locale}/opengraph-image`,
+        width: 1200,
+        height: 630,
+        alt: `${SITE_NAME} — Online Quran & Islamic Education`,
+      },
+    ],
+  };
+}
+
 /**
  * hreflang map for a page: every locale version of the same path,
  * plus an x-default pointing at the site's default locale.

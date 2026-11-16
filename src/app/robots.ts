@@ -7,7 +7,19 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/student/", "/teacher/", "/admin/", "/api/"],
+        // Every page lives under a locale prefix (/en/student/…), so a rule of
+        // "/student/" matched nothing and the dashboards were never actually
+        // disallowed. "/*/student/" is the pattern that matches them; the
+        // public /teachers directory is deliberately not caught by it.
+        disallow: [
+          "/*/student/",
+          "/*/teacher/",
+          "/*/admin/",
+          "/*/login",
+          "/*/signup",
+          "/*/onboarding",
+          "/api/",
+        ],
       },
     ],
     host: SITE_URL,

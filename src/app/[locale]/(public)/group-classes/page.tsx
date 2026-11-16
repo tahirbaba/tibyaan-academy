@@ -5,7 +5,7 @@ import { Footer } from "@/components/shared/footer";
 import { CohortCard } from "@/components/cohorts/cohort-card";
 import { listPublishedCohorts } from "@/lib/cohorts/queries";
 import { sendFailureAlert } from "@/lib/alerts";
-import { localeMetadataAlternates, absoluteUrl } from "@/lib/site-config";
+import { localeMetadataAlternates, absoluteUrl, openGraphBase } from "@/lib/site-config";
 import { Globe2, Users, Video } from "lucide-react";
 
 const meta: Record<string, { title: string; description: string }> = {
@@ -25,7 +25,7 @@ const meta: Record<string, { title: string; description: string }> = {
       "انضم إلى حصة جماعية صغيرة مباشرة عبر زوم مع معلم مؤهل. جدول أسبوعي ثابت بتوقيتك المحلي، رسوم شهرية، وحصة تجريبية مجانية.",
   },
   fr: {
-    title: "Cours collectifs en direct — Arabe coranique et sciences islamiques",
+    title: "Cours collectifs en direct — Arabe coranique et Islam",
     description:
       "Rejoignez un petit cours collectif en direct sur Zoom avec un enseignant qualifié. Horaire hebdomadaire fixe affiché à votre heure locale, tarif mensuel, un cours d'essai gratuit.",
   },
@@ -48,6 +48,7 @@ export async function generateMetadata({
     description: m.description,
     alternates: localeMetadataAlternates(locale, "/group-classes"),
     openGraph: {
+      ...openGraphBase(locale),
       title: m.title,
       description: m.description,
       url: absoluteUrl(locale, "/group-classes"),

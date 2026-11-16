@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { getPricing } from "@/lib/pricing-server";
+import { appendFeeSentence } from "@/lib/pricing";
 import { CountryPageTemplate } from "@/components/country/country-page-template";
 import { USA_PAGE } from "@/lib/data/country-pages";
-import { localeMetadataAlternates, absoluteUrl } from "@/lib/site-config";
+import { localeMetadataAlternates, absoluteUrl, openGraphBase } from "@/lib/site-config";
 
 const metaByLocale: Record<string, { title: string; description: string }> = {
   en: {
@@ -34,11 +35,14 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const meta = metaByLocale[locale] || metaByLocale.en;
+  // Short country descriptions get the fee sentence too, when it fits.
+  const description = appendFeeSentence(meta.description, locale, await getPricing());
   return {
     title: meta.title,
-    description: meta.description,
+    description,
     alternates: localeMetadataAlternates(locale, "/usa"),
-    openGraph: { title: meta.title, description: meta.description, url: absoluteUrl(locale, "/usa") },
+    openGraph: {
+      ...openGraphBase(locale), title: meta.title, description, url: absoluteUrl(locale, "/usa") },
   };
 }
 
