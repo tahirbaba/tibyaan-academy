@@ -4,7 +4,13 @@ import { Link } from "@/i18n/navigation";
 import { Navbar } from "@/components/shared/navbar";
 import { Footer } from "@/components/shared/footer";
 import { CheckCircle } from "lucide-react";
-import { COURSE_SLUG_TO_KEY, type PricingConfig } from "@/lib/pricing";
+import {
+  COURSE_SLUG_TO_KEY,
+  highestPrice,
+  lowestPrice,
+  type PricingConfig,
+} from "@/lib/pricing";
+import { SITE_NAME, SITE_URL } from "@/lib/site-config";
 import { CoursePrice } from "@/components/pricing/course-price";
 
 type Locale = "ur" | "ar" | "en" | "fr" | "id";
@@ -58,8 +64,32 @@ export function CountryPageTemplate({ locale, data, pricing }: Props) {
   const t = data.translations[lang];
   const isRTL = lang === "ur" || lang === "ar";
 
+  // Tells search engines what this page is: the academy's online teaching,
+  // offered in this country, with the real fee range from the pricing config.
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    serviceType: "Online Quran and Islamic education",
+    name: t.hero_heading,
+    description: t.hero_desc,
+    provider: { "@type": "EducationalOrganization", name: SITE_NAME, url: SITE_URL },
+    areaServed: { "@type": "Country", name: data.countryName.en },
+    availableLanguage: ["English", "Urdu", "Arabic", "French", "Indonesian"],
+    offers: {
+      "@type": "AggregateOffer",
+      priceCurrency: pricing.currency,
+      lowPrice: String(lowestPrice(pricing)),
+      highPrice: String(highestPrice(pricing)),
+      offerCount: String(t.courses.length * 2),
+    },
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <Navbar />
       <main className="flex-1" dir={isRTL ? "rtl" : "ltr"}>
         {/* Hero */}
