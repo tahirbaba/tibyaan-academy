@@ -1,14 +1,17 @@
 -- =============================================================================
--- Cohorts — paid, recurring group classes               (NOT BRANCH-VERIFIED)
+-- Cohorts — paid, recurring group classes                 (BRANCH-VERIFIED)
 --
 -- STATUS, stated plainly:
---   * Written 2026-11-14.
---   * Run TWICE on a throwaway local PostgreSQL 16 with a stand-in "users"
---     table: first run created everything, second run changed nothing, and the
---     seat-limit statements were exercised against it.
---   * NOT yet run on a Neon branch cloned from production. That is still to do
---     (working-agreement rule 5) and is the owner's step — see "How to run".
---   * NOT RUN on production.
+--   * Written 2026-11-14. Run twice on a throwaway local PostgreSQL 16.
+--   * VERIFIED 2026-11-16 on a Neon branch cloned from production
+--     (endpoint ep-curly-meadow-a49ik31m; production is ep-winter-hill-a4fend5v
+--     — the two hosts were compared before anything was run). The branch held
+--     real data: 43 tables, 18 users. Run twice: the first run created the enum,
+--     2 tables and 3 indexes (43 -> 45 tables); the second run changed nothing
+--     — the 45-column listing of both new tables and the verification output
+--     were byte-identical. No existing table was touched (users still 18).
+--   * NOT RUN on production. That still needs a fresh, restore-checked backup
+--     and must go out with the deploy (working-agreement rule 5).
 -- =============================================================================
 -- Purely additive:
 --   + 1 enum   cohort_enrollment_status
