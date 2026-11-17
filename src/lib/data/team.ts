@@ -10,6 +10,6 @@ export const TEAM_MEMBERS = [
   { id: 4, name: "Sheikh Abdul Jabbar", image: "/Our Team/Sheikh Abdul Jabbar.jpeg", whatsapp: "923152363498", translationIndex: 3 },
   { id: 5, name: "Maulana Ali Haider", image: "/Our Team/Maulana Ali Haider.jpeg", whatsapp: "923476676147", translationIndex: 4 },
   { id: 6, name: "Qari Muhammad Musheer", image: "/Our Team/Qari Muhammad Musheer.jpg", whatsapp: "923269244960", translationIndex: 5 },
-  { id: 7, name: "Qari Muhammad Ismail Hasni", image: "/Our Team/Qari Muhammad Ismail Hasni.jpeg", whatsapp: "923453184434", translationIndex: 6 },
+  { id: 7, name: "Qari Muhammad Ismail Hasni", image: "/Our Team/Qari-Muhammad-Ismail-Hasni.webp", whatsapp: "923453184434", translationIndex: 6 },
   { id: 8, name: "Ustaza Fatima Al-Zahra", image: "/Our Team/Ustaza Fatima Al-Zahra.jpg", whatsapp: "923042043314", translationIndex: 7 },
 ] as const;

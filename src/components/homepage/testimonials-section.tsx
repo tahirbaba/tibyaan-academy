@@ -1,12 +1,12 @@
 "use client";
 
+import Image from "next/image";
 import { formatStat } from "@/lib/site-stats";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { SectionHeading } from "./primitives";
 import { Star } from "lucide-react";
-import InitialsAvatar from "@/components/shared/initials-avatar";
 
 const reviews = [
   {
@@ -599,11 +599,15 @@ function ReviewCard({ review }: { review: (typeof reviews)[0] }) {
         &ldquo;{review.review}&rdquo;
       </p>
       <div className="flex items-center gap-2.5 mt-auto pt-3 border-t">
-        {/* Initials, not a photograph. The pictures that used to sit here were
-            stock photos, i.e. a stranger's face beside a student's name. A
-            neutral initial says who wrote the review without claiming to show
-            them. */}
-        <InitialsAvatar name={review.name} size={40} />
+        <div className="relative w-10 h-10 shrink-0">
+          <Image
+            src={review.image}
+            alt={review.name}
+            width={80}
+            height={80}
+            className="w-10 h-10 rounded-full object-cover"
+          />
+        </div>
         <div className="min-w-0">
           <p className="text-sm font-semibold text-foreground truncate">{review.name}</p>
           <p className="text-xs text-muted-foreground truncate">
