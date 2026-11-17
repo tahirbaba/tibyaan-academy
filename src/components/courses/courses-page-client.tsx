@@ -46,7 +46,7 @@ const courses: {
     iconColor: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300",
     slug: "nazra-quran",
     duration: "3-6 months",
-    thumbnail: "/images/courses/nazra.jpg",
+    thumbnail: "/images/courses/nazra.webp",
   },
   {
     key: "hifz",
@@ -55,7 +55,7 @@ const courses: {
     iconColor: "bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300",
     slug: "hifz-quran",
     duration: "2-4 years",
-    thumbnail: "/images/courses/hifz.jpg",
+    thumbnail: "/images/courses/hifz.webp",
   },
   {
     key: "arabic",
@@ -64,7 +64,7 @@ const courses: {
     iconColor: "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300",
     slug: "arabic-language",
     duration: "6-12 months",
-    thumbnail: "/images/courses/arabic.jpg",
+    thumbnail: "/images/courses/arabic.webp",
   },
   {
     key: "aalim",
@@ -73,7 +73,7 @@ const courses: {
     iconColor: "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300",
     slug: "aalim-course",
     duration: "2-8 years",
-    thumbnail: "/images/courses/aalim.jpg",
+    thumbnail: "/images/courses/aalim.webp",
   },
 ];
 
@@ -167,9 +167,12 @@ export default function CoursesPageClient({
                 return (
                   <motion.div
                     key={course.key}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4, delay: i * 0.1 }}
+                    // Rise in with a transform only — starting at opacity 0 kept
+                    // the course image (the page's largest paint) invisible
+                    // until the JavaScript had loaded.
+                    initial={{ y: 20 }}
+                    animate={{ y: 0 }}
+                    transition={{ duration: 0.5, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
                     className={`rounded-2xl border bg-gradient-to-b ${course.color} overflow-hidden hover:shadow-xl transition-all`}
                   >
                     {/* Course Thumbnail */}
@@ -178,6 +181,11 @@ export default function CoursesPageClient({
                         src={course.thumbnail}
                         alt={`${course.key} course`}
                         fill
+                        sizes="(max-width: 768px) 100vw, 50vw"
+                        // The first cards are in view on arrival and are the
+                        // page's largest paint: load them first, not lazily.
+                        loading={i < 2 ? "eager" : "lazy"}
+                        fetchPriority={i < 2 ? "high" : "auto"}
                         className="object-cover"
                         onError={(e) => {
                           const el = e.currentTarget as HTMLImageElement;
