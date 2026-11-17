@@ -49,7 +49,8 @@
     "startTrial": "Commencer l'essai gratuit de 5 jours",
     "parentWhatsapp": "Numéro WhatsApp des parents",
     "parentWhatsappPlaceholder": "+33-6-12345678",
-    "addPhoto": "Ajouter une photo de profil"
+    "addPhoto": "Ajouter une photo de profil",
+    "rememberMe": "Se souvenir de moi"
   },
   "onboarding": {
     "title": "Commençons !",
@@ -1837,5 +1838,30 @@
     "eyebrow": "Nos enseignants",
     "meetAll": "Découvrir tous les enseignants",
     "aboutUs": "À propos de l'académie"
+  },
+  "passwordReset": {
+    "forgotTitle": "Mot de passe oublié ?",
+    "forgotSubtitle": "Saisissez l'e-mail utilisé à l'inscription et nous vous enverrons un lien pour choisir un nouveau mot de passe.",
+    "email": "E-mail",
+    "sendLink": "Envoyer le lien",
+    "backToLogin": "Retour à la connexion",
+    "sentTitle": "Consultez vos e-mails",
+    "sentBody": "Si un compte existe pour cette adresse, un lien de réinitialisation est en route. Cela peut prendre quelques minutes — vérifiez aussi vos spams.",
+    "errRateLimited": "Trop de demandes. Patientez une minute puis réessayez.",
+    "errSendFailed": "L'e-mail n'a pas pu être envoyé. Réessayez ou contactez-nous sur WhatsApp.",
+    "resetTitle": "Choisissez un nouveau mot de passe",
+    "resetSubtitle": "Au moins 8 caractères.",
+    "newPassword": "Nouveau mot de passe",
+    "confirmPassword": "Confirmer le mot de passe",
+    "savePassword": "Enregistrer le mot de passe",
+    "errTooShort": "Le mot de passe doit contenir au moins 8 caractères.",
+    "errMismatch": "Les deux mots de passe ne correspondent pas.",
+    "errSamePassword": "Choisissez un mot de passe différent de l'ancien.",
+    "errSaveFailed": "Le mot de passe n'a PAS été modifié. Réessayez.",
+    "linkExpiredTitle": "Ce lien a expiré",
+    "linkExpiredBody": "Les liens de réinitialisation ne fonctionnent qu'une fois et pour une durée limitée. Demandez-en un nouveau ci-dessous.",
+    "sendNewLink": "Envoyer un nouveau lien",
+    "doneTitle": "Mot de passe modifié",
+    "doneBody": "Redirection vers votre tableau de bord…"
   }
 }

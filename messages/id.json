@@ -49,7 +49,8 @@
     "startTrial": "Mulai Uji Coba Gratis 5 Hari",
     "parentWhatsapp": "Nomor WhatsApp Orang Tua",
     "parentWhatsappPlaceholder": "+62-812-3456789",
-    "addPhoto": "Tambah Foto Profil"
+    "addPhoto": "Tambah Foto Profil",
+    "rememberMe": "Ingat saya"
   },
   "onboarding": {
     "title": "Ayo Mulai!",
@@ -1837,5 +1838,30 @@
     "eyebrow": "Guru kami",
     "meetAll": "Kenali semua guru",
     "aboutUs": "Tentang akademi"
+  },
+  "passwordReset": {
+    "forgotTitle": "Lupa kata sandi?",
+    "forgotSubtitle": "Masukkan email yang Anda gunakan saat mendaftar dan kami akan mengirimkan tautan untuk membuat kata sandi baru.",
+    "email": "Email",
+    "sendLink": "Kirim tautan reset",
+    "backToLogin": "Kembali ke halaman masuk",
+    "sentTitle": "Periksa email Anda",
+    "sentBody": "Jika ada akun dengan alamat tersebut, tautan untuk mengatur ulang kata sandi sedang dikirim. Mungkin perlu beberapa menit — periksa juga folder spam.",
+    "errRateLimited": "Terlalu banyak permintaan. Tunggu sebentar lalu coba lagi.",
+    "errSendFailed": "Email tidak dapat dikirim. Coba lagi atau hubungi kami melalui WhatsApp.",
+    "resetTitle": "Buat kata sandi baru",
+    "resetSubtitle": "Minimal 8 karakter.",
+    "newPassword": "Kata sandi baru",
+    "confirmPassword": "Konfirmasi kata sandi baru",
+    "savePassword": "Simpan kata sandi baru",
+    "errTooShort": "Kata sandi minimal 8 karakter.",
+    "errMismatch": "Kedua kata sandi tidak sama.",
+    "errSamePassword": "Pilih kata sandi yang berbeda dari yang lama.",
+    "errSaveFailed": "Kata sandi TIDAK diubah. Silakan coba lagi.",
+    "linkExpiredTitle": "Tautan ini sudah kedaluwarsa",
+    "linkExpiredBody": "Tautan reset hanya berlaku sekali dan untuk waktu terbatas. Minta yang baru di bawah ini.",
+    "sendNewLink": "Kirim tautan baru",
+    "doneTitle": "Kata sandi diubah",
+    "doneBody": "Mengarahkan ke dasbor Anda…"
   }
 }

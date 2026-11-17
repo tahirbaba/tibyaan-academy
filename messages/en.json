@@ -49,7 +49,8 @@
     "startTrial": "Start 5-Day Free Trial",
     "parentWhatsapp": "Parent WhatsApp Number",
     "parentWhatsappPlaceholder": "+92-300-1234567",
-    "addPhoto": "Add Profile Photo"
+    "addPhoto": "Add Profile Photo",
+    "rememberMe": "Remember me"
   },
   "onboarding": {
     "title": "Let's Get Started!",
@@ -1826,5 +1827,30 @@
     "eyebrow": "Our teachers",
     "meetAll": "Meet all teachers",
     "aboutUs": "About the academy"
+  },
+  "passwordReset": {
+    "forgotTitle": "Forgot your password?",
+    "forgotSubtitle": "Enter the email you signed up with and we will send you a link to choose a new password.",
+    "email": "Email",
+    "sendLink": "Send reset link",
+    "backToLogin": "Back to login",
+    "sentTitle": "Check your email",
+    "sentBody": "If an account exists for that address, a link to reset your password is on its way. It can take a few minutes — please check your spam folder too.",
+    "errRateLimited": "Too many requests. Please wait a minute and try again.",
+    "errSendFailed": "The email could not be sent. Please try again, or contact us on WhatsApp.",
+    "resetTitle": "Choose a new password",
+    "resetSubtitle": "At least 8 characters.",
+    "newPassword": "New password",
+    "confirmPassword": "Confirm new password",
+    "savePassword": "Save new password",
+    "errTooShort": "The password must be at least 8 characters.",
+    "errMismatch": "The two passwords do not match.",
+    "errSamePassword": "Please choose a password different from your old one.",
+    "errSaveFailed": "The password was NOT changed. Please try again.",
+    "linkExpiredTitle": "This link has expired",
+    "linkExpiredBody": "Reset links work once and for a limited time. Ask for a new one below.",
+    "sendNewLink": "Send a new link",
+    "doneTitle": "Password changed",
+    "doneBody": "Taking you to your dashboard…"
   }
 }
