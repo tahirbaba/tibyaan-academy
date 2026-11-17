@@ -81,7 +81,9 @@ export default async function HomePage() {
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
-      <main className="flex-1">
+      {/* home-main: the homepage animates its own headings (framer-motion),
+          so the site-wide CSS heading motion skips it. */}
+      <main className="flex-1 home-main">
         <HomeMotion>
           <HeroSection />
           <FeaturesSection />

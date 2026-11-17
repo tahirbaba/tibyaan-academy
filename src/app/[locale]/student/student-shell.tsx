@@ -1,5 +1,6 @@
 "use client";
 
+import { SiteMotion } from "@/components/shared/site-motion";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
@@ -209,6 +210,7 @@ export function StudentShell({
 
         {/* Page Content */}
         <main className="flex-1 overflow-y-auto p-4 lg:p-6">{children}</main>
+        <SiteMotion variant="dashboard" maxTilt={4} />
       </div>
     </div>
   );

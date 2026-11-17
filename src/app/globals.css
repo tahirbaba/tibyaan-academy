@@ -498,3 +498,146 @@
     transform: none;
   }
 }
+
+/* ==========================================================================
+   Site-wide motion + Islamic backdrop (all pages except the homepage, which
+   has its own). Enabled by <SiteMotion/>, which marks <body data-motion>.
+   ========================================================================== */
+
+:root {
+  --mosque-skyline-green: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 140' preserveAspectRatio='xMidYMax slice'%3E%3Cpath fill='%231B4332' d='M0,140 L0,118 L1200,118 L1200,140 Z M530,118 C530,37.5 586.0,9.5 600,-4.5 C614.0,9.5 670,37.5 670,118 Z M520,118 L520,96 L680,96 L680,118 Z M436,118 C436,78.9 463.2,65.3 470,58.5 C476.8,65.3 504,78.9 504,118 Z M696,118 C696,78.9 723.2,65.3 730,58.5 C736.8,65.3 764,78.9 764,118 Z M395,118 L395,46 L392,42 L402.0,28 L412,42 L409,46 L409,118 Z M401.0,28 L401.0,16 L403.0,16 L403.0,28 Z M791,118 L791,46 L788,42 L798.0,28 L808,42 L805,46 L805,118 Z M797.0,28 L797.0,16 L799.0,16 L799.0,28 Z M224,118 C224,88.1 244.8,77.69999999999999 250,72.5 C255.2,77.69999999999999 276,88.1 276,118 Z M924,118 C924,88.1 944.8,77.69999999999999 950,72.5 C955.2,77.69999999999999 976,88.1 976,118 Z M180,118 L180,104 L320,104 L320,118 Z M880,118 L880,104 L1020,104 L1020,118 Z M140,118 L140,76 L137,72 L145.0,58 L153,72 L150,76 L150,118 Z M144.0,58 L144.0,46 L146.0,46 L146.0,58 Z M1050,118 L1050,76 L1047,72 L1055.0,58 L1063,72 L1060,76 L1060,118 Z M1054.0,58 L1054.0,46 L1056.0,46 L1056.0,58 Z M62,118 C62,97.3 76.4,90.1 80,86.5 C83.6,90.1 98,97.3 98,118 Z M1102,118 C1102,97.3 1116.4,90.1 1120,86.5 C1123.6,90.1 1138,97.3 1138,118 Z'/%3E%3C/svg%3E");
+  --mosque-skyline-gold: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 140' preserveAspectRatio='xMidYMax slice'%3E%3Cpath fill='%23C9A84C' d='M0,140 L0,118 L1200,118 L1200,140 Z M530,118 C530,37.5 586.0,9.5 600,-4.5 C614.0,9.5 670,37.5 670,118 Z M520,118 L520,96 L680,96 L680,118 Z M436,118 C436,78.9 463.2,65.3 470,58.5 C476.8,65.3 504,78.9 504,118 Z M696,118 C696,78.9 723.2,65.3 730,58.5 C736.8,65.3 764,78.9 764,118 Z M395,118 L395,46 L392,42 L402.0,28 L412,42 L409,46 L409,118 Z M401.0,28 L401.0,16 L403.0,16 L403.0,28 Z M791,118 L791,46 L788,42 L798.0,28 L808,42 L805,46 L805,118 Z M797.0,28 L797.0,16 L799.0,16 L799.0,28 Z M224,118 C224,88.1 244.8,77.69999999999999 250,72.5 C255.2,77.69999999999999 276,88.1 276,118 Z M924,118 C924,88.1 944.8,77.69999999999999 950,72.5 C955.2,77.69999999999999 976,88.1 976,118 Z M180,118 L180,104 L320,104 L320,118 Z M880,118 L880,104 L1020,104 L1020,118 Z M140,118 L140,76 L137,72 L145.0,58 L153,72 L150,76 L150,118 Z M144.0,58 L144.0,46 L146.0,46 L146.0,58 Z M1050,118 L1050,76 L1047,72 L1055.0,58 L1063,72 L1060,76 L1060,118 Z M1054.0,58 L1054.0,46 L1056.0,46 L1056.0,58 Z M62,118 C62,97.3 76.4,90.1 80,86.5 C83.6,90.1 98,97.3 98,118 Z M1102,118 C1102,97.3 1116.4,90.1 1120,86.5 C1123.6,90.1 1138,97.3 1138,118 Z'/%3E%3C/svg%3E");
+}
+
+/* 1. Page title: rises and fades in when the page opens. */
+@keyframes title-rise {
+  from { opacity: 0; transform: translateY(28px); filter: blur(6px); }
+  to { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+body[data-motion="public"] main:not(.home-main) h1 {
+  animation: title-rise 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* 2. Section headings and cards rise into place as they scroll into view.
+   Scroll-driven (no JavaScript). Browsers without support show them still. */
+@supports (animation-timeline: view()) {
+  @keyframes scroll-rise {
+    from { opacity: 0; transform: translateY(40px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  body[data-motion="public"] main:not(.home-main) h2,
+  body[data-motion="public"] main:not(.home-main) section > div > p:first-of-type {
+    animation: scroll-rise linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 55%;
+  }
+}
+
+/* 3. Gold underline that draws itself under each section heading. */
+@keyframes underline-draw {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+body[data-motion="public"] main:not(.home-main) section h2::after {
+  content: "";
+  display: block;
+  width: 64px;
+  height: 2px;
+  margin: 14px auto 0;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, var(--color-islamic-gold), transparent);
+  transform-origin: center;
+  animation: underline-draw 1s 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+body[data-motion="public"] main:not(.home-main) section .text-start h2::after,
+body[data-motion="public"] main:not(.home-main) section h2.text-start::after {
+  margin-inline-start: 0;
+}
+
+/* 4. Cards under the cursor lean toward it in 3D (SiteMotion writes the angles). */
+body[data-motion] main .auto-tilt-on {
+  --auto-tilt-x: 0deg;
+  --auto-tilt-y: 0deg;
+  transform: perspective(1000px) rotateX(var(--auto-tilt-x)) rotateY(var(--auto-tilt-y)) translateY(-3px);
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s;
+  box-shadow: 0 24px 48px -24px rgb(15 41 34 / 0.35);
+  background-image: radial-gradient(
+    380px circle at var(--auto-glare-x, 50%) var(--auto-glare-y, 50%),
+    rgb(201 168 76 / 0.12),
+    transparent 60%
+  );
+  position: relative;
+  z-index: 1;
+}
+body[data-motion] main :is(.rounded-2xl.border, .rounded-xl.border, .rounded-3xl.border, .premium-card) {
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s;
+}
+
+/* 5. Islamic backdrop on the first band of every page: the star lattice
+   drifting slowly, and a mosque skyline along its lower edge. Pure CSS — no
+   video, no image request. Pages whose first band already carries the
+   lattice (.pattern-stars) only get the skyline. */
+@keyframes lattice-drift {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-96px, -96px, 0); }
+}
+body[data-motion="public"] main:not(.home-main) > section:first-child,
+body[data-motion="public"] main:not(.home-main) > div:first-child > section:first-child {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+body[data-motion="public"] main:not(.home-main) > section:first-child:not(.pattern-stars)::before {
+  content: "";
+  position: absolute;
+  inset: -96px;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.06;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 96 96'%3E%3Cg fill='none' stroke='%231B4332' stroke-width='1'%3E%3Cpath d='M48 12 58.5 37.5 84 48 58.5 58.5 48 84 37.5 58.5 12 48 37.5 37.5z'/%3E%3Cpath d='M22.5 22.5 48 33 73.5 22.5 63 48 73.5 73.5 48 63 22.5 73.5 33 48z'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 96px 96px;
+  animation: lattice-drift 40s linear infinite;
+}
+.dark body[data-motion="public"] main:not(.home-main) > section:first-child:not(.pattern-stars)::before,
+body[data-motion="public"].dark main:not(.home-main) > section:first-child:not(.pattern-stars)::before {
+  opacity: 0.08;
+  filter: invert(1);
+}
+body[data-motion="public"] main:not(.home-main) > section:first-child::after,
+.home-main > section:first-child::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: clamp(60px, 9vw, 120px);
+  z-index: -1;
+  pointer-events: none;
+  background: var(--mosque-skyline-green) bottom center / auto 100% repeat-x;
+  opacity: 0.07;
+}
+/* On the deep-green bands the skyline is drawn in gold. */
+body[data-motion="public"] main:not(.home-main) > section.pattern-stars:first-child::after,
+.home-main > section:first-child::after {
+  background-image: var(--mosque-skyline-gold);
+  opacity: 0.12;
+}
+.dark body[data-motion="public"] main:not(.home-main) > section:first-child::after {
+  background-image: var(--mosque-skyline-gold);
+  opacity: 0.1;
+}
+.home-main > section:first-child {
+  isolation: isolate;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body[data-motion="public"] main:not(.home-main) h1,
+  body[data-motion="public"] main:not(.home-main) h2,
+  body[data-motion="public"] main:not(.home-main) section > div > p:first-of-type,
+  body[data-motion="public"] main:not(.home-main) section h2::after,
+  body[data-motion="public"] main:not(.home-main) > section:first-child::before {
+    animation: none !important;
+  }
+  body[data-motion] main .auto-tilt-on {
+    transform: none;
+  }
+}

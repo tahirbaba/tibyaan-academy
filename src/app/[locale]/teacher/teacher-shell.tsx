@@ -1,5 +1,6 @@
 "use client";
 
+import { SiteMotion } from "@/components/shared/site-motion";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { signOut } from "@/app/[locale]/(auth)/actions";
@@ -198,6 +199,7 @@ export function TeacherShell({
 
         {/* Page Content */}
         <main className="flex-1 overflow-y-auto p-4 lg:p-6">{children}</main>
+        <SiteMotion variant="dashboard" maxTilt={4} />
       </div>
     </div>
   );
