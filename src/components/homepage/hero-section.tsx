@@ -67,9 +67,9 @@ export function HeroSection() {
             </p>
 
             <h1
-              aria-label={headline}
               className="mt-6 font-display text-4xl font-semibold leading-[1.12] text-white md:text-5xl lg:text-[3.75rem]"
             >
+              <span className="sr-only">{headline}</span>
               {headline.split(" ").map((word, i, all) => (
                 <span
                   key={`${word}-${i}`}

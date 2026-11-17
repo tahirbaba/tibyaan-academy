@@ -41,14 +41,16 @@ export function Reveal({
 
 /**
  * A line of text whose words rise into place one after another as it scrolls
- * into view. The full sentence is given to screen readers once (aria-label);
- * the moving word-pieces are hidden from them. Splitting is on spaces only,
+ * into view. Screen readers get the full sentence once, as visually hidden
+ * text (aria-label is not allowed on a plain span); the moving word-pieces
+ * are hidden from them. Splitting is on spaces only,
  * so Arabic and Urdu words stay whole and joined.
  */
 export function AnimatedWords({ text, delay = 0 }: { text: string; delay?: number }) {
   const words = text.split(" ");
   return (
-    <span aria-label={text} className="inline">
+    <span className="inline">
+      <span className="sr-only">{text}</span>
       {words.map((word, i) => (
         <span
           key={`${word}-${i}`}

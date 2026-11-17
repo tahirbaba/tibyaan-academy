@@ -181,8 +181,7 @@ export function Navbar() {
           </div>
 
           {/* Mobile Hamburger */}
-          <button
-            className="md:hidden p-2 text-muted-foreground"
+          <button aria-label={mobileOpen ? "Close menu" : "Open menu"} aria-expanded={mobileOpen}             className="md:hidden p-2 text-muted-foreground"
             onClick={() => setMobileOpen(!mobileOpen)}
           >
             {mobileOpen ? (
