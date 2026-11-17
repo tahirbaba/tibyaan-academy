@@ -45,6 +45,27 @@ function getDashboardByRole(role: string | undefined, locale: string): string {
 }
 
 export async function proxy(request: NextRequest) {
+  // A Google sign-in is supposed to come back to /api/auth/callback, which
+  // signs the user in and sends them to their dashboard. When Supabase does
+  // not accept that return address it falls back to the site's home page and
+  // puts the sign-in code on THAT URL (/?code=…). The browser then signed the
+  // user in quietly in the background but left them sitting on the home page,
+  // looking logged out — and a second click on "Login" went straight to the
+  // dashboard, because by then they were already signed in.
+  //
+  // So a sign-in code arriving on any page is forwarded to the callback,
+  // which finishes the job properly: one sign-in, straight to the dashboard.
+  const authCode = request.nextUrl.searchParams.get("code");
+  if (authCode && !request.nextUrl.pathname.startsWith("/api/")) {
+    const callback = new URL("/api/auth/callback", request.url);
+    callback.searchParams.set("code", authCode);
+    callback.searchParams.set(
+      "locale",
+      getLocaleFromPathname(request.nextUrl.pathname)
+    );
+    return NextResponse.redirect(callback);
+  }
+
   // Run intl middleware first for locale detection and routing
   const intlResponse = intlMiddleware(request);
 
