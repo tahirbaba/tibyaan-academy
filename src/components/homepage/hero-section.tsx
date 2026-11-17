@@ -36,6 +36,7 @@ const highlights = [
  */
 export function HeroSection() {
   const t = useTranslations("hero");
+  const headline = t("headline");
 
   return (
     <section className="pattern-stars relative overflow-hidden bg-gradient-to-br from-[#0F2922] via-[#1B4332] to-[#143528] text-white">
@@ -45,17 +46,41 @@ export function HeroSection() {
         className="pointer-events-none absolute -end-40 -top-40 h-[36rem] w-[36rem] rounded-full bg-[#C9A84C]/10 blur-3xl"
       />
 
+      {/* slow floating stars — decoration only */}
+      <svg aria-hidden viewBox="0 0 24 24" className="float-a pointer-events-none absolute start-[6%] top-[14%] h-10 w-10 text-[#C9A84C]/30" fill="none" stroke="currentColor" strokeWidth="1">
+        <path d="M12 1l3.2 7.8L23 12l-7.8 3.2L12 23l-3.2-7.8L1 12l7.8-3.2z" />
+      </svg>
+      <svg aria-hidden viewBox="0 0 24 24" className="float-b pointer-events-none absolute end-[42%] bottom-[10%] hidden h-16 w-16 text-[#C9A84C]/20 md:block" fill="none" stroke="currentColor" strokeWidth="0.8">
+        <path d="M12 1l3.2 7.8L23 12l-7.8 3.2L12 23l-3.2-7.8L1 12l7.8-3.2z" />
+      </svg>
+      <svg aria-hidden viewBox="0 0 24 24" className="float-a pointer-events-none absolute end-[8%] top-[8%] hidden h-6 w-6 text-white/20 md:block" fill="currentColor">
+        <path d="M12 1l3.2 7.8L23 12l-7.8 3.2L12 23l-3.2-7.8L1 12l7.8-3.2z" />
+      </svg>
+
       <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 md:py-24 lg:px-8 lg:py-28">
         <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-[1.25fr_0.75fr]">
           {/* Left column */}
           <div>
-            <p className="inline-flex items-center gap-2 rounded-full border border-[#C9A84C]/40 bg-[#C9A84C]/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-[#E3CE8A]">
+            <p className="bob inline-flex items-center gap-2 rounded-full border border-[#C9A84C]/40 bg-[#C9A84C]/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-[#E3CE8A]">
               <span className="h-1.5 w-1.5 rounded-full bg-[#C9A84C]" aria-hidden />
               Online Islamic Academy
             </p>
 
-            <h1 className="hero-rise mt-6 font-display text-4xl font-semibold leading-[1.12] text-white md:text-5xl lg:text-[3.75rem]">
-              {t("headline")}
+            <h1
+              aria-label={headline}
+              className="mt-6 font-display text-4xl font-semibold leading-[1.12] text-white md:text-5xl lg:text-[3.75rem]"
+            >
+              {headline.split(" ").map((word, i, all) => (
+                <span
+                  key={`${word}-${i}`}
+                  aria-hidden
+                  className="hero-word"
+                  style={{ animationDelay: `${i * 70}ms` }}
+                >
+                  {word}
+                  {i < all.length - 1 ? "\u00A0" : ""}
+                </span>
+              ))}
             </h1>
 
             <p className="hero-rise mt-6 max-w-xl text-lg leading-relaxed text-white/75 md:text-xl">

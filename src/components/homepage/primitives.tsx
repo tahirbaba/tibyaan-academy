@@ -1,7 +1,7 @@
 "use client";
 
-import { motion, MotionConfig } from "framer-motion";
-import type { ReactNode } from "react";
+import { motion, MotionConfig, useReducedMotion } from "framer-motion";
+import { useRef, type PointerEvent, type ReactNode } from "react";
 
 /**
  * Wraps the homepage so every framer-motion animation inside it honours the
@@ -39,6 +39,91 @@ export function Reveal({
   );
 }
 
+/**
+ * A line of text whose words rise into place one after another as it scrolls
+ * into view. The full sentence is given to screen readers once (aria-label);
+ * the moving word-pieces are hidden from them. Splitting is on spaces only,
+ * so Arabic and Urdu words stay whole and joined.
+ */
+export function AnimatedWords({ text, delay = 0 }: { text: string; delay?: number }) {
+  const words = text.split(" ");
+  return (
+    <span aria-label={text} className="inline">
+      {words.map((word, i) => (
+        <span
+          key={`${word}-${i}`}
+          aria-hidden
+          className="inline-block overflow-hidden pb-[0.12em] align-bottom"
+        >
+          <motion.span
+            className="inline-block"
+            initial={{ y: "105%", rotate: 4 }}
+            whileInView={{ y: 0, rotate: 0 }}
+            viewport={{ once: true, margin: "-40px" }}
+            transition={{ duration: 0.65, delay: delay + i * 0.07, ease: [0.22, 1, 0.36, 1] }}
+          >
+            {word}
+          </motion.span>
+          {i < words.length - 1 ? "\u00A0" : ""}
+        </span>
+      ))}
+    </span>
+  );
+}
+
+/**
+ * A card that leans toward the cursor in 3D and carries a soft moving
+ * highlight. Pointer-driven only: nothing happens on touch screens or when the
+ * visitor has asked for reduced motion, and the card returns flat when the
+ * cursor leaves. Styles are written straight to the element, so moving the
+ * mouse never re-renders React.
+ */
+export function TiltCard({
+  children,
+  className = "",
+  max = 7,
+}: {
+  children: ReactNode;
+  className?: string;
+  /** Largest tilt, in degrees. */
+  max?: number;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const reduce = useReducedMotion();
+
+  function onMove(event: PointerEvent<HTMLDivElement>) {
+    if (reduce || event.pointerType !== "mouse" || !ref.current) return;
+    const el = ref.current;
+    const box = el.getBoundingClientRect();
+    const x = (event.clientX - box.left) / box.width;
+    const y = (event.clientY - box.top) / box.height;
+    el.style.setProperty("--tilt-x", `${((0.5 - y) * max * 2).toFixed(2)}deg`);
+    el.style.setProperty("--tilt-y", `${((x - 0.5) * max * 2).toFixed(2)}deg`);
+    el.style.setProperty("--glare-x", `${(x * 100).toFixed(1)}%`);
+    el.style.setProperty("--glare-y", `${(y * 100).toFixed(1)}%`);
+  }
+
+  function onLeave() {
+    const el = ref.current;
+    if (!el) return;
+    el.style.setProperty("--tilt-x", "0deg");
+    el.style.setProperty("--tilt-y", "0deg");
+  }
+
+  return (
+    <div className="tilt-scene h-full">
+      <div
+        ref={ref}
+        onPointerMove={onMove}
+        onPointerLeave={onLeave}
+        className={`tilt-card h-full ${className}`}
+      >
+        {children}
+      </div>
+    </div>
+  );
+}
+
 /** Eyebrow + display heading + gold ornament, shared by every section. */
 export function SectionHeading({
   eyebrow,
@@ -67,7 +152,7 @@ export function SectionHeading({
           tone === "dark" ? "text-white" : "text-primary dark:text-foreground"
         }`}
       >
-        {title}
+        <AnimatedWords text={title} />
       </h2>
       <div className={`ornament mt-5 ${centered ? "justify-center" : ""}`} aria-hidden>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">

@@ -4,7 +4,8 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { CalendarClock, Globe2, Sparkles, Users } from "lucide-react";
-import { Reveal, SectionHeading } from "./primitives";
+import { Reveal, SectionHeading, TiltCard } from "./primitives";
+import { HeroOrnamentLazy } from "./hero-ornament-lazy";
 
 const points = [
   { key: "p1", icon: CalendarClock },
@@ -26,6 +27,9 @@ export function GroupClassesSection() {
 
   return (
     <section className="pattern-stars relative overflow-hidden bg-gradient-to-br from-[#0F2922] via-[#1B4332] to-[#143528] py-20 text-white md:py-28">
+      <div aria-hidden className="pointer-events-none absolute -end-24 top-1/2 hidden h-[34rem] w-[34rem] -translate-y-1/2 opacity-40 lg:block">
+        <HeroOrnamentLazy />
+      </div>
       <div className="relative mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 px-4 sm:px-6 lg:grid-cols-2 lg:px-8">
         <div>
           <SectionHeading
@@ -50,11 +54,11 @@ export function GroupClassesSection() {
         <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {points.map(({ key, icon: Icon }, i) => (
             <Reveal as="li" key={key} delay={i * 0.08}>
-              <div className="h-full rounded-2xl border border-white/10 bg-white/[0.06] p-6 backdrop-blur-sm transition-colors duration-300 hover:border-[#C9A84C]/50 hover:bg-white/[0.09]">
+              <TiltCard className="rounded-2xl border border-white/10 bg-white/[0.06] p-6 backdrop-blur-sm transition-colors duration-300 hover:border-[#C9A84C]/50 hover:bg-white/[0.09]">
                 <Icon className="h-6 w-6 text-[#C9A84C]" aria-hidden />
                 <h3 className="mt-4 font-semibold text-white">{t(`${key}Title`)}</h3>
                 <p className="mt-1.5 text-sm leading-relaxed text-white/70">{t(`${key}Desc`)}</p>
-              </div>
+              </TiltCard>
             </Reveal>
           ))}
         </ul>

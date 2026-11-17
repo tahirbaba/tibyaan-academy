@@ -10,7 +10,7 @@ import {
   GraduationCap,
   Calendar,
 } from "lucide-react";
-import { Reveal, SectionHeading } from "./primitives";
+import { Reveal, SectionHeading, TiltCard } from "./primitives";
 
 const features = [
   { key: "f1", icon: Bot },
@@ -35,8 +35,8 @@ export function FeaturesSection() {
             const Icon = feature.icon;
             return (
               <Reveal key={feature.key} delay={(i % 3) * 0.08}>
-                <div className="premium-card group h-full p-7">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/15 transition-colors duration-300 group-hover:bg-primary group-hover:text-primary-foreground">
+                <TiltCard className="premium-card group p-7">
+                  <div className="tilt-lift flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/15 transition-all duration-500 group-hover:rotate-[8deg] group-hover:scale-110 group-hover:bg-primary group-hover:text-primary-foreground">
                     <Icon className="h-6 w-6" aria-hidden />
                   </div>
                   <h3 className="mt-5 text-lg font-semibold text-foreground">
@@ -45,7 +45,7 @@ export function FeaturesSection() {
                   <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                     {t(`${feature.key}Desc`)}
                   </p>
-                </div>
+                </TiltCard>
               </Reveal>
             );
           })}

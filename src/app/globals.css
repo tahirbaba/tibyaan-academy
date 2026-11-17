@@ -357,3 +357,144 @@
 .flex.h-screen main {
   font-variant-numeric: tabular-nums;
 }
+
+/* ==========================================================================
+   Motion pass 2 — 3D tilt, hover reveal, moving words, floating shapes
+   ========================================================================== */
+
+/* TiltCard: the scene gives perspective; the card rotates from two custom
+   properties the component writes on pointer move. */
+.tilt-scene {
+  perspective: 1000px;
+}
+.tilt-card {
+  --tilt-x: 0deg;
+  --tilt-y: 0deg;
+  --glare-x: 50%;
+  --glare-y: 50%;
+  position: relative;
+  transform: rotateX(var(--tilt-x)) rotateY(var(--tilt-y));
+  transform-style: preserve-3d;
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+.tilt-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.35s;
+  background: radial-gradient(
+    420px circle at var(--glare-x) var(--glare-y),
+    rgb(201 168 76 / 0.16),
+    transparent 60%
+  );
+}
+.tilt-card:hover::after {
+  opacity: 1;
+}
+/* Content inside a tilted card can float a little above its surface. */
+.tilt-lift {
+  transform: translateZ(28px);
+}
+
+/* Hover reveal: extra content that opens when the cursor (or keyboard focus)
+   is on the card and closes again when it leaves. Animated with grid rows, so
+   it opens to its real height without measuring anything. On touch screens
+   there is no hover, so the content is simply always open there — nothing is
+   ever hidden from someone who cannot hover. */
+.hover-reveal {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition: grid-template-rows 0.45s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s;
+}
+.hover-reveal > * {
+  overflow: hidden;
+  min-height: 0;
+}
+.group:hover .hover-reveal,
+.group:focus-within .hover-reveal {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+@media (hover: none) {
+  .hover-reveal {
+    grid-template-rows: 1fr;
+    opacity: 1;
+  }
+}
+
+/* Hero headline: each word settles into place in turn. Transform only, so the
+   headline is painted in the very first frame (it is the page's LCP). */
+@keyframes word-settle {
+  from { transform: translateY(0.45em) rotate(2deg); }
+  to { transform: translateY(0) rotate(0); }
+}
+.hero-word {
+  display: inline-block;
+  animation: word-settle 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Slow floating stars behind the hero and the dark sections. */
+@keyframes float-a {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+  50% { transform: translate3d(0, -22px, 0) rotate(20deg); }
+}
+@keyframes float-b {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+  50% { transform: translate3d(14px, 18px, 0) rotate(-25deg); }
+}
+.float-a { animation: float-a 9s ease-in-out infinite; }
+.float-b { animation: float-b 12s ease-in-out infinite; }
+
+/* A gentle up-and-down drift for small labels and badges. */
+@keyframes bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+.bob { animation: bob 4s ease-in-out infinite; }
+
+/* Navigation dropdown that opens on hover or keyboard focus. */
+.nav-drop {
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.2s, transform 0.2s, visibility 0.2s;
+}
+.nav-drop-root:hover .nav-drop,
+.nav-drop-root:focus-within .nav-drop {
+  visibility: visible;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tilt-card,
+  .hover-reveal,
+  .nav-drop {
+    transition: none;
+  }
+  .tilt-card {
+    transform: none;
+  }
+  .hero-word,
+  .float-a,
+  .float-b,
+  .bob {
+    animation: none;
+  }
+}
+
+/* A premium card inside a TiltCard keeps its lift AND its tilt on hover
+   (the card's own hover rule would otherwise replace the tilt transform). */
+.tilt-card.premium-card:hover {
+  transform: translateY(-4px) rotateX(var(--tilt-x)) rotateY(var(--tilt-y));
+}
+@media (prefers-reduced-motion: reduce) {
+  .tilt-card.premium-card:hover {
+    transform: none;
+  }
+}

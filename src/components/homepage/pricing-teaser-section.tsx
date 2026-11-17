@@ -5,7 +5,7 @@ import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
 import { formatPrice, lowestPrice, type PricingConfig } from "@/lib/pricing";
-import { Reveal, SectionHeading } from "./primitives";
+import { Reveal, SectionHeading, TiltCard } from "./primitives";
 
 /**
  * The homepage pricing summary. Every number comes from the pricing config
@@ -32,7 +32,7 @@ export function PricingTeaserSection({ pricing }: { pricing: PricingConfig }) {
         <div className="mt-14 grid grid-cols-1 gap-6 lg:grid-cols-3">
           {/* Live teacher */}
           <Reveal className="lg:col-span-1">
-            <div className="relative h-full rounded-[1.25rem] border-2 border-accent bg-card p-7 shadow-xl">
+            <TiltCard max={4} className="rounded-[1.25rem] border-2 border-accent bg-card p-7 shadow-xl">
               <span className="absolute -top-3 start-6 rounded-full bg-accent px-3 py-1 text-xs font-semibold text-[#0F2922]">
                 {t("popular")}
               </span>
@@ -58,7 +58,7 @@ export function PricingTeaserSection({ pricing }: { pricing: PricingConfig }) {
                   </li>
                 ))}
               </ul>
-            </div>
+            </TiltCard>
           </Reveal>
 
           {/* AI only */}

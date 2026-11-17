@@ -40,6 +40,13 @@ export function TeachersSection() {
                     className="object-cover object-top transition-transform duration-700 group-hover:scale-105"
                   />
                   <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-[#0F2922]/70 to-transparent" aria-hidden />
+                  {/* Slides up when the cursor is on the card; on touch
+                      screens the same text is on the About page, one tap away. */}
+                  <div className="absolute inset-0 hidden translate-y-full flex-col justify-end bg-gradient-to-t from-[#0F2922] via-[#0F2922]/90 to-[#0F2922]/40 p-4 text-white transition-transform duration-500 ease-out group-hover:translate-y-0 group-focus-within:translate-y-0 md:flex">
+                    <p className="line-clamp-[9] text-xs leading-relaxed text-white/90">
+                      {team[member.translationIndex]?.description}
+                    </p>
+                  </div>
                 </div>
                 <div className="p-4 md:p-5">
                   <h3 className="text-sm font-semibold leading-snug text-foreground md:text-base" dir="ltr">
