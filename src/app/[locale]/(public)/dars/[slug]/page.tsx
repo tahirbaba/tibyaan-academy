@@ -7,7 +7,7 @@ import { notFound } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { ArrowLeft, Calendar, BookOpen } from "lucide-react";
 
-import { SITE_URL as BASE_URL, localeMetadataAlternates } from "@/lib/site-config";
+import { SITE_URL as BASE_URL, localeMetadataAlternates, openGraphBase } from "@/lib/site-config";
 import { renderPostContent, contentToPlainText, truncateText } from "@/lib/markdown";
 import { Navbar } from "@/components/shared/navbar";
 import { Footer } from "@/components/shared/footer";
@@ -86,6 +86,7 @@ export async function generateMetadata({
     description,
     alternates: localeMetadataAlternates(locale, `/dars/${slug}`),
     openGraph: {
+      ...openGraphBase(locale),
       title,
       description,
       url: `${BASE_URL}/${locale}/dars/${slug}`,

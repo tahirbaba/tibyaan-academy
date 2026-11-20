@@ -11,13 +11,18 @@ import { FloatingWhatsApp } from "@/components/shared/floating-whatsapp";
 import { ExitIntentPopup } from "@/components/shared/exit-intent-popup";
 import { WhatsAppClickTracker } from "@/components/shared/whatsapp-click-tracker";
 
-import { localeMetadataAlternates, absoluteUrl } from "@/lib/site-config";
+import { localeMetadataAlternates, absoluteUrl, openGraphBase } from "@/lib/site-config";
+import { getPricingOrNull } from "@/lib/pricing-server";
+import { feeSentence } from "@/lib/pricing";
 
-const localeMetadata: Record<string, { title: string; description: string }> = {
+const localeMetadata: Record<
+  string,
+  { title: string; description: string }
+> = {
   ur: {
     title: "تبیان اکیڈمی — آن لائن قرآن و اسلامی تعلیم",
     description:
-      "قرآن، حفظ، عربی اور اسلامی علوم آن لائن سیکھیں — لائیو اساتذہ + AI استاذ کے ساتھ۔ ماہانہ صرف $25 سے۔",
+      "قرآن، حفظ، عربی اور اسلامی علوم آن لائن سیکھیں — لائیو اساتذہ + AI استاذ کے ساتھ۔",
   },
   ar: {
     title: "أكاديمية تبيان — تعليم القرآن والعلوم الإسلامية",
@@ -27,7 +32,7 @@ const localeMetadata: Record<string, { title: string; description: string }> = {
   en: {
     title: "Tibyaan Academy — Online Quran & Islamic Education",
     description:
-      "Learn Quran, Hifz, Arabic & Islamic Sciences online with live teachers + AI Ustaz. Plans from $25/month.",
+      "Learn Quran, Hifz, Arabic & Islamic Sciences online with live teachers + AI Ustaz.",
   },
   fr: {
     title: "Tibyaan Academy — Éducation Coranique et Islamique en Ligne",
@@ -37,7 +42,7 @@ const localeMetadata: Record<string, { title: string; description: string }> = {
   id: {
     title: "Tibyaan Academy — Pendidikan Quran & Islam Online",
     description:
-      "Belajar Quran, Hifz, Bahasa Arab & Ilmu Islam online dengan guru langsung + AI Ustaz. Mulai dari $25/bulan.",
+      "Belajar Quran, Hifz, Bahasa Arab & Ilmu Islam online dengan guru langsung + AI Ustaz.",
   },
 };
 
@@ -58,13 +63,23 @@ export async function generateMetadata({
     };
   }
 
-  const meta = localeMetadata[locale] || localeMetadata.en;
+  const base = localeMetadata[locale] || localeMetadata.en;
+  // The price in the default description comes from the pricing config. If it
+  // cannot be read, the sentence is left out rather than filled with a guess.
+  const pricing = await getPricingOrNull();
+  const meta = {
+    title: base.title,
+    description: pricing
+      ? `${base.description} ${feeSentence(locale, pricing)}`
+      : base.description,
+  };
 
   return {
     title: meta.title,
     description: meta.description,
     alternates: localeMetadataAlternates(locale),
     openGraph: {
+      ...openGraphBase(locale),
       title: meta.title,
       description: meta.description,
       url: absoluteUrl(locale),

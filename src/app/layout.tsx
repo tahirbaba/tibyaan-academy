@@ -1,12 +1,22 @@
 import type { Metadata } from "next";
 import { getLocale } from "next-intl/server";
 import { GoogleAnalytics } from "@next/third-parties/google";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
 import "./globals.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+});
+
+// Display serif for headings (Latin-script locales). Self-hosted by next/font
+// with a size-adjusted fallback, so it neither blocks rendering nor shifts
+// layout when it swaps in.
+const playfair = Playfair_Display({
+  variable: "--font-playfair",
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  display: "swap",
 });
 
 const geistMono = Geist_Mono({
@@ -15,7 +25,8 @@ const geistMono = Geist_Mono({
 });
 
 import { SITE_URL as BASE_URL } from "@/lib/site-config";
-import { getLowestPrice, getHighestPrice } from "@/lib/pricing";
+import { lowestPrice, highestPrice } from "@/lib/pricing";
+import { getPricingOrNull } from "@/lib/pricing-server";
 
 const rtlLocales = ["ur", "ar"];
 
@@ -42,13 +53,6 @@ const organizationJsonLd = {
     contactType: "customer service",
     availableLanguage: ["English", "Urdu", "Arabic", "French", "Indonesian"],
   },
-  offers: {
-    "@type": "AggregateOffer",
-    priceCurrency: "USD",
-    lowPrice: String(getLowestPrice()),
-    highPrice: String(getHighestPrice()),
-    offerCount: "8",
-  },
 };
 
 export const metadata: Metadata = {
@@ -71,21 +75,12 @@ export const metadata: Metadata = {
     url: BASE_URL,
     locale: "en_US",
     alternateLocale: ["ur_PK", "ar_SA", "fr_FR", "id_ID"],
-    images: [
-      {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "Tibyaan Academy — Online Quran Education",
-      },
-    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Tibyaan Academy — Online Quran & Islamic Education",
     description:
       "Learn Quran, Hifz, Arabic & Islamic Sciences online with live teachers + AI Ustaz.",
-    images: ["/og-image.png"],
     creator: "@TibyaanAcademy",
   },
   verification: {
@@ -114,11 +109,27 @@ export default async function RootLayout({
   // Measurement ID comes from the environment — never hard-coded.
   const gaId = process.env.NEXT_PUBLIC_GA_ID;
 
+  // Price range in the structured data comes from the pricing config. If it
+  // cannot be read the offer is omitted — never filled with a guessed number.
+  const pricing = await getPricingOrNull();
+  const organizationWithOffers = pricing
+    ? {
+        ...organizationJsonLd,
+        offers: {
+          "@type": "AggregateOffer",
+          priceCurrency: pricing.currency,
+          lowPrice: String(lowestPrice(pricing)),
+          highPrice: String(highestPrice(pricing)),
+          offerCount: "7",
+        },
+      }
+    : organizationJsonLd;
+
   return (
     <html
       lang={locale}
       dir={dir}
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <head>
@@ -132,7 +143,7 @@ export default async function RootLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify(organizationJsonLd),
+            __html: JSON.stringify(organizationWithOffers),
           }}
         />
       </head>

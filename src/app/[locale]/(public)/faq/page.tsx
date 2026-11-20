@@ -1,8 +1,10 @@
+import { getPricing } from "@/lib/pricing-server";
+import { feeSentence } from "@/lib/pricing";
 import type { Metadata } from "next";
 import { Navbar } from "@/components/shared/navbar";
 import { Footer } from "@/components/shared/footer";
 import { Link } from "@/i18n/navigation";
-import { SITE_URL, localeMetadataAlternates, absoluteUrl } from "@/lib/site-config";
+import { SITE_URL, localeMetadataAlternates, absoluteUrl, openGraphBase } from "@/lib/site-config";
 
 const metaByLocale: Record<string, { title: string; description: string }> = {
   en: { title: "FAQ — Frequently Asked Questions | Tibyaan Academy", description: "Get answers to common questions about enrollment, pricing, teachers, schedule, free trial, and more at Tibyaan Academy." },
@@ -17,7 +19,7 @@ const faqsByLocale: Record<string, { q: string; a: string }[]> = {
     { q: "How do I enroll at Tibyaan Academy?", a: "Simply click 'Start Free Trial' on our website, create an account, select your course and plan, and start your 5-day free trial immediately — no credit card required." },
     { q: "Do I need a credit card for the free trial?", a: "No! Our 5-day free trial requires no credit card. You only pay when you decide to continue after the trial." },
     { q: "What courses are available?", a: "We offer 4 courses: Nazra Quran (Tajweed), Hifz Quran (Memorization), Arabic Language, and the Aalim Course (Dars-e-Nizami)." },
-    { q: "What are the pricing plans?", a: "We have two plans: Plan 1 (Human Teacher + AI Ustaz) and Plan 2 (AI Only). Prices start from $25/month. Visit our Pricing page for full details." },
+    { q: "What are the pricing plans?", a: "We have two plans: Plan 1 (Human Teacher + AI Ustaz) and Plan 2 (AI Only). {fees} Visit our Pricing page for full details." },
     { q: "Are the teachers qualified?", a: "All our teachers are certified scholars with ijazah chains. They hold degrees from renowned Islamic institutions like Darul Uloom, Al-Azhar, and others." },
     { q: "What time zones do you support?", a: "We support all global time zones. Students from UK, USA, UAE, Canada, Australia, and worldwide can book classes at their preferred times." },
     { q: "Can children join Tibyaan Academy?", a: "Yes! We have programs for all ages — from young children (5+) learning their first Arabic letters to adults pursuing the Aalim course." },
@@ -39,7 +41,7 @@ const faqsByLocale: Record<string, { q: string; a: string }[]> = {
     { q: "تبیان اکیڈمی میں داخلہ کیسے لیں؟", a: "ہماری ویب سائٹ پر 'مفت ٹرائل شروع کریں' پر کلک کریں، اکاؤنٹ بنائیں، اپنا کورس اور پلان منتخب کریں، اور فوری طور پر 5 دن کا مفت ٹرائل شروع کریں — کوئی کریڈٹ کارڈ ضروری نہیں۔" },
     { q: "کیا مفت ٹرائل کے لیے کریڈٹ کارڈ چاہیے؟", a: "نہیں! ہمارے 5 دن کے مفت ٹرائل کے لیے کوئی کریڈٹ کارڈ ضروری نہیں۔ آپ صرف اس وقت ادائیگی کریں گے جب آپ ٹرائل کے بعد جاری رکھنے کا فیصلہ کریں۔" },
     { q: "کون کون سے کورسز دستیاب ہیں؟", a: "ہم 4 کورسز پیش کرتے ہیں: ناظرہ قرآن، حفظ قرآن، عربی زبان، اور عالم کورس (درس نظامی)۔" },
-    { q: "قیمتیں کیا ہیں؟", a: "ہمارے دو پلان ہیں: پلان 1 (انسانی استاد + AI استاذ) اور پلان 2 (صرف AI)۔ قیمتیں $25 ماہانہ سے شروع ہوتی ہیں۔" },
+    { q: "قیمتیں کیا ہیں؟", a: "ہمارے دو پلان ہیں: پلان 1 (انسانی استاد + AI استاذ) اور پلان 2 (صرف AI)۔ {fees}" },
     { q: "کیا اساتذہ اہل ہیں؟", a: "ہمارے تمام اساتذہ سرٹیفائیڈ علماء ہیں جن کے اجازہ کی سند ہے۔ وہ دارالعلوم اور الازہر جیسے معروف اداروں کے فارغین ہیں۔" },
     { q: "کن ٹائم زونز میں کلاسز دستیاب ہیں؟", a: "ہم دنیا کے تمام ٹائم زونز سپورٹ کرتے ہیں۔ طلبا اپنی پسند کے وقت کلاس بک کر سکتے ہیں۔" },
     { q: "کیا بچے شامل ہو سکتے ہیں؟", a: "ہاں! ہمارے پاس تمام عمروں کے لیے پروگرام ہیں — 5 سال کے بچوں سے لے کر بالغوں تک۔" },
@@ -89,13 +91,19 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     title: meta.title,
     description: meta.description,
     alternates: localeMetadataAlternates(locale, "/faq"),
-    openGraph: { title: meta.title, description: meta.description, url: absoluteUrl(locale, "/faq") },
+    openGraph: {
+      ...openGraphBase(locale), title: meta.title, description: meta.description, url: absoluteUrl(locale, "/faq") },
   };
 }
 
 export default async function FAQPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
-  const faqs = faqsByLocale[locale] || faqsByLocale.en;
+  const pricing = await getPricing();
+  const fees = feeSentence(locale, pricing);
+  const faqs = (faqsByLocale[locale] || faqsByLocale.en).map((faq) => ({
+    q: faq.q,
+    a: faq.a.replace("{fees}", fees),
+  }));
   const isRTL = locale === "ur" || locale === "ar";
 
   const headings: Record<string, string> = {

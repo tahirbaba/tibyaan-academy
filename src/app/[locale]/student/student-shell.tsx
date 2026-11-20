@@ -1,5 +1,6 @@
 "use client";
 
+import { SiteMotion } from "@/components/shared/site-motion";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
@@ -43,6 +44,7 @@ const navItems = [
   { key: "sidebarTrackProgress", href: "/student/track-progress", icon: ClipboardCheck },
   { key: "sidebarClassRecordings", href: "/student/class-recordings", icon: Video },
   { key: "sidebarTestsAssignments", href: "/student/tests-assignments", icon: FileText },
+  { key: "sidebarGroupClasses", href: "/student/group-classes", icon: Users2 },
   { key: "sidebarDarsCircles", href: "/student/dars-circles", icon: Users2 },
   { key: "sidebarComplaints", href: "/student/complaints", icon: AlertCircle },
   { key: "sidebarPayments", href: "/student/payments", icon: CreditCard },
@@ -130,8 +132,8 @@ export function StudentShell({
                 onClick={() => setSidebarOpen(false)}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                   isActive
-                    ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                    : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+                    ? "border-s-[3px] border-accent bg-sidebar-accent text-sidebar-accent-foreground"
+                    : "border-s-[3px] border-transparent text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
                 } ${collapsed ? "justify-center" : ""}`}
               >
                 <Icon className="w-5 h-5 shrink-0" />
@@ -208,6 +210,7 @@ export function StudentShell({
 
         {/* Page Content */}
         <main className="flex-1 overflow-y-auto p-4 lg:p-6">{children}</main>
+        <SiteMotion variant="dashboard" maxTilt={4} />
       </div>
     </div>
   );

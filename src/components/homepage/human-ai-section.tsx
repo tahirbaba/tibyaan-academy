@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { Reveal, SectionHeading } from "./primitives";
 import { Link } from "@/i18n/navigation";
 import { GraduationCap, Bot, Sparkles } from "lucide-react";
 
@@ -28,58 +28,39 @@ const CTA = "Start Your 5-Day Free Trial — No Card Required";
 export function HumanAiSection() {
   return (
     // English copy, so this section reads left-to-right even on the RTL locales.
-    <section className="py-20 px-4 bg-muted/30" dir="ltr">
+    <section className="bg-muted/40 px-4 py-20 md:py-28" dir="ltr">
       <div className="max-w-5xl mx-auto">
-        <motion.h2
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="text-3xl md:text-4xl font-bold text-center text-primary"
-        >
-          {HEADING}
-        </motion.h2>
+        <SectionHeading title={HEADING} />
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          className="mt-8 max-w-3xl mx-auto space-y-5 text-center"
-        >
+        <Reveal delay={0.1} className="mx-auto mt-8 max-w-3xl space-y-5 text-center">
           {PARAGRAPHS.map((text) => (
-            <p key={text} className="text-base md:text-lg text-muted-foreground leading-relaxed">
+            <p key={text} className="text-base leading-relaxed text-muted-foreground md:text-lg">
               {text}
             </p>
           ))}
-        </motion.div>
+        </Reveal>
 
-        <div className="mt-12 grid gap-5 sm:grid-cols-3">
+        <div className="mt-14 grid gap-6 sm:grid-cols-3">
           {COLUMNS.map((col, i) => {
             const Icon = col.icon;
             return (
-              <motion.div
-                key={col.title}
-                initial={{ opacity: 0, y: 15 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: 0.15 + i * 0.08 }}
-                className="h-full p-6 rounded-2xl bg-card border shadow-sm text-center"
-              >
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mx-auto">
-                  <Icon className="w-6 h-6 text-primary" />
+              <Reveal key={col.title} delay={0.1 + i * 0.08}>
+                <div className="premium-card h-full p-7 text-center">
+                  <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 ring-1 ring-primary/15">
+                    <Icon className="h-6 w-6 text-primary" aria-hidden />
+                  </div>
+                  <h3 className="mt-4 font-display text-lg font-semibold text-foreground">{col.title}</h3>
+                  <p className="mt-2 text-sm text-muted-foreground">{col.body}</p>
                 </div>
-                <h3 className="mt-4 font-bold text-foreground">{col.title}</h3>
-                <p className="mt-2 text-sm text-muted-foreground">{col.body}</p>
-              </motion.div>
+              </Reveal>
             );
           })}
         </div>
 
-        <div className="mt-12 text-center">
+        <div className="mt-14 text-center">
           <Link
             href="/signup"
-            className="inline-flex items-center justify-center px-8 py-3.5 rounded-xl bg-primary text-primary-foreground font-semibold shadow-md hover:opacity-90 transition-opacity"
+            className="inline-flex items-center justify-center rounded-full bg-primary px-9 py-4 font-semibold text-primary-foreground shadow-lg transition-transform hover:-translate-y-0.5"
           >
             {CTA}
           </Link>

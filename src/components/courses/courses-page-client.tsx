@@ -27,13 +27,12 @@ import {
 type CourseKey = "nazra" | "hifz" | "arabic" | "aalim";
 type FilterKey = "all" | CourseKey;
 
-import { PRICING } from "@/lib/pricing";
+import type { PricingConfig } from "@/lib/pricing";
+import { CoursePrice } from "@/components/pricing/course-price";
 
 const courses: {
   key: CourseKey;
   icon: typeof BookOpen;
-  plan1Price: string;
-  plan2Price: string;
   color: string;
   iconColor: string;
   slug: string;
@@ -43,46 +42,38 @@ const courses: {
   {
     key: "nazra",
     icon: BookOpen,
-    plan1Price: `$${PRICING.nazra.human_ai}`,
-    plan2Price: `$${PRICING.nazra.ai_only}`,
     color: "from-emerald-500/10 to-emerald-500/5 border-emerald-200 dark:border-emerald-800",
     iconColor: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300",
     slug: "nazra-quran",
     duration: "3-6 months",
-    thumbnail: "/images/courses/nazra.jpg",
+    thumbnail: "/images/courses/nazra.webp",
   },
   {
     key: "hifz",
     icon: Sparkles,
-    plan1Price: `$${PRICING.hifz.human_ai}`,
-    plan2Price: `$${PRICING.hifz.ai_only}`,
     color: "from-amber-500/10 to-amber-500/5 border-amber-200 dark:border-amber-800",
     iconColor: "bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300",
     slug: "hifz-quran",
     duration: "2-4 years",
-    thumbnail: "/images/courses/hifz.jpg",
+    thumbnail: "/images/courses/hifz.webp",
   },
   {
     key: "arabic",
     icon: Languages,
-    plan1Price: `$${PRICING.arabic.human_ai}`,
-    plan2Price: `$${PRICING.arabic.ai_only}`,
     color: "from-blue-500/10 to-blue-500/5 border-blue-200 dark:border-blue-800",
     iconColor: "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300",
     slug: "arabic-language",
     duration: "6-12 months",
-    thumbnail: "/images/courses/arabic.jpg",
+    thumbnail: "/images/courses/arabic.webp",
   },
   {
     key: "aalim",
     icon: GraduationCap,
-    plan1Price: `$${PRICING.aalim.human_ai}`,
-    plan2Price: `$${PRICING.aalim.ai_only}`,
     color: "from-purple-500/10 to-purple-500/5 border-purple-200 dark:border-purple-800",
     iconColor: "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300",
     slug: "aalim-course",
     duration: "2-8 years",
-    thumbnail: "/images/courses/aalim.jpg",
+    thumbnail: "/images/courses/aalim.webp",
   },
 ];
 
@@ -109,7 +100,11 @@ const comparisonFeatures: {
   { key: "certificates", label: "Certificates", icon: Award, plan1: true, plan2: false },
 ];
 
-export default function CoursesPageClient() {
+export default function CoursesPageClient({
+  pricing,
+}: {
+  pricing: PricingConfig;
+}) {
   const t = useTranslations("coursesPage");
   const tc = useTranslations("coursesSection");
   const [activeFilter, setActiveFilter] = useState<FilterKey>("all");
@@ -172,9 +167,12 @@ export default function CoursesPageClient() {
                 return (
                   <motion.div
                     key={course.key}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4, delay: i * 0.1 }}
+                    // Rise in with a transform only — starting at opacity 0 kept
+                    // the course image (the page's largest paint) invisible
+                    // until the JavaScript had loaded.
+                    initial={{ y: 20 }}
+                    animate={{ y: 0 }}
+                    transition={{ duration: 0.5, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
                     className={`rounded-2xl border bg-gradient-to-b ${course.color} overflow-hidden hover:shadow-xl transition-all`}
                   >
                     {/* Course Thumbnail */}
@@ -183,6 +181,11 @@ export default function CoursesPageClient() {
                         src={course.thumbnail}
                         alt={`${course.key} course`}
                         fill
+                        sizes="(max-width: 768px) 100vw, 50vw"
+                        // The first cards are in view on arrival and are the
+                        // page's largest paint: load them first, not lazily.
+                        loading={i < 2 ? "eager" : "lazy"}
+                        fetchPriority={i < 2 ? "high" : "auto"}
                         className="object-cover"
                         onError={(e) => {
                           const el = e.currentTarget as HTMLImageElement;
@@ -217,31 +220,12 @@ export default function CoursesPageClient() {
                       ))}
                     </ul>
 
-                    {/* Pricing */}
-                    <div className="mt-6 grid grid-cols-2 gap-3">
-                      <div className="bg-card/60 border rounded-xl p-4 text-center">
-                        <p className="text-xs font-medium text-muted-foreground">
-                          {t("plan1Label")}
-                        </p>
-                        <p className="text-2xl font-bold text-primary mt-1">
-                          {course.plan1Price}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {t("perMonth")}
-                        </p>
-                      </div>
-                      <div className="bg-card/60 border rounded-xl p-4 text-center">
-                        <p className="text-xs font-medium text-muted-foreground">
-                          {t("plan2Label")}
-                        </p>
-                        <p className="text-2xl font-bold text-accent mt-1">
-                          {course.plan2Price}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {t("perMonth")}
-                        </p>
-                      </div>
-                    </div>
+                    {/* Pricing — the same block every course card uses */}
+                    <CoursePrice
+                      pricing={pricing}
+                      course={course.key}
+                      className="mt-6 rounded-xl border bg-card/60 p-4"
+                    />
 
                     {/* Flexible scheduling line */}
                     <p className="mt-4 text-xs text-primary font-medium">

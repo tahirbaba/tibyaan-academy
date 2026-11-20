@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
+import { formatPrice, teacherShare, type PricingConfig } from "@/lib/pricing";
 import {
   DollarSign,
   Globe,
@@ -14,17 +15,27 @@ import {
 } from "lucide-react";
 
 const benefits = [
-  { icon: DollarSign, key: "benefit1" as const, color: "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300" },
-  { icon: Globe, key: "benefit2" as const, color: "bg-teal-100 dark:bg-teal-900/40 text-teal-700 dark:text-teal-300" },
-  { icon: Bot, key: "benefit3" as const, color: "bg-cyan-100 dark:bg-cyan-900/40 text-cyan-700 dark:text-cyan-300" },
-  { icon: Clock, key: "benefit4" as const, color: "bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300" },
+  { icon: DollarSign, key: "benefit1" as const },
+  { icon: Globe, key: "benefit2" as const },
+  { icon: Bot, key: "benefit3" as const },
+  { icon: Clock, key: "benefit4" as const },
 ];
 
-export function TeacherCtaSection() {
+export function TeacherCtaSection({ pricing }: { pricing: PricingConfig }) {
   const t = useTranslations("teacherCta");
 
+  // What a teacher actually earns per student: their share of each 1-on-1 fee.
+  // Computed from the pricing config, so this sentence can never again promise
+  // more than a student pays.
+  const shares = Object.values(pricing.oneOnOne).map((fee) => teacherShare(pricing, fee));
+  const earnings = {
+    percent: pricing.teacherSharePercent,
+    low: formatPrice(Math.min(...shares)),
+    high: formatPrice(Math.max(...shares)),
+  };
+
   return (
-    <section className="py-16 md:py-24 bg-gradient-to-br from-emerald-50 via-teal-50/30 to-background dark:from-emerald-950/30 dark:via-teal-950/20 dark:to-background">
+    <section className="pattern-stars pattern-stars-light bg-muted/40 py-20 md:py-28">
       <div className="container mx-auto px-4">
         <div className="max-w-5xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -35,11 +46,11 @@ export function TeacherCtaSection() {
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
             >
-              <div className="inline-flex items-center gap-2 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 rounded-full px-4 py-1.5 text-sm font-medium mb-6">
+              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-accent/40 bg-accent/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-[#8A6F1F] dark:text-accent">
                 <GraduationCap className="w-4 h-4" />
                 Teachers
               </div>
-              <h2 className="text-3xl md:text-4xl font-bold text-foreground leading-tight">
+              <h2 className="font-display text-3xl font-semibold leading-tight text-primary dark:text-foreground md:text-[2.75rem]">
                 {t("title")}
               </h2>
               <p className="mt-4 text-lg text-muted-foreground">
@@ -50,7 +61,7 @@ export function TeacherCtaSection() {
                 <Link href="/signup">
                   <Button
                     size="lg"
-                    className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white gap-2 shadow-lg shadow-emerald-600/20"
+                    className="w-full gap-2 rounded-full bg-primary px-8 text-primary-foreground shadow-lg hover:bg-primary/90 sm:w-auto"
                   >
                     <GraduationCap className="w-5 h-5" />
                     {t("joinButton")}
@@ -60,7 +71,7 @@ export function TeacherCtaSection() {
                   <Button
                     size="lg"
                     variant="outline"
-                    className="w-full sm:w-auto border-emerald-300 dark:border-emerald-700 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 gap-2"
+                    className="w-full gap-2 rounded-full border-primary/30 px-8 sm:w-auto"
                   >
                     <LogIn className="w-4 h-4" />
                     {t("alreadyTeacher")}
@@ -80,13 +91,13 @@ export function TeacherCtaSection() {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.5, delay: i * 0.1 }}
-                    className="rounded-xl border border-emerald-200/60 dark:border-emerald-800/40 bg-white/80 dark:bg-card/80 backdrop-blur-sm p-5 shadow-sm hover:shadow-md transition-shadow"
+                    className="premium-card h-full p-6"
                   >
-                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center mb-3 ${benefit.color}`}>
+                    <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary ring-1 ring-primary/15">
                       <Icon className="w-5 h-5" />
                     </div>
                     <p className="text-sm font-medium text-foreground leading-snug">
-                      {t(benefit.key)}
+                      {benefit.key === "benefit1" ? t("benefit1", earnings) : t(benefit.key)}
                     </p>
                   </motion.div>
                 );

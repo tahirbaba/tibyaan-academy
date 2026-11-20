@@ -2,6 +2,9 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { getTeacherDashboardStats } from "@/lib/db/teacher-queries";
 import { TeacherDashboardClient } from "./dashboard-client";
+import { TeacherGroupClassesWidget } from "@/components/cohorts/dashboard-widgets";
+import { getPricing } from "@/lib/pricing-server";
+import { teacherShare } from "@/lib/pricing";
 
 export default async function TeacherDashboardPage({
   params,
@@ -32,6 +35,7 @@ export default async function TeacherDashboardPage({
 
   try {
     const raw = await getTeacherDashboardStats(user.id);
+    const pricing = await getPricing();
 
     stats = {
       todayClasses: raw.todayClasses.map((c) => {
@@ -64,18 +68,22 @@ export default async function TeacherDashboardPage({
       }),
       activeStudents: raw.activeStudents,
       pendingTests: raw.pendingTests,
-      monthlyRevenue: raw.monthlyRevenue,
+      // The teacher's share of what their students paid — not the gross.
+      monthlyRevenue: teacherShare(pricing, raw.monthlyRevenue),
     };
   } catch (err) {
     console.error("Failed to load teacher dashboard:", err);
   }
 
   return (
-    <TeacherDashboardClient
-      todayClasses={stats.todayClasses}
-      activeStudents={stats.activeStudents}
-      pendingTests={stats.pendingTests}
-      monthlyRevenue={stats.monthlyRevenue}
-    />
+    <>
+      <TeacherDashboardClient
+        todayClasses={stats.todayClasses}
+        activeStudents={stats.activeStudents}
+        pendingTests={stats.pendingTests}
+        monthlyRevenue={stats.monthlyRevenue}
+      />
+      <TeacherGroupClassesWidget teacherId={user.id} locale={locale} />
+    </>
   );
 }

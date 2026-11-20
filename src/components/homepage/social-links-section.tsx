@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
+import { SectionHeading } from "./primitives";
 import { Youtube, Linkedin, Facebook, Instagram, ExternalLink } from "lucide-react";
 
 const socialLinks = [
@@ -10,7 +11,6 @@ const socialLinks = [
     href: "https://www.youtube.com/channel/UCBU7Fc9ZjYU42SHfSQM9_rg",
     icon: Youtube,
     color: "bg-red-600",
-    bgCard: "from-red-50 to-red-100/50 dark:from-red-950/20 dark:to-red-900/10 border-red-200 dark:border-red-800",
     label: "YouTube",
   },
   {
@@ -18,7 +18,6 @@ const socialLinks = [
     href: "https://www.linkedin.com/in/tibyaan-academy-0263b73bb/",
     icon: Linkedin,
     color: "bg-blue-700",
-    bgCard: "from-blue-50 to-blue-100/50 dark:from-blue-950/20 dark:to-blue-900/10 border-blue-200 dark:border-blue-800",
     label: "LinkedIn",
   },
   {
@@ -30,7 +29,6 @@ const socialLinks = [
       </svg>
     ),
     color: "bg-black dark:bg-gray-800",
-    bgCard: "from-gray-50 to-gray-100/50 dark:from-gray-900/20 dark:to-gray-800/10 border-gray-200 dark:border-gray-700",
     label: "X (Twitter)",
   },
   {
@@ -38,7 +36,6 @@ const socialLinks = [
     href: "https://web.facebook.com/profile.php?id=61576509186955",
     icon: Facebook,
     color: "bg-blue-600",
-    bgCard: "from-blue-50 to-sky-100/50 dark:from-blue-950/20 dark:to-sky-900/10 border-blue-200 dark:border-blue-800",
     label: "Facebook",
   },
   {
@@ -46,7 +43,6 @@ const socialLinks = [
     href: "https://www.instagram.com/tibyaanacademy/",
     icon: Instagram,
     color: "bg-gradient-to-br from-purple-600 to-pink-500",
-    bgCard: "from-pink-50 to-purple-100/50 dark:from-pink-950/20 dark:to-purple-900/10 border-pink-200 dark:border-pink-800",
     label: "Instagram",
   },
 ];
@@ -55,25 +51,12 @@ export function SocialLinksSection() {
   const t = useTranslations("socialLinks");
 
   return (
-    <section className="py-16 bg-muted/30">
+    <section className="bg-muted/40 py-20 md:py-28">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="text-center mb-10"
-        >
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground">
-            {t("title")}
-          </h2>
-          <p className="mt-3 text-muted-foreground max-w-xl mx-auto">
-            {t("subtitle")}
-          </p>
-        </motion.div>
+        <SectionHeading title={t("title")} subtitle={t("subtitle")} />
 
         {/* Horizontal scroll row of portrait cards */}
-        <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide">
+        <div className="mt-12 flex snap-x snap-mandatory gap-5 overflow-x-auto pb-4 scrollbar-hide lg:justify-center">
           {socialLinks.map((social, index) => {
             const Icon = social.icon;
             return (
@@ -86,11 +69,7 @@ export function SocialLinksSection() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: index * 0.1 }}
-                className={`
-                  flex-none snap-start w-48 rounded-2xl border bg-gradient-to-b ${social.bgCard}
-                  p-6 flex flex-col items-center gap-4 text-center
-                  hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group
-                `}
+                className="premium-card group flex w-48 flex-none snap-start flex-col items-center gap-4 p-6 text-center"
               >
                 {/* Icon circle */}
                 <div className={`w-16 h-16 rounded-2xl ${social.color} flex items-center justify-center text-white shadow-lg`}>
@@ -111,7 +90,7 @@ export function SocialLinksSection() {
         </div>
 
         {/* Scroll hint */}
-        <p className="text-center text-xs text-muted-foreground mt-4">
+        <p className="mt-4 text-center text-xs text-muted-foreground lg:hidden">
           ← Scroll to see all social channels →
         </p>
       </div>

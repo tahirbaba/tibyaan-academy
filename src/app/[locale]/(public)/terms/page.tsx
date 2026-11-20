@@ -3,7 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { Navbar } from "@/components/shared/navbar";
 import { Footer } from "@/components/shared/footer";
 
-import { SITE_URL as BASE_URL, localeMetadataAlternates } from "@/lib/site-config";
+import { SITE_URL as BASE_URL, localeMetadataAlternates, openGraphBase } from "@/lib/site-config";
 
 const termsMeta: Record<string, { title: string; description: string }> = {
   ur: {
@@ -41,6 +41,7 @@ export async function generateMetadata({
     description: meta.description,
     alternates: localeMetadataAlternates(locale, "/terms"),
     openGraph: {
+      ...openGraphBase(locale),
       title: meta.title,
       description: meta.description,
       url: `${BASE_URL}/${locale}/terms`,

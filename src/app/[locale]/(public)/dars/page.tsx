@@ -4,7 +4,7 @@ import { listDars, type DarsRow } from "@/lib/db/dars-queries";
 import { sendFailureAlert } from "@/lib/alerts";
 import { Link } from "@/i18n/navigation";
 import { BookOpen, Calendar } from "lucide-react";
-import { localeMetadataAlternates, absoluteUrl } from "@/lib/site-config";
+import { localeMetadataAlternates, absoluteUrl, openGraphBase } from "@/lib/site-config";
 import { publishedDars } from "@/lib/content/publication";
 import { Navbar } from "@/components/shared/navbar";
 import { Footer } from "@/components/shared/footer";
@@ -28,7 +28,8 @@ export async function generateMetadata({
     title: meta.title,
     description: meta.description,
     alternates: localeMetadataAlternates(locale, "/dars"),
-    openGraph: { title: meta.title, description: meta.description, url: absoluteUrl(locale, "/dars") },
+    openGraph: {
+      ...openGraphBase(locale), title: meta.title, description: meta.description, url: absoluteUrl(locale, "/dars") },
   };
 }
 

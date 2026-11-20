@@ -23,12 +23,15 @@ const locales = [...SITE_LOCALES];
 const staticPages = [
   "",
   "/courses",
+  "/group-classes",
   "/pricing",
   "/dars",
   "/about",
   "/teachers",
   "/reviews",
   "/dars-circles",
+  "/faq",
+  "/contact",
 ];
 
 const courseSlugs = [
@@ -108,17 +111,35 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // DB not available during build — skip dynamic content
   }
 
+  // Group class (cohort) detail pages. Separate from the block above so a
+  // failure here cannot remove blog and dars URLs from the sitemap. A cohort
+  // missing from the sitemap is an omission, not a false statement, so this
+  // logs instead of failing the whole sitemap.
+  try {
+    const { listPublishedCohortSlugs } = await import("@/lib/cohorts/queries");
+    for (const cohort of await listPublishedCohortSlugs()) {
+      for (const locale of locales) {
+        entries.push({
+          url: `${BASE_URL}/${locale}/group-classes/${cohort.slug}`,
+          lastModified: cohort.updatedAt,
+          changeFrequency: "weekly",
+          priority: 0.7,
+        });
+      }
+    }
+  } catch (error) {
+    console.error("[sitemap] cohort pages omitted — query failed:", error);
+  }
+
   // Country-specific landing pages
+  // Each country page is translated and served in all five languages, and
+  // each version already declares the other four as hreflang alternates. The
+  // sitemap used to list only one language per country (e.g. /en/uk), so the
+  // Urdu, Arabic, French and Indonesian versions were never submitted to
+  // Google even though the pages exist and point at each other.
   const countryPages = [
-    { path: "uk", locales: ["en"] },
-    { path: "usa", locales: ["en"] },
-    { path: "uae", locales: ["en"] },
-    { path: "canada", locales: ["en"] },
-    { path: "australia", locales: ["en"] },
-    { path: "indonesia", locales: ["id"] },
-    { path: "germany", locales: ["en"] },
-    { path: "saudi", locales: ["ar"] },
-  ];
+    "uk", "usa", "uae", "canada", "australia", "indonesia", "germany", "saudi",
+  ].map((path) => ({ path, locales: [...locales] as string[] }));
 
   for (const { path, locales: pagLocales } of countryPages) {
     for (const locale of pagLocales) {

@@ -16,8 +16,12 @@ import { DailyDarsSection } from "@/components/homepage/daily-dars-section";
 import { DashboardPreviewSection } from "@/components/homepage/dashboard-preview-section";
 import { EnrollmentFormSection } from "@/components/homepage/enrollment-form-section";
 import { Footer } from "@/components/shared/footer";
+import { TeachersSection } from "@/components/homepage/teachers-section";
+import { GroupClassesSection } from "@/components/homepage/group-classes-section";
+import { HomeMotion } from "@/components/homepage/primitives";
+import { getPricing } from "@/lib/pricing-server";
 
-import { localeMetadataAlternates, absoluteUrl } from "@/lib/site-config";
+import { localeMetadataAlternates, absoluteUrl, openGraphBase } from "@/lib/site-config";
 
 const homeMeta: Record<string, { title: string; description: string }> = {
   ur: {
@@ -60,6 +64,7 @@ export async function generateMetadata({
     description: meta.description,
     alternates: localeMetadataAlternates(locale),
     openGraph: {
+      ...openGraphBase(locale),
       title: meta.title,
       description: meta.description,
       url: absoluteUrl(locale),
@@ -67,26 +72,37 @@ export async function generateMetadata({
   };
 }
 
-export default function HomePage() {
+export default async function HomePage() {
+  // One read of the pricing config for the whole page; every price shown
+  // below comes from it. If it cannot be read the page fails loudly
+  // (getPricing alerts) instead of showing prices nobody set.
+  const pricing = await getPricing();
+
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
-      <main className="flex-1">
-        <HeroSection />
-        <FeaturesSection />
-        <HumanAiSection />
-        <CoursesSection />
-        <TeacherVideosSection />
-        <HowItWorksSection />
-        <DailyDarsSection />
-        <TestimonialsSection />
-        <TrustSignalsSection />
-        <DashboardPreviewSection />
-        <PricingTeaserSection />
-        <EnrollmentFormSection />
-        <TeacherCtaSection />
-        <SocialLinksSection />
-        <CtaSection />
+      {/* home-main: the homepage animates its own headings (framer-motion),
+          so the site-wide CSS heading motion skips it. */}
+      <main className="flex-1 home-main">
+        <HomeMotion>
+          <HeroSection />
+          <FeaturesSection />
+          <HumanAiSection />
+          <CoursesSection pricing={pricing} />
+          <GroupClassesSection />
+          <TeachersSection />
+          <TeacherVideosSection />
+          <HowItWorksSection />
+          <DailyDarsSection />
+          <TestimonialsSection />
+          <TrustSignalsSection />
+          <DashboardPreviewSection />
+          <PricingTeaserSection pricing={pricing} />
+          <EnrollmentFormSection />
+          <TeacherCtaSection pricing={pricing} />
+          <SocialLinksSection />
+          <CtaSection />
+        </HomeMotion>
       </main>
       <Footer />
     </div>

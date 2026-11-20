@@ -3,7 +3,8 @@ import { createClient } from "@/lib/supabase/server";
 import { db } from "@/lib/db";
 import { referrals } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
-import { getFamilyDiscount } from "@/lib/stripe";
+import { familyDiscountPercent } from "@/lib/pricing";
+import { getPricingForCharge } from "@/lib/pricing-server";
 
 export async function POST(request: NextRequest) {
   try {
@@ -47,7 +48,8 @@ export async function POST(request: NextRequest) {
 
     // Student index: 2nd student, 3rd student, etc.
     const studentIndex = familyMembers.length + 1;
-    const discount = getFamilyDiscount(studentIndex);
+    const pricing = await getPricingForCharge();
+    const discount = familyDiscountPercent(pricing, studentIndex);
 
     // Create referral record
     await db.insert(referrals).values({
@@ -58,9 +60,9 @@ export async function POST(request: NextRequest) {
     });
 
     return Response.json({
-      discount: discount * 100, // percentage
+      discount, // percentage
       studentIndex,
-      message: `Family discount applied: ${discount * 100}% off`,
+      message: `Family discount applied: ${discount}% off`,
     });
   } catch (error) {
     console.error("Family discount error:", error);

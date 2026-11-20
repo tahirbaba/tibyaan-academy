@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { Video, Eye, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { VideoShareButtons } from "@/components/video/video-share-buttons";
+import { SectionHeading } from "./primitives";
 
 interface TeacherVideo {
   id: string;
@@ -38,22 +39,10 @@ export function TeacherVideosSection() {
   // Don't render null when empty — show placeholder below
 
   return (
-    <section className="py-16 md:py-24 bg-muted/30">
+    <section className="bg-muted/40 py-20 md:py-28">
       <div className="container mx-auto px-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="text-center mb-12"
-        >
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground">
-            {t("title")}
-          </h2>
-          <p className="mt-3 text-lg text-muted-foreground max-w-2xl mx-auto">
-            {t("subtitle")}
-          </p>
-        </motion.div>
+        <SectionHeading title={t("title")} subtitle={t("subtitle")} />
+        <div className="h-12" aria-hidden />
 
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">

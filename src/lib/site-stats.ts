@@ -12,13 +12,13 @@
 export const SITE_STATS = {
   students: 500,
   countries: 15,
-  classes: 10000,
+  classes: 5000,
   huffaz: 50,
 } as const;
 
 export type SiteStatKey = keyof typeof SITE_STATS;
 
-/** 10000 -> "10,000+" */
+/** 5000 -> "5,000+" */
 export function formatStat(key: SiteStatKey): string {
   return `${SITE_STATS[key].toLocaleString("en-US")}+`;
 }

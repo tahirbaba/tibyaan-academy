@@ -1,5 +1,6 @@
 "use client";
 
+import { SiteMotion } from "@/components/shared/site-motion";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useLocale } from "next-intl";
@@ -14,7 +15,8 @@ import {
   Bot,
   Star,
   Bell,
-  Video,  UserCheck,
+  Video,
+  UserCheck,
   CalendarClock,
   Activity,
   Sun,
@@ -32,6 +34,7 @@ import {
   ClipboardList,
   FileCheck,
   Mail,
+  DollarSign,
 } from "lucide-react";
 import { NotificationBell } from "@/components/shared/notification-bell";
 
@@ -47,6 +50,8 @@ const navItems = [
   { key: "sidebarScheduleChanges", href: "/admin/schedule-change-requests", icon: RefreshCw },
   { key: "sidebarComplaints", href: "/admin/complaints", icon: AlertCircle },
   { key: "sidebarDarsCircles", href: "/admin/dars-circles", icon: Users2 },
+  { key: "sidebarCohorts", href: "/admin/cohorts", icon: Users2 },
+  { key: "sidebarPricing", href: "/admin/pricing", icon: DollarSign },
   { key: "sidebarCertificates", href: "/admin/certificates", icon: Award },
   { key: "sidebarAgents", href: "/admin/agents", icon: Activity },
   { key: "sidebarAIMonitor", href: "/admin/ai-monitor", icon: Bot },
@@ -144,8 +149,8 @@ export function AdminShell({
                 onClick={() => setSidebarOpen(false)}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                   isActive
-                    ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                    : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+                    ? "border-s-[3px] border-accent bg-sidebar-accent text-sidebar-accent-foreground"
+                    : "border-s-[3px] border-transparent text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
                 } ${collapsed ? "justify-center" : ""}`}
               >
                 <Icon className="w-5 h-5 shrink-0" />
@@ -222,6 +227,7 @@ export function AdminShell({
 
         {/* Page Content */}
         <main className="flex-1 overflow-y-auto p-4 lg:p-6">{children}</main>
+        <SiteMotion variant="dashboard" maxTilt={4} />
       </div>
     </div>
   );

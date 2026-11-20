@@ -28,6 +28,7 @@ export default function LoginPage() {
   const confirmPending = searchParams.get("confirmed") === "pending";
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [remember, setRemember] = useState(true);
 
   async function handleEmailLogin(formData: FormData) {
     setLoading(true);
@@ -43,7 +44,7 @@ export default function LoginPage() {
   async function handleGoogleLogin() {
     setLoading(true);
     setError(null);
-    const result = await loginWithGoogle(locale);
+    const result = await loginWithGoogle(locale, remember);
     if (result?.error) {
       setError(result.error);
       setLoading(false);
@@ -148,6 +149,17 @@ export default function LoginPage() {
                 className="h-12"
               />
             </div>
+
+            <label className="flex cursor-pointer items-center gap-2 text-sm text-foreground">
+              <input
+                type="checkbox"
+                name="remember"
+                checked={remember}
+                onChange={(e) => setRemember(e.target.checked)}
+                className="h-4 w-4 rounded border-border accent-[#1B4332]"
+              />
+              {t("rememberMe")}
+            </label>
 
             {error && (
               <p className="text-sm text-destructive text-center">{error}</p>

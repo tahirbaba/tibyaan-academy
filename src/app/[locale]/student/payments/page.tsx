@@ -9,7 +9,14 @@ import {
   CreditCard, Calendar, DollarSign, Users, Copy, Check,
   AlertTriangle, CheckCircle2, Clock, ArrowUpRight, Receipt, Loader2,
 } from "lucide-react";
-import { COURSE_FEES } from "@/lib/data/fees-config";
+import {
+  COURSE_KEYS,
+  aiOnlyMonthly,
+  formatPrice,
+  parsePricingConfig,
+  yearlyPrice,
+  type PricingConfig,
+} from "@/lib/pricing";
 
 type Subscription = {
   id: string;
@@ -25,40 +32,12 @@ type Subscription = {
   currentPeriodEnd: string;
 };
 
-// Mock data — will be replaced with real API calls
-const currentSubscription = {
-  plan: "human_ai" as const,
-  course: "Nazra Quran",
-  courseType: "nazra" as const,
-  amount: 40,
-  interval: "month" as const,
-  status: "active" as const,
-  currentPeriodEnd: "2026-04-22",
-  stripeSubscriptionId: "sub_mock_123",
-  cancelAtPeriodEnd: false,
-};
-
 const statusConfig: Record<string, { color: string; bg: string; label: string }> = {
   active:   { color: "text-emerald-600", bg: "bg-emerald-100 dark:bg-emerald-900", label: "active" },
   trialing: { color: "text-blue-600",    bg: "bg-blue-100 dark:bg-blue-900",       label: "trialing" },
   past_due: { color: "text-red-600",     bg: "bg-red-100 dark:bg-red-900",         label: "pastDue" },
   cancelled:{ color: "text-muted-foreground", bg: "bg-muted",                      label: "cancelled" },
 };
-
-const paymentHistory = [
-  { id: "1", date: "2026-03-22", description: "Nazra Quran — Human + AI", amount: "$40.00", status: "paid" },
-  { id: "2", date: "2026-02-22", description: "Nazra Quran — Human + AI", amount: "$40.00", status: "paid" },
-  { id: "3", date: "2026-01-22", description: "Nazra Quran — Human + AI", amount: "$40.00", status: "paid" },
-];
-
-const familyCode = "TBY-FAM-A1B2C3";
-
-const coursePricing = [
-  { course: "Nazra Quran", type: "nazra", plan1: 40, plan2: 33 },
-  { course: "Hifz Quran", type: "hifz", plan1: 45, plan2: 37 },
-  { course: "Arabic Language", type: "arabic", plan1: 43, plan2: 35 },
-  { course: "Aalim Course", type: "aalim", plan1: 50, plan2: 40 },
-];
 
 export default function PaymentsPage() {
   const t = useTranslations("payments");
@@ -68,6 +47,22 @@ export default function PaymentsPage() {
   const [codeCopied, setCodeCopied] = useState(false);
   const [familyInput, setFamilyInput] = useState("");
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  // Prices come from the one pricing config (Admin → Pricing). A failed load is
+  // shown as a failure — this table must never fall back to typed-in numbers.
+  const [pricing, setPricing] = useState<PricingConfig | null>(null);
+  const [pricingFailed, setPricingFailed] = useState(false);
+  const tc = useTranslations("coursesSection");
+  const tpr = useTranslations("pricingPage");
+
+  useEffect(() => {
+    fetch("/api/pricing")
+      .then((r) => {
+        if (!r.ok) throw new Error(`pricing ${r.status}`);
+        return r.json();
+      })
+      .then((data) => setPricing(parsePricingConfig(data.pricing)))
+      .catch(() => setPricingFailed(true));
+  }, []);
 
   useEffect(() => {
     fetch("/api/payments/subscription")
@@ -221,36 +216,63 @@ export default function PaymentsPage() {
                       billingInterval === interval ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"
                     }`}>
                     {interval === "month" ? t("monthly") : t("yearly")}
-                    {interval === "year" && <span className="ms-1 text-emerald-600">(-17%)</span>}
                   </button>
                 ))}
               </div>
             </div>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-start p-3 text-xs font-medium text-muted-foreground uppercase">Course</th>
-                    <th className="text-center p-3 text-xs font-medium text-muted-foreground uppercase">{t("plan1Label")}</th>
-                    <th className="text-center p-3 text-xs font-medium text-muted-foreground uppercase">{t("plan2Label")}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {coursePricing.map((c) => {
-                    const p1 = billingInterval === "year" ? c.plan1 * 10 : c.plan1;
-                    const p2 = billingInterval === "year" ? c.plan2 * 10 : c.plan2;
-                    const lbl = billingInterval === "year" ? t("perYear") : t("perMonth");
-                    return (
-                      <tr key={c.course} className="border-b last:border-0">
-                        <td className="p-3 text-sm font-medium text-foreground">{c.course}</td>
-                        <td className="p-3 text-center"><span className="text-lg font-bold text-foreground">${p1}</span><span className="text-xs text-muted-foreground">{lbl}</span></td>
-                        <td className="p-3 text-center"><span className="text-lg font-bold text-foreground">${p2}</span><span className="text-xs text-muted-foreground">{lbl}</span></td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+            {pricingFailed ? (
+              <p role="alert" className="text-sm text-red-600 py-4">
+                {t("pricesUnavailable")}
+              </p>
+            ) : !pricing ? (
+              <div className="flex justify-center py-6">
+                <Loader2 className="w-5 h-5 animate-spin text-primary" />
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-start p-3 text-xs font-medium text-muted-foreground uppercase">{tpr("course")}</th>
+                      <th className="text-center p-3 text-xs font-medium text-muted-foreground uppercase">{tpr("col3Days")}</th>
+                      <th className="text-center p-3 text-xs font-medium text-muted-foreground uppercase">{tpr("col5Days")}</th>
+                      <th className="text-center p-3 text-xs font-medium text-muted-foreground uppercase">{t("plan2Label")}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {COURSE_KEYS.map((course) => {
+                      const show = (monthly: number) =>
+                        formatPrice(
+                          billingInterval === "year"
+                            ? yearlyPrice(pricing, monthly)
+                            : monthly
+                        );
+                      const lbl = billingInterval === "year" ? t("perYear") : t("perMonth");
+                      const cell = (amount: number | null) => (
+                        <td className="p-3 text-center">
+                          {amount === null ? (
+                            <span className="text-muted-foreground">—</span>
+                          ) : (
+                            <>
+                              <span className="text-lg font-bold text-foreground tabular-nums">{show(amount)}</span>
+                              <span className="text-xs text-muted-foreground">{lbl}</span>
+                            </>
+                          )}
+                        </td>
+                      );
+                      return (
+                        <tr key={course} className="border-b last:border-0">
+                          <td className="p-3 text-sm font-medium text-foreground">{tc(`${course}Title`)}</td>
+                          {cell(course === "hifz" ? null : pricing.oneOnOne.threeDays)}
+                          {cell(course === "hifz" ? pricing.oneOnOne.hifz : pricing.oneOnOne.fiveDays)}
+                          {cell(aiOnlyMonthly(pricing, course))}
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </motion.div>
 
           {/* All Subscriptions */}
@@ -340,11 +362,11 @@ export default function PaymentsPage() {
             <div className="space-y-2 mb-4">
               <div className="flex items-center gap-2 text-sm">
                 <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                <span className="text-muted-foreground">{t("family2nd")}</span>
+                <span className="text-muted-foreground">{pricing ? t("family2nd", { percent: pricing.familyDiscount.secondChildPercent }) : "…"}</span>
               </div>
               <div className="flex items-center gap-2 text-sm">
                 <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                <span className="text-muted-foreground">{t("family3rd")}</span>
+                <span className="text-muted-foreground">{pricing ? t("family3rd", { percent: pricing.familyDiscount.thirdChildOnwardPercent }) : "…"}</span>
               </div>
             </div>
             <div className="space-y-2">
@@ -357,34 +379,6 @@ export default function PaymentsPage() {
                 <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white">
                   {t("applyCode")}
                 </Button>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Quick Stats */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.25 }}
-            className="rounded-xl border bg-card p-6"
-          >
-            <h3 className="text-lg font-semibold text-foreground mb-4">Summary</h3>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between py-2 border-b">
-                <span className="text-sm text-muted-foreground">Plan</span>
-                <span className="text-sm font-medium text-foreground">{t("plan1Label")}</span>
-              </div>
-              <div className="flex items-center justify-between py-2 border-b">
-                <span className="text-sm text-muted-foreground">Course</span>
-                <span className="text-sm font-medium text-foreground">Nazra Quran</span>
-              </div>
-              <div className="flex items-center justify-between py-2 border-b">
-                <span className="text-sm text-muted-foreground">Billing</span>
-                <span className="text-sm font-medium text-foreground">{t("monthly")}</span>
-              </div>
-              <div className="flex items-center justify-between py-2">
-                <span className="text-sm text-muted-foreground">Total Paid</span>
-                <span className="text-sm font-bold text-emerald-600">$120.00</span>
               </div>
             </div>
           </motion.div>

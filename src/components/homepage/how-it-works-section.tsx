@@ -1,8 +1,8 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { motion } from "framer-motion";
 import { UserPlus, BookMarked, Rocket } from "lucide-react";
+import { Reveal, SectionHeading } from "./primitives";
 
 const steps = [
   { key: "step1", icon: UserPlus, num: "1" },
@@ -14,50 +14,38 @@ export function HowItWorksSection() {
   const t = useTranslations("howItWorks");
 
   return (
-    <section className="py-20 bg-background">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.h2
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="text-3xl md:text-4xl font-bold text-primary"
-        >
-          {t("title")}
-        </motion.h2>
+    <section className="bg-background py-20 md:py-28">
+      <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+        <SectionHeading title={t("title")} />
 
-        <div className="mt-14 relative">
+        <div className="relative mt-16">
           {/* Connecting line */}
-          <div className="hidden md:block absolute top-12 start-[16.67%] end-[16.67%] h-0.5 bg-gradient-to-r from-primary/30 via-accent/50 to-primary/30" />
+          <div
+            aria-hidden
+            className="absolute start-[16.67%] end-[16.67%] top-12 hidden h-px bg-gradient-to-r from-transparent via-accent to-transparent md:block"
+          />
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <ol className="grid grid-cols-1 gap-10 md:grid-cols-3">
             {steps.map((step, i) => {
               const Icon = step.icon;
               return (
-                <motion.div
-                  key={step.key}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: i * 0.2 }}
-                  className="text-center relative"
-                >
-                  <div className="mx-auto w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center relative z-10 border-4 border-background">
-                    <Icon className="w-10 h-10 text-primary" />
-                    <span className="absolute -top-2 -end-2 w-8 h-8 bg-accent text-white rounded-full flex items-center justify-center text-sm font-bold shadow-lg">
+                <Reveal as="li" key={step.key} delay={i * 0.15} className="relative text-center">
+                  <div className="relative z-10 mx-auto flex h-24 w-24 items-center justify-center rounded-full border border-accent/40 bg-card shadow-lg ring-8 ring-background">
+                    <Icon className="h-9 w-9 text-primary" aria-hidden />
+                    <span className="absolute -end-1 -top-1 flex h-8 w-8 items-center justify-center rounded-full bg-accent font-display text-sm font-bold text-[#0F2922] shadow-md">
                       {step.num}
                     </span>
                   </div>
-                  <h3 className="mt-5 text-lg font-bold text-foreground">
+                  <h3 className="mt-6 text-lg font-semibold text-foreground">
                     {t(`${step.key}Title`)}
                   </h3>
-                  <p className="mt-2 text-sm text-muted-foreground">
+                  <p className="mx-auto mt-2 max-w-xs text-sm leading-relaxed text-muted-foreground">
                     {t(`${step.key}Desc`)}
                   </p>
-                </motion.div>
+                </Reveal>
               );
             })}
-          </div>
+          </ol>
         </div>
       </div>
     </section>

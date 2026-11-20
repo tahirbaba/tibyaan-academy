@@ -7,6 +7,9 @@ export async function GET(request: NextRequest) {
   const { searchParams, origin } = request.nextUrl;
   const code = searchParams.get("code");
   const locale = searchParams.get("locale") || "ur";
+  // Only one follow-on page is allowed, by name — never a URL from the query
+  // string, which would make this an open redirect.
+  const next = searchParams.get("next") === "reset-password" ? "reset-password" : null;
 
   if (code) {
     const supabase = await createClient();
@@ -16,6 +19,10 @@ export async function GET(request: NextRequest) {
       const {
         data: { user },
       } = await supabase.auth.getUser();
+
+      if (user && next === "reset-password") {
+        return NextResponse.redirect(new URL(`/${locale}/reset-password`, origin));
+      }
 
       if (user) {
         const metadataRole = user.user_metadata?.role as string | undefined;

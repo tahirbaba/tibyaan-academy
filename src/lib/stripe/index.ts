@@ -1,5 +1,5 @@
 import Stripe from "stripe";
-import { PRICING } from "@/lib/pricing";
+import { applyDiscount, type CourseKey } from "@/lib/pricing";
 
 // Lazy initialization to avoid build-time errors when env vars are empty
 let _stripe: Stripe | null = null;
@@ -13,37 +13,19 @@ export function getStripe(): Stripe {
   return _stripe;
 }
 
-// Course pricing configuration (monthly USD).
-// Derived from the single pricing source of truth so billed amounts can never
-// drift from the amounts advertised on the site.
-export const COURSE_PRICES = {
-  nazra:  { plan1: PRICING.nazra.human_ai,  plan2: PRICING.nazra.ai_only },
-  hifz:   { plan1: PRICING.hifz.human_ai,   plan2: PRICING.hifz.ai_only },
-  arabic: { plan1: PRICING.arabic.human_ai, plan2: PRICING.arabic.ai_only },
-  aalim:  { plan1: PRICING.aalim.human_ai,  plan2: PRICING.aalim.ai_only },
-} as const;
-
-export type CourseType = keyof typeof COURSE_PRICES;
+export type CourseType = CourseKey;
 export type PlanType = "plan1" | "plan2";
 
-// Yearly = 10 months price (2 months free)
-export function getYearlyPrice(monthlyPrice: number): number {
-  return monthlyPrice * 10;
-}
-
-// Family discount percentages
-export const FAMILY_DISCOUNTS = {
-  2: 0.2, // 2nd student: 20% off
-  3: 0.3, // 3rd+ student: 30% off
-} as const;
-
-export function getFamilyDiscount(studentIndex: number): number {
-  if (studentIndex >= 3) return FAMILY_DISCOUNTS[3];
-  if (studentIndex === 2) return FAMILY_DISCOUNTS[2];
-  return 0;
-}
-
-// Create a Stripe Checkout Session
+/**
+ * Create a Stripe Checkout Session for a 1-on-1 / AI-only course subscription.
+ *
+ * `monthlyAmount` and `discountPercent` are decided by the SERVER from the
+ * pricing config and the enrollment row (see /api/payments/checkout). Nothing
+ * here accepts a price or a discount from the browser.
+ *
+ * This only ever creates a NEW subscription. It never modifies an existing
+ * one, so students already subscribed keep the amount they signed up at.
+ */
 export async function createCheckoutSession({
   customerEmail,
   courseType,
@@ -53,6 +35,9 @@ export async function createCheckoutSession({
   cancelUrl,
   studentId,
   enrollmentId,
+  courseId,
+  monthlyAmount,
+  yearlyMonthsCharged,
   discountPercent = 0,
 }: {
   customerEmail: string;
@@ -63,18 +48,35 @@ export async function createCheckoutSession({
   cancelUrl: string;
   studentId: string;
   enrollmentId: string;
+  courseId: string;
+  /** List price per month in USD, before any family discount. */
+  monthlyAmount: number;
+  yearlyMonthsCharged: number;
+  /** Family discount as a percentage, e.g. 15. */
   discountPercent?: number;
 }) {
   const stripe = getStripe();
-  const plan = planType === "plan1" ? "plan1" : "plan2";
-  const monthlyPrice = COURSE_PRICES[courseType][plan];
-  const unitAmount =
+  const listAmount =
     billingInterval === "year"
-      ? getYearlyPrice(monthlyPrice) * 100 // cents
-      : monthlyPrice * 100;
+      ? monthlyAmount * yearlyMonthsCharged
+      : monthlyAmount;
+  const unitAmountCents = Math.round(
+    applyDiscount(listAmount, discountPercent) * 100
+  );
+  if (!Number.isFinite(unitAmountCents) || unitAmountCents <= 0) {
+    throw new Error(`Refusing to create a checkout for ${unitAmountCents} cents`);
+  }
 
-  // Apply family discount
-  const discountedAmount = Math.round(unitAmount * (1 - discountPercent));
+  const metadata = {
+    kind: "course",
+    studentId,
+    enrollmentId,
+    courseId,
+    courseType,
+    planType,
+    billingInterval,
+    discountPercent: String(discountPercent),
+  };
 
   const session = await stripe.checkout.sessions.create({
     customer_email: customerEmail,
@@ -88,7 +90,7 @@ export async function createCheckoutSession({
             name: `Tibyaan Academy — ${courseType.charAt(0).toUpperCase() + courseType.slice(1)} (${planType === "plan1" ? "Human + AI" : "AI Only"})`,
             description: `${billingInterval === "year" ? "Annual" : "Monthly"} subscription`,
           },
-          unit_amount: discountedAmount,
+          unit_amount: unitAmountCents,
           recurring: {
             interval: billingInterval,
           },
@@ -96,26 +98,78 @@ export async function createCheckoutSession({
         quantity: 1,
       },
     ],
-    metadata: {
-      studentId,
-      enrollmentId,
-      courseType,
-      planType,
-      billingInterval,
-    },
+    metadata,
     success_url: successUrl,
     cancel_url: cancelUrl,
-    subscription_data: {
-      metadata: {
-        studentId,
-        enrollmentId,
-        courseType,
-        planType,
-      },
-    },
+    subscription_data: { metadata },
   });
 
   return session;
+}
+
+/**
+ * Create a Stripe Checkout Session for a group cohort seat: one monthly
+ * subscription at the fee the admin set on that cohort.
+ *
+ * The session expires after 30 minutes (Stripe's minimum), which is exactly as
+ * long as the seat is held for the student — an unpaid checkout can never
+ * outlive its seat reservation.
+ */
+export async function createCohortCheckoutSession({
+  customerEmail,
+  cohortId,
+  cohortTitle,
+  enrollmentId,
+  studentId,
+  monthlyFee,
+  currency,
+  expiresAt,
+  successUrl,
+  cancelUrl,
+}: {
+  customerEmail: string;
+  cohortId: string;
+  cohortTitle: string;
+  enrollmentId: string;
+  studentId: string;
+  monthlyFee: number;
+  currency: string;
+  expiresAt: Date;
+  successUrl: string;
+  cancelUrl: string;
+}) {
+  const unitAmountCents = Math.round(monthlyFee * 100);
+  if (!Number.isFinite(unitAmountCents) || unitAmountCents <= 0) {
+    throw new Error(`Refusing to create a cohort checkout for ${unitAmountCents} cents`);
+  }
+
+  const metadata = { kind: "cohort", cohortId, enrollmentId, studentId };
+
+  return getStripe().checkout.sessions.create({
+    customer_email: customerEmail,
+    mode: "subscription",
+    payment_method_types: ["card"],
+    client_reference_id: enrollmentId,
+    expires_at: Math.floor(expiresAt.getTime() / 1000),
+    line_items: [
+      {
+        price_data: {
+          currency: currency.toLowerCase(),
+          product_data: {
+            name: `Tibyaan Academy — Group Class: ${cohortTitle}`,
+            description: "Monthly group class subscription",
+          },
+          unit_amount: unitAmountCents,
+          recurring: { interval: "month" },
+        },
+        quantity: 1,
+      },
+    ],
+    metadata,
+    subscription_data: { metadata },
+    success_url: successUrl,
+    cancel_url: cancelUrl,
+  });
 }
 
 // Cancel a Stripe subscription

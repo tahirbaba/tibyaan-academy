@@ -5,7 +5,7 @@ import { useTranslations, useLocale } from "next-intl";
 import { Link, useRouter, usePathname } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "next-themes";
-import { Menu, X, Moon, Sun, Globe } from "lucide-react";
+import { Menu, X, Moon, Sun, Globe, ChevronDown } from "lucide-react";
 
 const languages = [
   { value: "ur", label: "اردو", flag: "🇵🇰" },
@@ -15,8 +15,16 @@ const languages = [
   { value: "id", label: "Indonesia", flag: "🇮🇩" },
 ];
 
+const courseLinks = [
+  { key: "nazra", slug: "nazra-quran" },
+  { key: "hifz", slug: "hifz-quran" },
+  { key: "arabic", slug: "arabic-language" },
+  { key: "aalim", slug: "aalim-course" },
+] as const;
+
 const navLinks = [
   { href: "/courses" as const, key: "courses" as const },
+  { href: "/group-classes" as const, key: "groupClasses" as const },
   { href: "/about" as const, key: "about" as const },
   { href: "/blog" as const, key: "blog" as const },
   { href: "/pricing" as const, key: "pricing" as const },
@@ -25,6 +33,7 @@ const navLinks = [
 
 export function Navbar() {
   const t = useTranslations("common");
+  const tcs = useTranslations("coursesSection");
   const locale = useLocale();
   const pathname = usePathname();
   const router = useRouter();
@@ -61,15 +70,52 @@ export function Navbar() {
 
           {/* Desktop Nav Links */}
           <div className="hidden md:flex items-center gap-6">
-            {navLinks.map((link) => (
-              <Link
-                key={link.key}
-                href={link.href}
-                className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
-              >
-                {t(link.key)}
-              </Link>
-            ))}
+            {navLinks.map((link) =>
+              link.key === "courses" ? (
+                // Resting the cursor on "Courses" (or tabbing to it) opens the
+                // four courses; moving away closes it. The link itself still
+                // goes to the Courses page, so a tap on a phone works as before.
+                <div key={link.key} className="nav-drop-root relative py-5">
+                  <Link
+                    href={link.href}
+                    className="inline-flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    {t(link.key)}
+                    <ChevronDown className="h-3.5 w-3.5" aria-hidden />
+                  </Link>
+                  <div className="nav-drop absolute start-1/2 top-full z-50 w-64 -translate-x-1/2 rtl:translate-x-1/2">
+                    <ul className="overflow-hidden rounded-2xl border border-border bg-card p-2 shadow-2xl">
+                      {courseLinks.map((course) => (
+                        <li key={course.slug}>
+                          <Link
+                            href={`/courses/${course.slug}`}
+                            className="block rounded-xl px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-primary/10 hover:text-primary"
+                          >
+                            {tcs(`${course.key}Title`)}
+                          </Link>
+                        </li>
+                      ))}
+                      <li className="mt-1 border-t border-border pt-1">
+                        <Link
+                          href="/group-classes"
+                          className="block rounded-xl px-4 py-2.5 text-sm font-medium text-[#8A6F1F] transition-colors hover:bg-accent/10 dark:text-accent"
+                        >
+                          {t("groupClasses")}
+                        </Link>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              ) : (
+                <Link
+                  key={link.key}
+                  href={link.href}
+                  className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+                >
+                  {t(link.key)}
+                </Link>
+              )
+            )}
           </div>
 
           {/* Desktop Right Side */}
@@ -135,8 +181,7 @@ export function Navbar() {
           </div>
 
           {/* Mobile Hamburger */}
-          <button
-            className="md:hidden p-2 text-muted-foreground"
+          <button aria-label={mobileOpen ? "Close menu" : "Open menu"} aria-expanded={mobileOpen}             className="md:hidden p-2 text-muted-foreground"
             onClick={() => setMobileOpen(!mobileOpen)}
           >
             {mobileOpen ? (
