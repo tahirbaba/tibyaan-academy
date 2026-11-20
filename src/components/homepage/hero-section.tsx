@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { BookOpen, Check, Mail, MessageCircle } from "lucide-react";
 import { YouTubeEmbed } from "@/components/shared/youtube-embed";
 import { HeroOrnamentLazy } from "./hero-ornament-lazy";
+import { HeroVideo } from "./hero-video";
 
 /**
  * Optional. Set it to a YouTube URL (a normal video or a Short - the embed
@@ -127,8 +128,10 @@ export function HeroSection() {
             {heroVideo ? (
               <YouTubeEmbed url={heroVideo} title="Tibyaan Academy" className="shadow-2xl" />
             ) : (
-              <div className="relative h-72 w-full overflow-hidden rounded-3xl border border-[#C9A84C]/25 bg-[#0F2922] shadow-2xl md:h-80">
+              <div className="relative h-72 w-full overflow-hidden rounded-3xl border border-[#C9A84C]/25 bg-[#0F2922] shadow-2xl md:h-96">
                 <HeroOrnamentLazy />
+                {/* Video of a live online lesson, desktop only (see hero-video.tsx). */}
+                <HeroVideo />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#0F2922] via-[#0F2922]/40 to-transparent" />
                 <div className="relative flex h-full flex-col items-center justify-end px-8 pb-8 text-center">
                   <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-[#C9A84C]/50 bg-[#C9A84C]/10">
