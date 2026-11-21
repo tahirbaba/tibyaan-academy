@@ -1,7 +1,13 @@
 # Video credits
 
-`hero-online-class.mp4` joins five clips from Pexels (IDs 6985208, 6985243,
-6985244, 6985246, 6985247), supplied by the academy owner. Pexels licence:
-free for commercial use, no attribution required — https://www.pexels.com/license/
+`hero-online-class.mp4` is cut from Pexels clips supplied by the academy
+owner: 8685400 (opens and closes the loop), 6985243, 7180371, 6985247.
+Pexels licence: free for commercial use, no attribution required —
+https://www.pexels.com/license/
 
-Each clip is 4.5 s, crossfaded, scaled to 1024x576, silent, H.264 (0.9 MB).
+Owner also supplied 6985208, 6985244, 6985246, 8135471 and 8135556, which are
+not used (8135471: the subject looks upset; 8135556: an office scene, not a
+lesson; the 69852xx extras repeat the same scene).
+
+Each segment is 4.5 s with 0.7 s crossfades, scaled and cropped to 1024x576,
+silent, H.264 (0.8 MB, 20 s).
