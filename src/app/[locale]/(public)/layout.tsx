@@ -1,4 +1,5 @@
 import { SiteMotion } from "@/components/shared/site-motion";
+import { PageBackdrop } from "@/components/shared/backdrop-video";
 
 /**
  * Every public page: the shared motion layer (moving headings, cards that
@@ -9,6 +10,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
     <>
       {children}
       <SiteMotion variant="public" />
+      <PageBackdrop />
     </>
   );
 }

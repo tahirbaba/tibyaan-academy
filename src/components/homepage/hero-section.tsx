@@ -6,6 +6,7 @@ import { BookOpen, Check, Mail, MessageCircle } from "lucide-react";
 import { YouTubeEmbed } from "@/components/shared/youtube-embed";
 import { HeroOrnamentLazy } from "./hero-ornament-lazy";
 import { HeroVideo } from "./hero-video";
+import { BackdropVideo } from "@/components/shared/backdrop-video";
 
 /**
  * Optional. Set it to a YouTube URL (a normal video or a Short - the embed
@@ -46,6 +47,9 @@ export function HeroSection() {
         aria-hidden
         className="pointer-events-none absolute -end-40 -top-40 h-[36rem] w-[36rem] rounded-full bg-[#C9A84C]/10 blur-3xl"
       />
+
+      {/* A masjid under the night sky, behind everything (desktop only). */}
+      <BackdropVideo scene="night-masjid" className="opacity-60" />
 
       {/* slow floating stars — decoration only */}
       <svg aria-hidden viewBox="0 0 24 24" className="float-a pointer-events-none absolute start-[6%] top-[14%] h-10 w-10 text-[#C9A84C]/30" fill="none" stroke="currentColor" strokeWidth="1">

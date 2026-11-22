@@ -1,0 +1,290 @@
+<!doctype html>
+<!--
+  Generated backdrop videos for Tibyaan Academy. Every frame is drawn here by
+  code — no footage, no photos, no third-party artwork — so there is nothing
+  to license. render.mjs loads this page, calls draw(scene, t) for each frame
+  and stitches the frames into MP4 with ffmpeg.
+
+  Each scene is a seamless loop: everything that moves is a periodic function
+  of t over LOOP seconds (rotations by a full symmetry step, drifts by one
+  whole tile, twinkles at whole-number frequencies), so frame LOOP equals
+  frame 0 and the video repeats without a visible jump.
+-->
+<html>
+<head>
+<meta charset="utf-8" />
+<style>
+  html, body { margin: 0; background: #000; }
+  canvas { display: block; }
+</style>
+</head>
+<body>
+<canvas id="c" width="1280" height="720"></canvas>
+<script>
+const W = 1280, H = 720, LOOP = 12;
+const ctx = document.getElementById("c").getContext("2d");
+const TAU = Math.PI * 2;
+const GOLD = "201,168,76";
+
+// Deterministic randomness, so every render of a scene is identical.
+function rng(seed) {
+  return () => {
+    seed = (seed * 1664525 + 1013904223) % 4294967296;
+    return seed / 4294967296;
+  };
+}
+
+// An eight-pointed star (khatam) as a path.
+function starPath(cx, cy, outer, inner, rot = 0) {
+  ctx.beginPath();
+  for (let i = 0; i < 16; i++) {
+    const r = i % 2 === 0 ? outer : inner;
+    const a = (Math.PI / 8) * i - Math.PI / 2 + rot;
+    const x = cx + r * Math.cos(a), y = cy + r * Math.sin(a);
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  }
+  ctx.closePath();
+}
+
+// A girih-style rosette: nested stars and rings.
+function rosette(cx, cy, R, rot, stroke, width, alpha) {
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.strokeStyle = stroke;
+  ctx.lineWidth = width;
+  for (const [o, i, rr] of [[1, 0.78, 0], [0.74, 0.56, Math.PI / 8], [0.5, 0.36, 0], [0.28, 0.2, Math.PI / 8]]) {
+    starPath(cx, cy, R * o, R * i, rot + rr);
+    ctx.stroke();
+  }
+  for (const k of [1.06, 0.62, 0.16]) {
+    ctx.beginPath(); ctx.arc(cx, cy, R * k, 0, TAU); ctx.stroke();
+  }
+  // radial spokes
+  for (let s = 0; s < 16; s++) {
+    const a = rot + (TAU / 16) * s;
+    ctx.beginPath();
+    ctx.moveTo(cx + Math.cos(a) * R * 0.16, cy + Math.sin(a) * R * 0.16);
+    ctx.lineTo(cx + Math.cos(a) * R * 0.28, cy + Math.sin(a) * R * 0.28);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+// A repeating khatam lattice, offset by (ox, oy) — one tile is `size`.
+function lattice(size, ox, oy, stroke, alpha, width = 1) {
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.strokeStyle = stroke;
+  ctx.lineWidth = width;
+  for (let y = -size + (oy % size); y < H + size; y += size) {
+    for (let x = -size + (ox % size); x < W + size; x += size) {
+      starPath(x + size / 2, y + size / 2, size * 0.38, size * 0.27);
+      ctx.stroke();
+      starPath(x + size / 2, y + size / 2, size * 0.38, size * 0.27, Math.PI / 8);
+      ctx.stroke();
+    }
+  }
+  ctx.restore();
+}
+
+// Mosque skyline: domes, minarets with crescents, arched bays.
+// Drawn into a path of width `span`, starting at x0, baseline `base`.
+function skyline(x0, base, scale, fill, windows) {
+  const s = scale;
+  ctx.fillStyle = fill;
+  ctx.beginPath();
+  const dome = (cx, r, b) => {
+    ctx.moveTo(cx - r, b);
+    ctx.bezierCurveTo(cx - r, b - r * 1.15, cx - r * 0.2, b - r * 1.55, cx, b - r * 1.78);
+    ctx.bezierCurveTo(cx + r * 0.2, b - r * 1.55, cx + r, b - r * 1.15, cx + r, b);
+    ctx.closePath();
+  };
+  const rect = (x, y, w, h) => { ctx.rect(x, y, w, h); };
+  const minaret = (x, w, top) => {
+    rect(x, base - top, w, top);
+    ctx.moveTo(x - 3 * s, base - top);
+    ctx.lineTo(x + w / 2, base - top - 22 * s);
+    ctx.lineTo(x + w + 3 * s, base - top);
+    ctx.closePath();
+    rect(x - 4 * s, base - top * 0.62, w + 8 * s, 5 * s); // balcony
+  };
+  const X = (v) => x0 + v * s;
+  rect(X(0), base - 40 * s, 1280 * s, 400);                   // ground mass
+  rect(X(470), base - 120 * s, 340 * s, 120 * s);              // prayer hall
+  dome(X(640), 120 * s, base - 120 * s);                       // main dome
+  dome(X(505), 46 * s, base - 120 * s);
+  dome(X(775), 46 * s, base - 120 * s);
+  minaret(X(420), 26 * s, 330 * s);
+  minaret(X(834), 26 * s, 330 * s);
+  rect(X(250), base - 80 * s, 180 * s, 80 * s);
+  dome(X(340), 50 * s, base - 80 * s);
+  rect(X(850), base - 80 * s, 180 * s, 80 * s);
+  dome(X(940), 50 * s, base - 80 * s);
+  minaret(X(205), 18 * s, 230 * s);
+  minaret(X(1057), 18 * s, 230 * s);
+  dome(X(110), 34 * s, base - 40 * s);
+  dome(X(1170), 34 * s, base - 40 * s);
+  ctx.fill();
+
+  // finial crescents on the domes
+  if (windows) {
+    for (const [cx, top] of [[640, 120 + 120 * 1.78], [505, 120 + 46 * 1.78], [775, 120 + 46 * 1.78]]) {
+      const x = X(cx), y = base - top * s - 14 * s;
+      ctx.fillStyle = `rgba(${GOLD},0.9)`;
+      ctx.beginPath(); ctx.arc(x, y, 7 * s, 0, TAU); ctx.fill();
+      ctx.fillStyle = fill;
+      ctx.beginPath(); ctx.arc(x + 3 * s, y - 2 * s, 6 * s, 0, TAU); ctx.fill();
+    }
+  }
+}
+
+// Glowing arched windows in the prayer hall; they breathe gently.
+function hallWindows(x0, base, s, t) {
+  for (let i = 0; i < 7; i++) {
+    const x = x0 + (492 + i * 44) * s, y = base - 92 * s, w = 18 * s, h = 46 * s;
+    const glow = 0.55 + 0.35 * (0.5 + 0.5 * Math.sin(TAU * (t / LOOP) * (1 + (i % 3)) + i));
+    ctx.save();
+    ctx.shadowColor = `rgba(255,214,120,${glow})`;
+    ctx.shadowBlur = 18 * s;
+    ctx.fillStyle = `rgba(255,210,120,${glow})`;
+    ctx.beginPath();
+    ctx.moveTo(x, y + h);
+    ctx.lineTo(x, y + w / 2);
+    ctx.arc(x + w / 2, y + w / 2, w / 2, Math.PI, 0);
+    ctx.lineTo(x + w, y + h);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
+}
+
+const stars = (() => {
+  const r = rng(7), out = [];
+  for (let i = 0; i < 170; i++) {
+    out.push({ x: r() * W, y: r() * H * 0.62, s: 0.6 + r() * 1.8, k: 1 + Math.floor(r() * 3), p: r() * TAU });
+  }
+  return out;
+})();
+
+const dust = (() => {
+  const r = rng(11), out = [];
+  for (let i = 0; i < 46; i++) {
+    out.push({ x: r() * W, y: r() * H, s: 1 + r() * 2.4, cycles: 1 + Math.floor(r() * 2), sway: r() * TAU });
+  }
+  return out;
+})();
+
+// ------------------------------------------------------------------ scenes
+
+// A: night over a masjid — for dark hero bands.
+function nightMasjid(t) {
+  const u = t / LOOP;
+  const g = ctx.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0, "#07160f"); g.addColorStop(0.55, "#12352a"); g.addColorStop(1, "#1B4332");
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+
+  // faint lattice in the sky, rotating 45 degrees per loop (8-fold symmetry)
+  ctx.save();
+  ctx.translate(W / 2, H * 0.55);
+  ctx.rotate((Math.PI / 4) * u);
+  ctx.translate(-W / 2, -H * 0.55);
+  lattice(120, 0, 0, `rgb(${GOLD})`, 0.05, 1);
+  ctx.restore();
+
+  // stars
+  for (const st of stars) {
+    const a = 0.25 + 0.75 * (0.5 + 0.5 * Math.sin(TAU * u * st.k + st.p));
+    ctx.fillStyle = `rgba(255,244,214,${a})`;
+    ctx.beginPath(); ctx.arc(st.x, st.y, st.s, 0, TAU); ctx.fill();
+  }
+
+  // crescent moon with halo
+  const mx = W * 0.8, my = H * 0.2;
+  const halo = ctx.createRadialGradient(mx, my, 10, mx, my, 170);
+  halo.addColorStop(0, `rgba(${GOLD},0.35)`); halo.addColorStop(1, "rgba(201,168,76,0)");
+  ctx.fillStyle = halo; ctx.fillRect(mx - 200, my - 200, 400, 400);
+  // the crescent is cut on its own canvas, so the cut shows the sky behind
+  // it rather than a dark disc
+  const moon = document.createElement("canvas");
+  moon.width = moon.height = 120;
+  const m = moon.getContext("2d");
+  m.fillStyle = "#F1DFA6";
+  m.beginPath(); m.arc(60, 60, 44, 0, TAU); m.fill();
+  m.globalCompositeOperation = "destination-out";
+  m.beginPath(); m.arc(78, 50, 40, 0, TAU); m.fill();
+  ctx.drawImage(moon, mx - 60, my - 60);
+
+  // warm glow behind the main dome, breathing
+  const gx = W / 2, gy = H * 0.86;
+  const glow = ctx.createRadialGradient(gx, gy, 20, gx, gy, 520);
+  glow.addColorStop(0, `rgba(${GOLD},${0.28 + 0.06 * Math.sin(TAU * u)})`);
+  glow.addColorStop(1, "rgba(201,168,76,0)");
+  ctx.fillStyle = glow; ctx.fillRect(0, 0, W, H);
+
+  // far skyline, drifting one full width per loop (seamless)
+  const off = -W * u;
+  for (const x0 of [off, off + W]) skyline(x0, H - 70, 0.55, "rgba(20,53,40,0.85)", false);
+
+  // near skyline (static, centred) with glowing windows
+  skyline(0, H + 4, 1, "#06130e", true);
+  hallWindows(0, H + 4, 1, t);
+
+  // rising gold dust (each mote rises whole screen heights per loop)
+  for (const d of dust) {
+    const y = ((d.y - H * d.cycles * u) % H + H) % H;
+    const x = d.x + 14 * Math.sin(TAU * u * d.cycles + d.sway);
+    const a = 0.25 + 0.45 * Math.sin(Math.PI * (y / H));
+    ctx.fillStyle = `rgba(${GOLD},${a})`;
+    ctx.beginPath(); ctx.arc(x, y, d.s, 0, TAU); ctx.fill();
+  }
+}
+
+// B / C: a turning girih rosette over a drifting lattice — for page headers.
+function geometry(t, dark) {
+  const u = t / LOOP;
+  const bg = ctx.createLinearGradient(0, 0, W, H);
+  if (dark) { bg.addColorStop(0, "#0d241c"); bg.addColorStop(1, "#163a2e"); }
+  else { bg.addColorStop(0, "#f7f5ee"); bg.addColorStop(1, "#efeadb"); }
+  ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+
+  const line = dark ? `rgb(${GOLD})` : "#1B4332";
+  // lattice drifting diagonally by exactly one tile per loop
+  lattice(110, 110 * u, 110 * u, line, dark ? 0.09 : 0.07, 1);
+
+  // light sweep crossing the frame once per loop
+  const sx = -W * 0.5 + W * 2 * u;
+  const sweep = ctx.createLinearGradient(sx - 300, 0, sx + 300, H);
+  sweep.addColorStop(0, "rgba(255,255,255,0)");
+  sweep.addColorStop(0.5, dark ? "rgba(201,168,76,0.07)" : "rgba(201,168,76,0.12)");
+  sweep.addColorStop(1, "rgba(255,255,255,0)");
+  ctx.fillStyle = sweep; ctx.fillRect(0, 0, W, H);
+
+  // two large rosettes turning in opposite directions (45 degrees per loop)
+  const gold = `rgb(${GOLD})`;
+  rosette(W * 0.84, H * 0.32, 300, (Math.PI / 4) * u, gold, 1.6, dark ? 0.55 : 0.5);
+  rosette(W * 0.12, H * 0.92, 230, -(Math.PI / 4) * u, dark ? gold : "#1B4332", 1.3, dark ? 0.35 : 0.22);
+
+  // small stars floating
+  for (const d of dust.slice(0, 26)) {
+    const y = ((d.y - H * d.cycles * u) % H + H) % H;
+    const x = d.x + 10 * Math.sin(TAU * u * d.cycles + d.sway);
+    ctx.save();
+    ctx.globalAlpha = (dark ? 0.5 : 0.35) * Math.sin(Math.PI * (y / H));
+    ctx.fillStyle = gold;
+    starPath(x, y, d.s * 3, d.s * 1.4, TAU * u);
+    ctx.fill();
+    ctx.restore();
+  }
+}
+
+window.LOOP = LOOP;
+window.draw = (scene, t) => {
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.clearRect(0, 0, W, H);
+  if (scene === "night-masjid") nightMasjid(t);
+  else if (scene === "geometry-light") geometry(t, false);
+  else if (scene === "geometry-dark") geometry(t, true);
+};
+</script>
+</body>
+</html>
