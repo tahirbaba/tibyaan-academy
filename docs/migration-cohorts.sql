@@ -1,5 +1,5 @@
 -- =============================================================================
--- Cohorts — paid, recurring group classes                 (BRANCH-VERIFIED)
+-- Cohorts — paid, recurring group classes                 (RUN ON PRODUCTION)
 --
 -- STATUS, stated plainly:
 --   * Written 2026-11-14. Run twice on a throwaway local PostgreSQL 16.
@@ -10,8 +10,13 @@
 --     2 tables and 3 indexes (43 -> 45 tables); the second run changed nothing
 --     — the 45-column listing of both new tables and the verification output
 --     were byte-identical. No existing table was touched (users still 18).
---   * NOT RUN on production. That still needs a fresh, restore-checked backup
---     and must go out with the deploy (working-agreement rule 5).
+--   * RUN ON PRODUCTION 2026-11-26, with the deploy of main 882b0c6, at the
+--     owner's explicit instruction. Before it: a full logical backup of all
+--     43 tables (447 rows) taken over Neon's HTTPS endpoint, restored into a
+--     separate PostgreSQL 16 database, and checked table by table — row counts
+--     and an order-independent content checksum matched 43/43. Run twice; the
+--     second run changed nothing (43 -> 45 tables). Afterwards the 43 existing
+--     tables still matched the backup checksums 43/43: no existing data touched.
 -- =============================================================================
 -- Purely additive:
 --   + 1 enum   cohort_enrollment_status
